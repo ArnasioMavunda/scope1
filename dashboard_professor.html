@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE — Professor</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b:#1E4ED8;--bm:#2563EB;--bl:#3B82F6;--bp:#EFF6FF;
+  --g:#10B981;--gp:#ECFDF5;--y:#F59E0B;--yp:#FFFBEB;
+  --r:#EF4444;--rp:#FEF2F2;
+  --s50:#F8FAFC;--s100:#F1F5F9;--s200:#E2E8F0;
+  --s400:#94A3B8;--s600:#475569;--s800:#1E293B;
+  --sh:0 4px 16px rgba(0,0,0,.10);--shs:0 1px 3px rgba(0,0,0,.07);
+  --rad:14px;--rads:9px;--sw:240px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var(--s800);display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sw);background:linear-gradient(180deg,#0f3d91 0%,#1a4faa 100%);height:100vh;display:flex;flex-direction:column;flex-shrink:0;box-shadow:2px 0 20px rgba(15,61,145,.3);z-index:50;transition:transform .3s}
+.sb-brand{padding:18px 16px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo{width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo img{width:24px;height:24px;object-fit:contain}
+.sb-name{font-size:17px;font-weight:800;color:white;letter-spacing:2.5px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.8px;margin-top:1px;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.8px;padding:10px 10px 3px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .18s;border:none;background:none;font-family:inherit;width:100%;text-align:left}
+.nav-item i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.1);color:white}
+.nav-item.active{background:rgba(255,255,255,.17);color:white;font-weight:700}
+.nav-item.active i{color:#7dd3fc}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:9px}
+.sb-av{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.45)}
+.btn-logout{background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:4px;transition:color .2s;flex-shrink:0}
+.btn-logout:hover{color:#fca5a5}
+.sb-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--bm);border:none;border-radius:9px;width:38px;height:38px;color:white;font-size:15px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--sh)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:white;padding:0 22px;height:54px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--s200);flex-shrink:0;box-shadow:var(--shs)}
+.tb-title{font-size:15px;font-weight:700;color:var(--s800)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.rfid-pill{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--g)}
+.rfid-dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pg 2s infinite}
+@keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{box-shadow:0 0 0 4px rgba(16,185,129,0)}}
+.tb-date{font-size:11px;color:var(--s400);font-weight:500;white-space:nowrap}
+.page{flex:1;overflow-y:auto;padding:18px 20px 36px}
+.view{display:none}.view.active{display:block}
+.hero{background:linear-gradient(135deg,#0f3d91 0%,#1a4faa 50%,#2563eb 100%);border-radius:var(--rad);padding:20px 24px;color:white;position:relative;overflow:hidden;margin-bottom:14px;box-shadow:0 6px 28px rgba(15,61,145,.3)}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.055)}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-bottom:8px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pg 2s infinite}
+.hero-turma{font-size:26px;font-weight:800;letter-spacing:.5px}
+.hero-disc{font-size:13px;opacity:.8;margin-top:3px}
+.hero-clock{background:rgba(255,255,255,.13);border-radius:10px;padding:9px 16px;text-align:center;flex-shrink:0}
+.hero-hora{font-size:24px;font-weight:800;letter-spacing:1px}
+.hero-hora-lbl{font-size:9px;opacity:.6;letter-spacing:.5px;margin-top:1px}
+.hero-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hero-info{background:rgba(255,255,255,.1);border-radius:9px;padding:9px 12px}
+.hero-info-lbl{font-size:9px;opacity:.55;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.hero-info-val{font-size:12px;font-weight:700}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.sc{background:white;border-radius:var(--rad);padding:13px 15px;display:flex;align-items:center;gap:11px;box-shadow:var(--shs);position:relative;overflow:hidden;transition:transform .18s}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.sc::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:14px 0 0 14px}
+.sc.sg::before{background:var(--g)}.sc.sy::before{background:var(--y)}.sc.sr::before{background:var(--r)}.sc.sb::before{background:var(--bl)}
+.sc-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sc.sg .sc-ic{background:var(--gp);color:var(--g)}.sc.sy .sc-ic{background:var(--yp);color:var(--y)}.sc.sr .sc-ic{background:var(--rp);color:var(--r)}.sc.sb .sc-ic{background:var(--bp);color:var(--bl)}
+.sc-n{font-size:24px;font-weight:800;line-height:1;margin-bottom:1px}
+.sc.sg .sc-n{color:var(--g)}.sc.sy .sc-n{color:var(--y)}.sc.sr .sc-n{color:var(--r)}.sc.sb .sc-n{color:var(--bl)}
+.sc-l{font-size:10px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.grid2{display:grid;grid-template-columns:1fr 258px;gap:13px}
+.card{background:white;border-radius:var(--rad);box-shadow:var(--shs);overflow:hidden;margin-bottom:13px}
+.card:last-child{margin-bottom:0}
+.ch{padding:12px 16px;border-bottom:1px solid var(--s100);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ct{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;color:var(--s800)}
+.ct i{color:var(--bm);font-size:12px}
+.cs{font-size:11px;color:var(--s400)}
+.cb{padding:13px 16px}
+.aluno-list{display:flex;flex-direction:column;gap:5px}
+.aluno-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--rads);border:1.5px solid var(--s100);transition:all .25s}
+.aluno-row:hover{background:var(--s50)}
+.aluno-row.aus{opacity:.7}
+.aluno-row.rfid-flash{border-color:var(--g);background:rgba(16,185,129,.06);animation:fl .5s ease}
+@keyframes fl{from{transform:translateX(7px);opacity:.3}to{transform:translateX(0);opacity:1}}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;flex-shrink:0}
+.ai{flex:1;min-width:0}
+.an{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asub{font-size:11px;color:var(--s400);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.badge.presente{background:rgba(16,185,129,.1);color:var(--g)}.badge.atraso{background:rgba(245,158,11,.1);color:var(--y)}.badge.ausente{background:rgba(239,68,68,.1);color:var(--r)}
+.btn-mini{width:27px;height:27px;border:1.5px solid var(--s200);border-radius:7px;background:none;cursor:pointer;font-size:11px;color:var(--s400);display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.btn-mini:hover{border-color:var(--bm);color:var(--bm);background:var(--bp)}
+.rfid-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.rfid-ev{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s50);border:1px solid var(--s100);border-radius:var(--rads);animation:si .35s ease}
+@keyframes si{from{transform:translateX(10px);opacity:0}to{transform:translateX(0);opacity:1}}
+.rfid-ev.nova{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25)}
+.rfid-ev-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;flex-shrink:0}
+.rfid-empty{font-size:12px;color:var(--s400);text-align:center;padding:20px 10px}
+.rfid-empty i{font-size:24px;color:var(--s200);display:block;margin-bottom:8px}
+.btn-act{width:100%;padding:10px 14px;border:none;border-radius:var(--rads);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px}
+.btn-act:last-child{margin-bottom:0}
+.btn-act.prim{background:linear-gradient(135deg,var(--bm),var(--b));color:white}
+.btn-act.prim:hover{box-shadow:0 5px 18px rgba(37,99,235,.35);transform:translateY(-1px)}
+.btn-act.succ{background:linear-gradient(135deg,#059669,var(--g));color:white}
+.btn-act.succ:hover{box-shadow:0 5px 18px rgba(16,185,129,.3);transform:translateY(-1px)}
+.filter-btn{padding:6px 14px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;font-weight:600;color:var(--s600);cursor:pointer;transition:all .18s}
+.filter-btn.active{background:var(--bm);border-color:var(--bm);color:white}
+.fsel{padding:6px 12px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;color:var(--s600);cursor:pointer;outline:none}
+.fsel:focus{border-color:var(--bm)}
+.hist-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.hs{background:white;border-radius:var(--rad);padding:11px 13px;text-align:center;box-shadow:var(--shs)}
+.hs-n{font-size:20px;font-weight:800;line-height:1}
+.hs-l{font-size:10px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.htable{width:100%;border-collapse:collapse;font-size:13px}
+.htable th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--s100);white-space:nowrap}
+.htable td{padding:10px 13px;border-bottom:1px solid var(--s100)}
+.htable tr:hover td{background:var(--s50)}
+.htable tr:last-child td{border-bottom:none}
+.otag{font-size:11px;color:var(--s600);background:var(--s100);padding:2px 8px;border-radius:20px;white-space:nowrap}
+.ptable{width:100%;border-collapse:collapse;font-size:12px}
+.ptable th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--s100)}
+.ptable td{padding:9px 12px;border-bottom:1px solid var(--s100);vertical-align:middle}
+.ptable tr:hover td{background:var(--s50)}
+.pbar-bg{flex:1;height:5px;background:var(--s100);border-radius:10px;overflow:hidden;min-width:50px}
+.pbar-f{height:100%;border-radius:10px}
+.pbar-f.hi{background:var(--g)}.pbar-f.me{background:var(--y)}.pbar-f.lo{background:var(--r)}
+.nchip{background:var(--s100);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--s600)}
+.txa{width:100%;padding:10px 12px;border:1.5px solid var(--s200);border-radius:var(--rads);font-family:inherit;font-size:13px;color:var(--s800);resize:none;background:var(--s50);transition:border-color .2s}
+.txa:focus{outline:none;border-color:var(--bm);background:white}
+.fg{margin-bottom:10px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--s600);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.fi{width:100%;padding:9px 12px;border:1.5px solid var(--s200);border-radius:var(--rads);font-family:inherit;font-size:13px;color:var(--s800);background:var(--s50);transition:all .2s;outline:none}
+.fi:focus{border-color:var(--bm);background:white}
+.sum-item{padding:11px 14px;border-bottom:1px solid var(--s100)}
+.sum-item:last-child{border-bottom:none}
+.ov{position:fixed;inset:0;background:rgba(15,25,50,.55);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center}
+.ov.open{display:flex}
+.modal{background:white;border-radius:18px;padding:22px;width:320px;max-width:92vw;box-shadow:0 18px 52px rgba(0,0,0,.2);animation:mi .28s ease}
+@keyframes mi{from{opacity:0;transform:scale(.93) translateY(-8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.mt{font-size:14px;font-weight:800;margin-bottom:14px}
+.est-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px}
+.eb{padding:10px 6px;border:2px solid var(--s200);border-radius:9px;background:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.eb i{font-size:16px}
+.eb.sg{border-color:var(--g);background:rgba(16,185,129,.1);color:var(--g)}
+.eb.sy{border-color:var(--y);background:rgba(245,158,11,.1);color:var(--y)}
+.eb.sr{border-color:var(--r);background:rgba(239,68,68,.1);color:var(--r)}
+.mft{display:flex;gap:7px;justify-content:flex-end}
+.btn-c{padding:8px 15px;border:1.5px solid var(--s200);border-radius:8px;background:none;font-family:inherit;font-size:13px;cursor:pointer;color:var(--s600)}
+.btn-s{padding:8px 15px;background:linear-gradient(135deg,var(--bm),var(--b));color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s800);color:white;padding:10px 15px;border-radius:11px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--sh);transform:translateY(80px);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1);z-index:999;max-width:290px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.tg{border-left:4px solid var(--g)}.toast.ty{border-left:4px solid var(--y)}.toast.tr{border-left:4px solid var(--r)}.toast.tb{border-left:4px solid var(--bl)}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.hist-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-toggle{display:flex}.topbar{padding:0 14px 0 58px}.page{padding:14px 10px 28px}}
+</style>
+</head>
+<body>
+<button class="sb-toggle" onclick="toggleSb()"><i class="fa fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <img src="recursos/Imagens/icon.png" alt="SCOPE" onerror="this.style.display='none'">
+    </div>
+    <div><div class="sb-name">SCOPE</div><div class="sb-role">Professor</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Principal</div>
+    <button class="nav-item active" id="nav-aula" onclick="ir('aula')"><i class="fa fa-chalkboard-user"></i>Aula Atual</button>
+    <button class="nav-item" id="nav-presencas" onclick="ir('presencas')"><i class="fa fa-clipboard-list"></i>Lista de Presenças</button>
+    <div class="nav-sec">Turma</div>
+    <button class="nav-item" id="nav-historico" onclick="ir('historico')"><i class="fa fa-calendar-check"></i>Histórico</button>
+    <button class="nav-item" id="nav-alunos" onclick="ir('alunos')"><i class="fa fa-users-rectangle"></i>Alunos da Turma</button>
+    <div class="nav-sec">Registos</div>
+    <button class="nav-item" id="nav-sumario" onclick="ir('sumario')"><i class="fa fa-book-open"></i>Sumário</button>
+    <button class="nav-item" id="nav-ocorrencias" onclick="ir('ocorrencias')"><i class="fa fa-triangle-exclamation"></i>Ocorrências</button>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-av">PS</div>
+    <div style="flex:1;min-width:0"><div class="sb-uname">Prof. Silva</div><div class="sb-urole">Professor</div></div>
+    <button class="btn-logout" onclick="if(confirm('Terminar sessão?'))SCOPE.logout()" title="Sair"><i class="fa fa-right-from-bracket"></i></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title" id="tbTitle">Aula Atual</span>
+    <div class="tb-right">
+      <div class="rfid-pill"><div class="rfid-dot"></div><span>Leitor Online</span></div>
+      <span class="tb-date" id="tbDate"></span>
+    </div>
+  </div>
+  <div class="page">
+
+    <!-- AULA ATUAL -->
+    <div class="view active" id="view-aula">
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-badge"><span class="hero-dot"></span>AULA EM CURSO</div>
+            <div class="hero-turma">12ª CFB</div>
+            <div class="hero-disc">Ciências Físicas e Biológicas · 2025/2026</div>
+          </div>
+          <div class="hero-clock">
+            <div class="hero-hora" id="hora">--:--</div>
+            <div class="hero-hora-lbl">HORA ATUAL</div>
+          </div>
+        </div>
+        <div class="hero-row">
+          <div class="hero-info"><div class="hero-info-lbl">SALA</div><div class="hero-info-val">Sala 12</div></div>
+          <div class="hero-info"><div class="hero-info-lbl">HORÁRIO</div><div class="hero-info-val">13:00 – 14:30</div></div>
+          <div class="hero-info"><div class="hero-info-lbl">ANO LETIVO</div><div class="hero-info-val">2025 / 2026</div></div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="sc sg"><div class="sc-ic"><i class="fa fa-circle-check"></i></div><div><div class="sc-n" id="stP">0</div><div class="sc-l">Presentes</div></div></div>
+        <div class="sc sy"><div class="sc-ic"><i class="fa fa-clock"></i></div><div><div class="sc-n" id="stAt">0</div><div class="sc-l">Atraso</div></div></div>
+        <div class="sc sr"><div class="sc-ic"><i class="fa fa-circle-xmark"></i></div><div><div class="sc-n" id="stAu">7</div><div class="sc-l">Ausentes</div></div></div>
+        <div class="sc sb"><div class="sc-ic"><i class="fa fa-chart-pie"></i></div><div><div class="sc-n" id="stT">0%</div><div class="sc-l">Taxa Presença</div></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="ch">
+            <span class="ct"><i class="fa fa-clipboard-list"></i>Lista de Presenças — 12ª CFB</span>
+            <span class="cs" id="subA">0 de 7 registados</span>
+          </div>
+          <div class="cb"><div class="aluno-list" id="alunoList"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card">
+            <div class="ch">
+              <span class="ct"><i class="fa fa-tower-broadcast"></i>Leituras RFID</span>
+              <span style="font-size:10px;color:var(--g);font-weight:700;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--g);display:inline-block;animation:pg 2s infinite"></span>LIVE</span>
+            </div>
+            <div class="cb">
+              <div class="rfid-list" id="rfidList">
+                <div class="rfid-empty" id="rfidEmpty"><i class="fa fa-tower-broadcast"></i>Aguardando leitura de cartão…</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct"><i class="fa fa-bolt"></i>Ações Rápidas</span></div>
+            <div class="cb">
+              <button class="btn-act prim" onclick="toast('Aula confirmada!','tg')"><i class="fa fa-circle-check"></i>Confirmar Aula</button>
+              <button class="btn-act succ" onclick="if(confirm('Encerrar aula?'))toast('Aula encerrada. Dados guardados.','tb')"><i class="fa fa-flag-checkered"></i>Encerrar Aula</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA DE PRESENÇAS -->
+    <div class="view" id="view-presencas">
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-clipboard-list"></i>Lista de Presenças — 12ª CFB</span>
+          <select class="fsel" id="discFilter">
+            <option value="">Todas as disciplinas</option>
+            <option>Matemática</option><option>Física</option><option>Língua Inglesa</option>
+            <option>Língua Portuguesa</option><option>Biologia</option><option>Geologia</option>
+            <option>Química</option><option>Empreendedorismo</option><option>Filosofia</option>
+            <option>Geometria Descritiva</option><option>Educação Física</option>
+          </select>
+        </div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="ptable">
+            <thead><tr><th>Nº</th><th>Aluno</th><th>% Presença</th><th>Presenças</th><th>Faltas</th><th>Atrasos</th><th>Estado</th></tr></thead>
+            <tbody id="presBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="view" id="view-historico">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <button class="filter-btn active" onclick="setF(this)">Semana</button>
+        <button class="filter-btn" onclick="setF(this)">Mês</button>
+        <button class="filter-btn" onclick="setF(this)">Trimestre</button>
+        <button class="filter-btn" onclick="setF(this)">Ano</button>
+        <select class="fsel"><option>Março 2026</option><option>Fevereiro 2026</option></select>
+        <select class="fsel"><option>Todas as disciplinas</option></select>
+        <button class="btn-act prim" style="width:auto;padding:6px 14px;margin:0;font-size:12px" onclick="toast('A exportar…','tb')"><i class="fa fa-download"></i>Exportar</button>
+      </div>
+      <div class="hist-stats">
+        <div class="hs"><div class="hs-n" style="color:var(--bm)">12</div><div class="hs-l">Aulas</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--g)">68</div><div class="hs-l">Presenças</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--r)">16</div><div class="hs-l">Ausências</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--y)">8</div><div class="hs-l">Atrasos</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--bm)">81%</div><div class="hs-l">Média</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-calendar-check"></i>Histórico Detalhado</span></div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="htable">
+            <thead><tr><th>Data</th><th>Hora</th><th>Disciplina</th><th>Presentes</th><th>Ausentes</th><th>Atrasos</th><th>Observações</th></tr></thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALUNOS DA TURMA -->
+    <div class="view" id="view-alunos">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-users-rectangle"></i>Alunos — 12ª CFB (7 alunos)</span></div>
+        <div class="cb"><div class="aluno-list" id="alunosTurma"></div></div>
+      </div>
+    </div>
+
+    <!-- SUMÁRIO -->
+    <div class="view" id="view-sumario">
+      <div class="grid2">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-pen-to-square"></i>Sumário da Aula</span><span class="cs" id="sumData"></span></div>
+          <div class="cb">
+            <div class="fg"><label class="fl">Disciplina</label><select class="fi" id="sumDisc"><option>Matemática</option><option>Física</option><option>Língua Inglesa</option><option>Língua Portuguesa</option><option>Biologia</option><option>Geologia</option><option>Química</option><option>Empreendedorismo</option><option>Filosofia</option><option>Geometria Descritiva</option><option>Educação Física</option></select></div>
+            <div class="fg"><label class="fl">Sumário</label><textarea class="txa" style="height:120px" id="sumText" placeholder="Escreve o sumário da aula…"></textarea></div>
+            <div class="fg"><label class="fl">Observações</label><textarea class="txa" id="sumObs" placeholder="Observações adicionais (opcional)…"></textarea></div>
+            <button class="btn-act prim" onclick="guardarSum()"><i class="fa fa-floppy-disk"></i>Guardar Sumário</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-clock-rotate-left"></i>Sumários Anteriores</span></div>
+          <div id="sumHist"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCORRÊNCIAS -->
+    <div class="view" id="view-ocorrencias">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-triangle-exclamation"></i>Registar Ocorrência</span></div>
+        <div class="cb">
+          <div class="fg"><label class="fl">Aluno (opcional)</label>
+            <select class="fi" id="ocAluno">
+              <option value="">Toda a turma</option>
+              <option>1 — Agnalda Kunjikisse Jelembi Vapor</option>
+              <option>2 — Alexandre Fernando Monteiro Pereira</option>
+              <option>3 — Domingos Caselo Kalwiji Samanjata</option>
+              <option>4 — Haziel Simboyala Chitau Hamuyela Tchitavila</option>
+              <option>5 — Larissa Fato Botelho</option>
+              <option>6 — Luís Caison Zango Caica</option>
+              <option>7 — Maria Da Conceição José Pena</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Tipo</label>
+            <select class="fi"><option>Comportamento</option><option>Advertência</option><option>Elogio</option><option>Outro</option></select>
+          </div>
+          <div class="fg"><label class="fl">Descrição</label>
+            <textarea class="txa" id="ocText" style="height:100px" placeholder="Descreve a ocorrência…"></textarea>
+          </div>
+          <button class="btn-act prim" onclick="guardarOc()"><i class="fa fa-floppy-disk"></i>Guardar Ocorrência</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="modalEst">
+  <div class="modal">
+    <div class="mt" id="modalNome">Editar Estado</div>
+    <div class="est-btns">
+      <button class="eb" id="eb-presente" onclick="selE('presente')"><i class="fa fa-circle-check"></i>Presente</button>
+      <button class="eb" id="eb-atraso" onclick="selE('atraso')"><i class="fa fa-clock"></i>Atraso</button>
+      <button class="eb" id="eb-ausente" onclick="selE('ausente')"><i class="fa fa-circle-xmark"></i>Ausente</button>
+    </div>
+    <div class="mft">
+      <button class="btn-c" onclick="closeM()">Cancelar</button>
+      <button class="btn-s" onclick="saveM()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="ov" onclick="toggleSb(false)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45"></div>
+
+<script src="recursos/js/scope-api.js"></script>
+<script>
+// ── Estado local ─────────────────────────────────────────────
+let ALUNOS      = [];          // lista actualizada pela API
+let _horarioId  = null;        // id do horário do bloco actual
+let mId = null, mEst = null;   // modal editar estado
+
+// ── Utilitários ──────────────────────────────────────────────
+const COR = SCOPE_CORES;
+function ini(n){ return scopeIniciais(n); }
+function lbl(e){ return e==='presente'?'Presente':e==='atraso'?'Atraso':e==='falta_disciplinar'?'F.Disc':'Ausente'; }
+function pcc(p){ return p>=85?'hi':p>=70?'me':'lo'; }
+let tT; function toast(msg,c='tg'){ scopeToast(msg,c); }
+
+// ── Renderizar lista de alunos (aula actual) ─────────────────
+function rAlunos(){
+  document.getElementById('alunoList').innerHTML = ALUNOS.map((a,i)=>`
+    <div class="aluno-row ${a.estado==='ausente'?'aus':''}" id="row-${a.id}">
+      <div class="av" style="background:${COR[i%COR.length]}">${ini(a.nome)}</div>
+      <div class="ai">
+        <div class="an">${i+1}. ${a.nome}</div>
+        <div class="asub">${a.hora_entrada
+          ? '<i class="fa fa-clock" style="margin-right:3px"></i>'+SCOPE.fmtHora(a.hora_entrada)
+          : 'Proc. '+a.num_processo}</div>
+      </div>
+      <span class="badge ${a.estado}">${lbl(a.estado)}</span>
+      <button class="btn-mini" onclick="openM(${a.id},${i})"><i class="fa fa-pen"></i></button>
+    </div>`).join('');
+}
+
+// ── Renderizar alunos da turma (secção Alunos) ───────────────
+function rTurma(){
+  const el = document.getElementById('alunosTurma'); if(!el) return;
+  el.innerHTML = ALUNOS.map((a,i)=>`
+    <div class="aluno-row">
+      <div class="av" style="background:${COR[i%COR.length]}">${ini(a.nome)}</div>
+      <div class="ai"><div class="an">${i+1}. ${a.nome}</div><div class="asub">Nº Processo: ${a.num_processo}</div></div>
+      <span class="badge presente" style="opacity:.6">Ativo</span>
+    </div>`).join('');
+}
+
+// ── Actualizar contadores de estatísticas ────────────────────
+function updStats(totais){
+  if(!totais) {
+    const p  = ALUNOS.filter(a=>a.estado==='presente').length;
+    const at = ALUNOS.filter(a=>a.estado==='atraso').length;
+    const tot= ALUNOS.length;
+    totais = { presentes:p, atrasos:at, ausentes:tot-p-at,
+               total:tot, taxa: tot?Math.round(((p+at)/tot)*100):0 };
+  }
+  document.getElementById('stP').textContent  = totais.presentes;
+  document.getElementById('stAt').textContent = totais.atrasos;
+  document.getElementById('stAu').textContent = totais.ausentes;
+  document.getElementById('stT').textContent  = totais.taxa + '%';
+  document.getElementById('subA').textContent = `${totais.presentes+totais.atrasos} de ${totais.total} registados`;
+}
+
+// ── Tabela Lista de Presenças (usa estatísticas do mês) ──────
+async function rPresencas(){
+  const resp = await SCOPE.estatisticas();
+  if(resp.status !== 'ok') return;
+  document.getElementById('presBody').innerHTML = resp.dados.map((a,i)=>{
+    const pct = parseFloat(a.taxa) || 0;
+    const nome = a.nome || a.aluno || '—';
+    return `<tr>
+      <td><span class="nchip">${i+1}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="width:26px;height:26px;border-radius:50%;background:${COR[i%COR.length]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">${ini(nome)}</div>
+        <span style="font-weight:600">${nome}</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="pbar-bg"><div class="pbar-f ${pcc(pct)}" style="width:${pct}%"></div></div>
+        <span style="font-size:12px;font-weight:700;min-width:32px;text-align:right;color:${pct>=85?'var(--g)':pct>=70?'var(--y)':'var(--r)'}">${pct}%</span></div></td>
+      <td style="color:var(--g);font-weight:700">${a.presencas}</td>
+      <td style="color:${a.ausencias>3?'var(--r)':'var(--s600)'};font-weight:${a.ausencias>3?700:400}">${a.ausencias}</td>
+      <td style="color:${a.faltas_disc>0?'var(--y)':'var(--s400)'}">${a.faltas_disc}</td>
+      <td><span class="badge ${pct>=85?'presente':pct>=70?'atraso':'ausente'}" style="font-size:10px">${pct>=85?'Regular':pct>=70?'Em risco':'Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Histórico (placeholder — futura tabela de sumários) ──────
+function rHist(){
+  document.getElementById('histBody').innerHTML =
+    `<tr><td colspan="7" style="text-align:center;color:var(--s400);padding:24px">
+      Sem registos históricos disponíveis.
+    </td></tr>`;
+}
+
+// ── Sumário ──────────────────────────────────────────────────
+function rSumario(){
+  document.getElementById('sumData').textContent =
+    new Date().toLocaleDateString('pt-PT',{day:'numeric',month:'long'});
+  const el = document.getElementById('sumHist'); if(!el) return;
+  el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--s400);font-size:12px">Sem sumários anteriores.</div>`;
+}
+async function guardarSum(){
+  const t = document.getElementById('sumText').value.trim();
+  if(!t){ toast('Escreve o sumário primeiro.','ty'); return; }
+  // Guardar sumário como ocorrência com prefixo [Sumário]
+  const sessao = JSON.parse(localStorage.getItem('scope_user')||'{}');
+  const profId = sessao.referencia_id || 1;
+  const resp = await SCOPE.guardarOcorrencia(profId, '[Sumário] ' + t);
+  if(resp.status === 'ok'){
+    document.getElementById('sumText').value='';
+    const obsEl = document.getElementById('sumObs'); if(obsEl) obsEl.value='';
+    toast('Sumário guardado!','tg');
+  } else {
+    toast('Erro ao guardar sumário.','tr');
+  }
+}
+
+// ── Guardar ocorrência via API ────────────────────────────────
+async function guardarOc(){
+  const desc = document.getElementById('ocText').value.trim();
+  if(!desc){ toast('Escreve a ocorrência.','ty'); return; }
+  // Usar professor_id da sessão guardada
+  const sessao = JSON.parse(localStorage.getItem('scope_user')||'{}');
+  const profId = sessao.referencia_id || 1;
+  const resp = await SCOPE.guardarOcorrencia(profId, desc);
+  if(resp.status === 'ok'){
+    document.getElementById('ocText').value='';
+    toast('Ocorrência guardada!','tg');
+    rOcView(); // actualizar lista
+  } else {
+    toast('Erro ao guardar ocorrência.','tr');
+  }
+}
+
+// ── Listar ocorrências da turma ───────────────────────────────
+async function rOcView(){
+  const el = document.getElementById('ocList'); if(!el) return;
+  el.innerHTML = '<div style="color:var(--s400);font-size:12px;padding:8px">A carregar…</div>';
+  const resp = await fetch('api/turma.php?acao=listar_ocorrencias&turma=1')
+    .then(r=>r.json()).catch(()=>({status:'erro'}));
+  if(resp.status !== 'ok' || !resp.ocorrencias.length){
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--s400)"><i class="fa fa-folder-open" style="font-size:28px;display:block;margin-bottom:8px"></i>Sem ocorrências registadas.</div>';
+    return;
+  }
+  el.innerHTML = resp.ocorrencias.map(o=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--s100)">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--yp);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px">⚠️</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">${o.descricao||'—'}</div>
+        <div style="font-size:11px;color:var(--s400);margin-top:2px">
+          ${o.data||''} · Prof. ${o.professor||'—'} · Tempo ${o.tempo||'—'}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Adicionar evento RFID ao painel lateral ──────────────────
+function adicionarEventoRFID(aluno){
+  const lst = document.getElementById('rfidList');
+  document.getElementById('rfidEmpty')?.remove();
+  const i   = ALUNOS.findIndex(a=>a.id===aluno.id);
+  const cor = COR[Math.max(i,0) % COR.length];
+  const d   = document.createElement('div');
+  d.className = 'rfid-ev nova';
+  d.innerHTML = `
+    <div class="rfid-ev-av" style="background:${cor}">${ini(aluno.nome)}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${aluno.nome}</div>
+      <div style="font-size:10px;color:var(--s400)"><i class="fa fa-clock" style="margin-right:3px"></i>${SCOPE.fmtHora(aluno.hora_entrada)}</div>
+    </div>
+    <span class="badge ${aluno.estado}" style="font-size:10px">${lbl(aluno.estado)}</span>`;
+  lst.insertBefore(d, lst.firstChild);
+  setTimeout(()=>d.classList.remove('nova'), 3000);
+  if(lst.querySelectorAll('.rfid-ev').length>5) lst.lastChild.remove();
+
+  // Flash na linha do aluno
+  const row = document.getElementById('row-'+aluno.id);
+  if(row){ row.classList.add('rfid-flash'); setTimeout(()=>row.classList.remove('rfid-flash'),1400); }
+
+  toast(aluno.nome.split(' ')[0]+' — '+lbl(aluno.estado), aluno.estado==='presente'?'tg':'ty');
+}
+
+// ── Carregar presenças do bloco actual ───────────────────────
+async function carregarAulaActual(){
+  const resp = await SCOPE.carregarPresencasDia();
+  if(resp.status !== 'ok') return;
+
+  ALUNOS = resp.alunos.map((a,i)=>({...a, ord: i+1}));
+  _horarioId = resp.alunos[0]?.horario_id ?? null;
+
+  rAlunos();
+  updStats(resp.totais);
+}
+
+// ── Modal editar estado ──────────────────────────────────────
+function openM(id, idx){
+  const a = ALUNOS.find(x=>x.id===id); if(!a) return;
+  mId = id; mEst = a.estado;
+  document.getElementById('modalNome').textContent = '✏️ '+a.nome;
+  updEB(a.estado);
+  document.getElementById('modalEst').classList.add('open');
+}
+function selE(e){ mEst=e; updEB(e); }
+function updEB(e){
+  const m={presente:'sg',atraso:'sy',ausente:'sr'};
+  ['presente','atraso','ausente'].forEach(x=>{
+    document.getElementById('eb-'+x).className='eb'+(x===e?' '+m[x]:'');
+  });
+}
+async function saveM(){
+  const a = ALUNOS.find(x=>x.id===mId); if(!a) return;
+  if(!_horarioId){ toast('Sem aula activa para editar.','ty'); closeM(); return; }
+  const resp = await SCOPE.editarEstado(mId, _horarioId, mEst);
+  if(resp.status==='ok'){
+    a.estado = mEst;
+    if(mEst!=='ausente' && !a.hora_entrada) a.hora_entrada = new Date().toTimeString().substring(0,8);
+    if(mEst==='ausente') a.hora_entrada = null;
+    rAlunos(); updStats();
+    toast(a.nome.split(' ')[0]+' → '+lbl(mEst), 'tg');
+  } else {
+    toast('Erro ao guardar estado.','tr');
+  }
+  closeM();
+}
+function closeM(){ document.getElementById('modalEst').classList.remove('open'); }
+document.getElementById('modalEst').addEventListener('click', e=>{ if(e.target.id==='modalEst') closeM(); });
+
+// ── Navegação entre vistas ───────────────────────────────────
+const TITLES={aula:'Aula Atual',presencas:'Lista de Presenças',historico:'Histórico de Presenças',alunos:'Alunos da Turma',sumario:'Sumário',ocorrencias:'Ocorrências'};
+function ir(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  document.getElementById('tbTitle').textContent = TITLES[v]||v;
+  if(v==='presencas')   rPresencas();
+  if(v==='alunos')      rTurma();
+  if(v==='historico')   rHist();
+  if(v==='sumario')     rSumario();
+  if(v==='ocorrencias') rOcView();
+  if(window.innerWidth<=768) toggleSb(false);
+}
+
+// ── Sidebar ──────────────────────────────────────────────────
+let sbO=false;
+function toggleSb(f){
+  const sb=document.getElementById('sidebar'),o=document.getElementById('ov');
+  if(f===false||sbO){sb.classList.remove('open');o.style.display='none';sbO=false;}
+  else{sb.classList.add('open');o.style.display='block';sbO=true;}
+}
+function setF(btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// ── Inicialização ────────────────────────────────────────────
+(async function init(){
+  // Verificar sessão — só professores podem aceder
+  const user = await SCOPE.verificarSessao(['professor','administrador']);
+  if (!user) return;
+  SCOPE.preencherUI(user);
+  // Relógio e data
+  scopeRelogio('hora');
+  scopeDataExtenso('tbDate');
+
+  // Carregar aula actual
+  await carregarAulaActual();
+
+  // Iniciar polling RFID — actualiza a cada 8s
+  SCOPE.iniciarPolling(novaLeitura => {
+    // Actualizar aluno na lista local
+    const idx = ALUNOS.findIndex(a=>a.id===novaLeitura.id);
+    if(idx >= 0) ALUNOS[idx] = { ...ALUNOS[idx], ...novaLeitura };
+    adicionarEventoRFID(novaLeitura);
+    rAlunos();
+    updStats();
+  });
+
+  // Listener de actualização geral
+  SCOPE.on('presencas_atualizadas', resp=>{
+    ALUNOS = resp.alunos.map((a,i)=>({...a, ord:i+1}));
+    rAlunos();
+    updStats(resp.totais);
+  });
+
+  rSumario();
+})();
+</script>
+</body>
+</html>

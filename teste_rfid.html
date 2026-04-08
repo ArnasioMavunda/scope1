@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE — Simulador RFID</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #0a0f1e;
+  --bg2:   #0f1628;
+  --bg3:   #151e35;
+  --line:  rgba(255,255,255,.07);
+  --b:     #2563EB;
+  --bm:    #3B82F6;
+  --bl:    #60A5FA;
+  --g:     #10B981;
+  --gd:    #059669;
+  --y:     #F59E0B;
+  --r:     #EF4444;
+  --p:     #8B5CF6;
+  --txt:   #E2E8F0;
+  --muted: #64748B;
+  --mono:  'JetBrains Mono', monospace;
+  --sans:  'Plus Jakarta Sans', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Grid background ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    linear-gradient(rgba(37,99,235,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.wrap { position:relative; z-index:1; max-width:1000px; margin:0 auto; padding:24px 20px 60px; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; gap:16px; margin-bottom:28px;
+  padding-bottom:20px; border-bottom:1px solid var(--line);
+}
+.logo {
+  width:44px; height:44px; border-radius:12px;
+  background:linear-gradient(135deg,var(--b),var(--p));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-weight:700; font-size:14px; color:white;
+  flex-shrink:0;
+}
+.header-title { font-size:20px; font-weight:800; letter-spacing:-.3px; }
+.header-sub   { font-size:12px; color:var(--muted); margin-top:2px; font-family:var(--mono); }
+.badge-sim {
+  margin-left:auto;
+  background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3);
+  color:var(--y); font-size:11px; font-weight:700; font-family:var(--mono);
+  padding:4px 10px; border-radius:20px; letter-spacing:.5px;
+}
+
+/* ── Grid layout ── */
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:700px){ .grid,.grid3{ grid-template-columns:1fr; } }
+
+/* ── Cards ── */
+.card {
+  background:var(--bg2); border:1px solid var(--line);
+  border-radius:16px; padding:18px 20px;
+}
+.card-title {
+  font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.2px;
+  margin-bottom:14px; display:flex; align-items:center; gap:7px;
+}
+.card-title::before {
+  content:''; width:6px; height:6px; border-radius:50%;
+  background:var(--bm); display:block;
+}
+
+/* ── Alunos grid ── */
+.aluno-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+@media(max-width:500px){ .aluno-grid{ grid-template-columns:1fr; } }
+
+.aluno-btn {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg3); border:1.5px solid var(--line);
+  border-radius:12px; padding:10px 12px;
+  cursor:pointer; transition:all .18s; text-align:left; font-family:var(--sans);
+  position:relative; overflow:hidden;
+}
+.aluno-btn:hover { border-color:rgba(59,130,246,.5); background:#1a2540; }
+.aluno-btn.selected {
+  border-color:var(--bm);
+  background:rgba(37,99,235,.12);
+  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+.aluno-btn.selected::after {
+  content:'✓'; position:absolute; top:6px; right:8px;
+  font-size:11px; font-weight:700; color:var(--bm);
+}
+.av {
+  width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color:white; flex-shrink:0;
+}
+.av-name  { font-size:12px; font-weight:700; line-height:1.3; }
+.av-rfid  { font-size:10px; color:var(--muted); font-family:var(--mono); margin-top:2px; }
+
+/* ── Tempo picker ── */
+.blocos { display:flex; flex-direction:column; gap:6px; }
+.bloco-btn {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg3); border:1.5px solid var(--line);
+  border-radius:10px; padding:9px 12px;
+  cursor:pointer; transition:all .18s; font-family:var(--sans);
+  width:100%;
+}
+.bloco-btn:hover { border-color:rgba(59,130,246,.4); }
+.bloco-btn.active { border-color:var(--bm); background:rgba(37,99,235,.1); }
+.bloco-label { font-size:13px; font-weight:700; }
+.bloco-time  { font-size:11px; color:var(--muted); font-family:var(--mono); }
+.bloco-tags  { margin-left:auto; display:flex; gap:4px; }
+.tag {
+  font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px;
+  font-family:var(--mono); letter-spacing:.3px;
+}
+.tag.p  { background:rgba(16,185,129,.15); color:var(--g); }
+.tag.a  { background:rgba(245,158,11,.15);  color:var(--y); }
+.tag.f  { background:rgba(239,68,68,.15);   color:var(--r); }
+
+/* ── Hora customizada ── */
+.custom-time {
+  display:flex; align-items:center; gap:10px; margin-top:10px;
+}
+.custom-label { font-size:12px; color:var(--muted); white-space:nowrap; }
+.time-input {
+  flex:1; background:var(--bg3); border:1.5px solid var(--line);
+  border-radius:8px; padding:7px 12px; font-family:var(--mono);
+  font-size:14px; color:var(--txt); outline:none;
+  transition:border-color .18s;
+}
+.time-input:focus { border-color:var(--bm); }
+.date-input {
+  flex:1; background:var(--bg3); border:1.5px solid var(--line);
+  border-radius:8px; padding:7px 12px; font-family:var(--mono);
+  font-size:13px; color:var(--txt); outline:none;
+}
+.date-input:focus { border-color:var(--bm); }
+
+/* ── Estado preview ── */
+.estado-preview {
+  background:var(--bg3); border:1px solid var(--line);
+  border-radius:10px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
+  margin-top:10px;
+}
+.estado-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.estado-txt { font-size:13px; font-weight:700; }
+.estado-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+
+/* ── Botão enviar ── */
+.btn-enviar {
+  width:100%; padding:14px;
+  background:linear-gradient(135deg,var(--b),#1d4ed8);
+  border:none; border-radius:12px; color:white;
+  font-family:var(--sans); font-size:15px; font-weight:800;
+  cursor:pointer; transition:all .2s; display:flex; align-items:center;
+  justify-content:center; gap:8px; letter-spacing:-.2px;
+  margin-top:14px;
+}
+.btn-enviar:hover:not(:disabled) {
+  box-shadow:0 6px 24px rgba(37,99,235,.4);
+  transform:translateY(-2px);
+}
+.btn-enviar:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+
+.btn-turma {
+  width:100%; padding:10px;
+  background:transparent; border:1.5px solid var(--line);
+  border-radius:10px; color:var(--muted);
+  font-family:var(--sans); font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .2s; margin-top:8px;
+}
+.btn-turma:hover { border-color:var(--g); color:var(--g); }
+
+/* ── Log ── */
+.log-wrap { background:var(--bg2); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.log-header {
+  padding:12px 18px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.log-title { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; font-family:var(--mono); }
+.log-clear { background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer; font-family:var(--mono); transition:color .18s; }
+.log-clear:hover { color:var(--r); }
+.log-body { padding:14px 18px; min-height:160px; max-height:320px; overflow-y:auto; }
+.log-body::-webkit-scrollbar { width:4px; }
+.log-body::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; }
+
+.log-entry {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:8px 0; border-bottom:1px solid var(--line);
+  animation:fadeIn .25s ease;
+}
+.log-entry:last-child { border-bottom:none; }
+@keyframes fadeIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
+.log-ts { font-family:var(--mono); font-size:10px; color:var(--muted); white-space:nowrap; padding-top:1px; }
+.log-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.log-dot.ok  { background:var(--g); box-shadow:0 0 6px var(--g); }
+.log-dot.err { background:var(--r); box-shadow:0 0 6px var(--r); }
+.log-dot.info{ background:var(--bm); }
+.log-msg { flex:1; font-size:12px; line-height:1.5; font-family:var(--mono); }
+.log-msg .ok  { color:var(--g); font-weight:700; }
+.log-msg .err { color:var(--r); font-weight:700; }
+.log-msg .info{ color:var(--bl); }
+.log-msg .name{ color:white; font-weight:700; }
+.log-msg .dim { color:var(--muted); }
+
+/* ── Stats bar ── */
+.stats-bar {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  background:var(--bg2); border:1px solid var(--line);
+  border-radius:14px; overflow:hidden; margin-bottom:16px;
+}
+.stat {
+  padding:14px 16px; border-right:1px solid var(--line);
+  text-align:center;
+}
+.stat:last-child { border-right:none; }
+.stat-n { font-size:22px; font-weight:800; line-height:1; }
+.stat-l { font-size:10px; color:var(--muted); margin-top:3px; font-family:var(--mono); text-transform:uppercase; letter-spacing:.5px; }
+
+/* ── Aviso ── */
+.aviso {
+  background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2);
+  border-radius:10px; padding:10px 14px;
+  font-size:12px; color:rgba(245,158,11,.9);
+  display:flex; gap:8px; align-items:flex-start; margin-bottom:16px;
+}
+.aviso-icon { flex-shrink:0; font-size:14px; margin-top:1px; }
+
+/* ── Modo turma completa ── */
+.progress-bar {
+  height:4px; background:var(--bg3); border-radius:4px;
+  overflow:hidden; margin-top:8px;
+}
+.progress-fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg,var(--b),var(--g));
+  transition:width .4s ease;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">S</div>
+    <div>
+      <div class="header-title">SCOPE — Simulador RFID</div>
+      <div class="header-sub">Simula passagens de cartão para testes · <span id="horaReal">--:--:--</span></div>
+    </div>
+    <div class="badge-sim">⚗ MODO TESTE</div>
+  </div>
+
+  <!-- Aviso -->
+  <div class="aviso">
+    <div class="aviso-icon">⚠️</div>
+    <div>Esta página envia dados reais para a base de dados. Usa-a só para testes antes do sistema entrar em produção.
+    Acesso apenas a partir de <strong>localhost / 192.168.0.58</strong>.</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-n" id="stTotal" style="color:var(--bl)">0</div><div class="stat-l">Enviados</div></div>
+    <div class="stat"><div class="stat-n" id="stOk"    style="color:var(--g)">0</div><div class="stat-l">Sucesso</div></div>
+    <div class="stat"><div class="stat-n" id="stErr"   style="color:var(--r)">0</div><div class="stat-l">Erros</div></div>
+    <div class="stat"><div class="stat-n" id="stMs"    style="color:var(--muted)">—</div><div class="stat-l">Último ms</div></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- Coluna esquerda: Aluno + Tempo -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Seleccionar aluno -->
+      <div class="card">
+        <div class="card-title">1 — Seleccionar Aluno</div>
+        <div class="aluno-grid" id="alunoGrid"></div>
+      </div>
+
+      <!-- Seleccionar bloco/hora -->
+      <div class="card">
+        <div class="card-title">2 — Seleccionar Momento</div>
+        <div class="blocos" id="blocosGrid"></div>
+        <div class="custom-time">
+          <span class="custom-label">Data:</span>
+          <input type="date" class="date-input" id="dataInput">
+        </div>
+        <div class="custom-time">
+          <span class="custom-label">Hora:</span>
+          <input type="time" class="time-input" id="horaInput" step="1">
+        </div>
+        <div class="estado-preview" id="estadoPreview">
+          <div class="estado-dot" id="prevDot" style="background:var(--muted)"></div>
+          <div>
+            <div class="estado-txt" id="prevTxt">—</div>
+            <div class="estado-sub" id="prevSub">Selecciona um bloco ou define a hora</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna direita: Enviar + Log -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Enviar -->
+      <div class="card">
+        <div class="card-title">3 — Enviar para API</div>
+        <div style="background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--muted)">
+          <div><span style="color:var(--muted)">POST</span> <span style="color:var(--bl)">api/presenca.php</span></div>
+          <div id="previewJson" style="color:var(--txt);margin-top:6px">{<br>&nbsp;&nbsp;"rfid": <span style="color:var(--g)">—</span>,<br>&nbsp;&nbsp;"timestamp": <span style="color:var(--y)">—</span><br>}</div>
+        </div>
+        <button class="btn-enviar" id="btnEnviar" onclick="enviar()">
+          <span id="btnIcon">📡</span>
+          <span id="btnTxt">Simular Passagem de Cartão</span>
+        </button>
+        <button class="btn-turma" onclick="enviarTurma()">
+          ⚡ Enviar Turma Completa (todos os 7 alunos)
+        </button>
+        <div class="progress-bar" id="progBar" style="display:none">
+          <div class="progress-fill" id="progFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="log-wrap">
+        <div class="log-header">
+          <span class="log-title">📋 Log de Pedidos</span>
+          <button class="log-clear" onclick="limparLog()">limpar</button>
+        </div>
+        <div class="log-body" id="logBody">
+          <div style="color:var(--muted);font-size:12px;font-family:var(--mono);padding:8px 0">
+            Aguarda primeira simulação…
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Link para dashboard -->
+  <div style="text-align:center;margin-top:8px">
+    <a href="dashboard_coordenador.html" style="color:var(--muted);font-size:12px;font-family:var(--mono);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--bl)'" onmouseout="this.style.color='var(--muted)'">
+      → Abrir Dashboard do Coordenador
+    </a>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <a href="dashboard_professor.html" style="color:var(--muted);font-size:12px;font-family:var(--mono);text-decoration:none" onmouseover="this.style.color='var(--bl)'" onmouseout="this.style.color='var(--muted)'">
+      → Abrir Dashboard do Professor
+    </a>
+  </div>
+
+</div>
+
+<script>
+// ── Dados ──────────────────────────────────────────────────────
+const ALUNOS = [
+  { nome:'Agnalda Kunjikisse Jelembi Vapor',         rfid:'4682816',  cor:'#3B82F6' },
+  { nome:'Alexandre Fernando Monteiro Pereira',      rfid:'4710756',  cor:'#8B5CF6' },
+  { nome:'Domingos Caselo Kalwiji Samanjata',         rfid:'4713470',  cor:'#EC4899' },
+  { nome:'Haziel Simbovala Chitau Hamuyela Tchitawila',rfid:'4732271', cor:'#14B8A6' },
+  { nome:'Larissa Fato Botelho',                     rfid:'4737708',  cor:'#F97316' },
+  { nome:'Luís Caison Zango Caíca',                  rfid:'4742167',  cor:'#06B6D4' },
+  { nome:'Maria Da Conceição José Pena',             rfid:'5882869',  cor:'#A855F7' },
+];
+
+const BLOCOS = [
+  { id:'b1p', label:'Bloco 1 — Presente',  hora:'13:03:00', bloco:1, estado:'presente',  cor:'var(--g)', tag:'p', desc:'≤ 5 min após as 13:00' },
+  { id:'b1a', label:'Bloco 1 — Atraso',    hora:'13:10:00', bloco:1, estado:'atraso',    cor:'var(--y)', tag:'a', desc:'6–15 min após as 13:00' },
+  { id:'b1f', label:'Bloco 1 — Falta',     hora:'13:20:00', bloco:1, estado:'ausente',   cor:'var(--r)', tag:'f', desc:'> 15 min — registo de falta' },
+  { id:'b2p', label:'Bloco 2 — Presente',  hora:'14:48:00', bloco:2, estado:'presente',  cor:'var(--g)', tag:'p', desc:'≤ 5 min após as 14:45' },
+  { id:'b2a', label:'Bloco 2 — Atraso',    hora:'14:55:00', bloco:2, estado:'atraso',    cor:'var(--y)', tag:'a', desc:'6–15 min após as 14:45' },
+  { id:'b3p', label:'Bloco 3 — Presente',  hora:'16:32:00', bloco:3, estado:'presente',  cor:'var(--g)', tag:'p', desc:'≤ 5 min após as 16:30' },
+  { id:'b3a', label:'Bloco 3 — Atraso',    hora:'16:40:00', bloco:3, estado:'atraso',    cor:'var(--y)', tag:'a', desc:'6–15 min após as 16:30' },
+  { id:'saida', label:'Saída',             hora:'18:05:00', bloco:0, estado:'saida',     cor:'var(--bl)', tag:'p', desc:'Passagem após as 18:00' },
+];
+
+// ── Estado UI ─────────────────────────────────────────────────
+let alunoSel  = null;
+let blocoSel  = null;
+let stats = { total:0, ok:0, err:0 };
+
+// ── Iniciais ──────────────────────────────────────────────────
+function iniciais(nome) {
+  const p = nome.trim().split(' ');
+  return (p[0][0] + (p[p.length-1]?.[0]||'')).toUpperCase();
+}
+
+// ── Render alunos ─────────────────────────────────────────────
+function renderAlunos() {
+  document.getElementById('alunoGrid').innerHTML = ALUNOS.map((a,i) => `
+    <button class="aluno-btn${alunoSel===i?' selected':''}" onclick="selAluno(${i})">
+      <div class="av" style="background:${a.cor}">${iniciais(a.nome)}</div>
+      <div>
+        <div class="av-name">${a.nome.split(' ').slice(0,2).join(' ')}</div>
+        <div class="av-rfid">${a.rfid}</div>
+      </div>
+    </button>`).join('');
+}
+
+// ── Render blocos ─────────────────────────────────────────────
+function renderBlocos() {
+  document.getElementById('blocosGrid').innerHTML = BLOCOS.map(b => `
+    <button class="bloco-btn${blocoSel?.id===b.id?' active':''}" onclick="selBloco('${b.id}')">
+      <div>
+        <div class="bloco-label">${b.label}</div>
+        <div class="bloco-time">${b.hora}</div>
+      </div>
+      <div class="bloco-tags">
+        <span class="tag ${b.tag}">${b.estado}</span>
+      </div>
+    </button>`).join('');
+}
+
+// ── Seleccionar aluno ─────────────────────────────────────────
+function selAluno(i) {
+  alunoSel = i;
+  renderAlunos();
+  actualizarPreview();
+}
+
+// ── Seleccionar bloco ─────────────────────────────────────────
+function selBloco(id) {
+  blocoSel = BLOCOS.find(b => b.id === id);
+  if (blocoSel) {
+    document.getElementById('horaInput').value = blocoSel.hora.substring(0,5);
+  }
+  renderBlocos();
+  actualizarPreview();
+}
+
+// ── Actualizar preview ────────────────────────────────────────
+function actualizarPreview() {
+  const horaVal = document.getElementById('horaInput').value;
+  const dataVal = document.getElementById('dataInput').value;
+  const preview = document.getElementById('previewJson');
+  const dot  = document.getElementById('prevDot');
+  const txt  = document.getElementById('prevTxt');
+  const sub  = document.getElementById('prevSub');
+
+  const rfid = alunoSel !== null ? ALUNOS[alunoSel].rfid : null;
+  const ts   = (dataVal && horaVal) ? `${dataVal} ${horaVal}:00` : null;
+
+  // Actualizar JSON preview
+  preview.innerHTML = rfid
+    ? `{<br>&nbsp;&nbsp;"rfid": <span style="color:var(--g)">"${rfid}"</span>,<br>&nbsp;&nbsp;"timestamp": <span style="color:var(--y)">"${ts||'—'}"</span><br>}`
+    : `{<br>&nbsp;&nbsp;"rfid": <span style="color:var(--muted)">—</span>,<br>&nbsp;&nbsp;"timestamp": <span style="color:var(--muted)">—</span><br>}`;
+
+  // Estado esperado baseado na hora
+  const [h,m] = (horaVal||'00:00').split(':').map(Number);
+  const minutos = h*60+m;
+  let estTxt = '—', estCor = 'var(--muted)', estSub = 'Selecciona aluno e hora';
+
+  if (horaVal) {
+    if      (minutos >= 18*60)                   { estTxt='Saída';    estCor='var(--bl)'; estSub='Regista hora de saída'; }
+    else if (minutos >= 16*60+46)                { estTxt='Ausente';  estCor='var(--r)';  estSub='Falta no Bloco 3 (>16:45)'; }
+    else if (minutos >= 16*60+36)                { estTxt='Atraso';   estCor='var(--y)';  estSub='Bloco 3 — atraso (16:36–16:45)'; }
+    else if (minutos >= 16*60+30)                { estTxt='Presente'; estCor='var(--g)';  estSub='Bloco 3 — presente (≤16:35)'; }
+    else if (minutos >= 15*60+1)                 { estTxt='Ausente';  estCor='var(--r)';  estSub='Falta no Bloco 2 (>15:00)'; }
+    else if (minutos >= 14*60+51)                { estTxt='Atraso';   estCor='var(--y)';  estSub='Bloco 2 — atraso (14:51–15:00)'; }
+    else if (minutos >= 14*60+45)                { estTxt='Presente'; estCor='var(--g)';  estSub='Bloco 2 — presente (≤14:50)'; }
+    else if (minutos >= 13*60+16)                { estTxt='Ausente';  estCor='var(--r)';  estSub='Falta no Bloco 1 (>13:15)'; }
+    else if (minutos >= 13*60+6)                 { estTxt='Atraso';   estCor='var(--y)';  estSub='Bloco 1 — atraso (13:06–13:15)'; }
+    else if (minutos >= 13*60)                   { estTxt='Presente'; estCor='var(--g)';  estSub='Bloco 1 — presente (≤13:05)'; }
+    else                                         { estTxt='—';         estCor='var(--muted)'; estSub='Fora do horário de aulas'; }
+  }
+
+  dot.style.background = estCor;
+  dot.style.boxShadow  = estCor !== 'var(--muted)' ? `0 0 6px ${estCor}` : 'none';
+  txt.textContent = estTxt;
+  txt.style.color = estCor;
+  sub.textContent = estSub;
+}
+
+// ── Enviar pedido ─────────────────────────────────────────────
+async function enviar(rfidOverride=null, tsOverride=null) {
+  const rfid = rfidOverride || (alunoSel !== null ? ALUNOS[alunoSel].rfid : null);
+  const horaVal = document.getElementById('horaInput').value;
+  const dataVal = document.getElementById('dataInput').value;
+  const ts   = tsOverride || ((dataVal && horaVal) ? `${dataVal} ${horaVal}:00` : null);
+
+  if (!rfid) { addLog('err', '—', 'Nenhum aluno seleccionado.'); return; }
+  if (!ts)   { addLog('err', rfid, 'Define a data e hora antes de enviar.'); return; }
+
+  const aluno = ALUNOS.find(a => a.rfid === rfid);
+  const btn   = document.getElementById('btnEnviar');
+  if (!rfidOverride) {
+    btn.disabled = true;
+    document.getElementById('btnTxt').textContent = 'A enviar…';
+    document.getElementById('btnIcon').textContent = '⏳';
+  }
+
+  const t0 = Date.now();
+  try {
+    const resp = await fetch('api/presenca.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rfid, timestamp: ts }),
+    });
+    const data = await resp.json();
+    const ms = Date.now() - t0;
+
+    stats.total++; stats.ok++;
+    document.getElementById('stTotal').textContent = stats.total;
+    document.getElementById('stOk').textContent    = stats.ok;
+    document.getElementById('stMs').textContent    = ms + 'ms';
+
+    const nomeAbrev = aluno ? aluno.nome.split(' ').slice(0,2).join(' ') : rfid;
+    addLog('ok', ts.split(' ')[1], `<span class="name">${nomeAbrev}</span> → <span class="ok">${data.estado||data.mensagem||'ok'}</span> <span class="dim">[${ms}ms]</span>`);
+
+    return data;
+  } catch(e) {
+    stats.total++; stats.err++;
+    document.getElementById('stTotal').textContent = stats.total;
+    document.getElementById('stErr').textContent   = stats.err;
+    const nomeAbrev = aluno ? aluno.nome.split(' ').slice(0,2).join(' ') : rfid;
+    addLog('err', ts.split(' ')[1], `<span class="name">${nomeAbrev}</span> → <span class="err">Erro: ${e.message}</span>`);
+    return null;
+  } finally {
+    if (!rfidOverride) {
+      btn.disabled = false;
+      document.getElementById('btnTxt').textContent = 'Simular Passagem de Cartão';
+      document.getElementById('btnIcon').textContent = '📡';
+    }
+  }
+}
+
+// ── Enviar turma completa ─────────────────────────────────────
+async function enviarTurma() {
+  const horaVal = document.getElementById('horaInput').value;
+  const dataVal = document.getElementById('dataInput').value;
+  if (!dataVal || !horaVal) { addLog('err','—','Define data e hora antes de enviar a turma.'); return; }
+
+  const prog = document.getElementById('progBar');
+  const fill = document.getElementById('progFill');
+  prog.style.display = 'block';
+  addLog('info', horaVal, `<span class="info">▶ A enviar turma completa (${ALUNOS.length} alunos)…</span>`);
+
+  for (let i=0; i < ALUNOS.length; i++) {
+    const a  = ALUNOS[i];
+    const ts = `${dataVal} ${horaVal}:00`;
+    await enviar(a.rfid, ts);
+    fill.style.width = ((i+1)/ALUNOS.length*100)+'%';
+    await new Promise(r => setTimeout(r, 350)); // pequena pausa entre pedidos
+  }
+
+  addLog('ok', horaVal, `<span class="ok">✓ Turma completa enviada — ${ALUNOS.length} registos</span>`);
+  setTimeout(() => { prog.style.display='none'; fill.style.width='0%'; }, 2000);
+}
+
+// ── Log ───────────────────────────────────────────────────────
+function addLog(tipo, hora, html) {
+  const body = document.getElementById('logBody');
+  // Remover placeholder
+  const ph = body.querySelector('div[style]');
+  if (ph && ph.textContent.includes('Aguarda')) ph.remove();
+
+  const dot  = tipo==='ok'?'ok':tipo==='err'?'err':'info';
+  const ts   = new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <div class="log-ts">${ts}</div>
+    <div class="log-dot ${dot}"></div>
+    <div class="log-msg">${html}</div>`;
+  body.insertBefore(entry, body.firstChild);
+
+  // Limite de 50 entradas
+  while (body.children.length > 50) body.removeChild(body.lastChild);
+}
+
+function limparLog() {
+  document.getElementById('logBody').innerHTML =
+    '<div style="color:var(--muted);font-size:12px;font-family:var(--mono);padding:8px 0">Log limpo.</div>';
+}
+
+// ── Relógio em tempo real ─────────────────────────────────────
+function tick() {
+  document.getElementById('horaReal').textContent =
+    new Date().toLocaleTimeString('pt-PT');
+}
+setInterval(tick, 1000); tick();
+
+// ── Input de hora actualiza preview ──────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Data de hoje por defeito
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('dataInput').value = hoje;
+  document.getElementById('horaInput').value =
+    new Date().toTimeString().substring(0,5);
+
+  document.getElementById('horaInput').addEventListener('input', () => {
+    blocoSel = null; renderBlocos(); actualizarPreview();
+  });
+  document.getElementById('dataInput').addEventListener('input', actualizarPreview);
+
+  renderAlunos();
+  renderBlocos();
+  actualizarPreview();
+
+  addLog('info','—','<span class="info">Simulador iniciado. Selecciona aluno → momento → Enviar.</span>');
+});
+</script>
+</body>
+</html>

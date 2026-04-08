@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE - Sistema de Controlo de Presença Escolar</title>
+
+<link rel="stylesheet" href="recursos/css/style.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- Partículas (só visíveis nas secções com fundo azul) -->
+<canvas id="particles"></canvas>
+
+<!-- SPLASH -->
+<div class="section" id="splash">
+  <div class="logo-circle">
+    <img src="recursos/imagens/icon.png" alt="icon logo SCOPE">
+  </div>
+  <h1>SCOPE</h1>
+  <div class="subtitle">Sistema de Controlo de Presença Escolar</div>
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="section hidden" id="login">
+  <div class="login-container">
+    <div class="login-header">
+      <img src="recursos/imagens/icon.png" alt="icon logo SCOPE">
+      <h2>SCOPE</h2>
+      <p>Sistema de Controlo de Presença Escolar</p>
+    </div>
+
+    <div class="input-group">
+      <label>Utilizador</label>
+      <i class="fa fa-user left-icon"></i>
+      <input type="text" id="username" placeholder="Nome ou Email">
+    </div>
+
+    <div class="input-group">
+      <label>Palavra-Passe</label>
+      <i class="fa fa-lock left-icon"></i>
+      <input type="password" id="password" placeholder="Palavra-passe">
+      <i class="fa fa-eye right-icon" id="togglePassword"></i>
+    </div>
+
+    <div class="input-group">
+      <label>Perfil</label>
+      <i class="fa fa-user-tag left-icon"></i>
+      <select id="perfilSelect">
+        <option value="professor">Professor</option>
+        <option value="coordenador">Coordenador</option>
+        <option value="administrador">Administrador</option>
+      </select>
+    </div>
+
+    <button class="btn-login" onclick="entrar()">
+      <i class="fa fa-right-to-bracket"></i> Entrar no Sistema
+    </button>
+
+    <div class="login-erro" id="loginErro" style="display:none"></div>
+
+    <div class="login-footer">© 2026 SCOPE — Todos os direitos reservados</div>
+  </div>
+</div>
+
+<!-- PROCESSING -->
+<div class="section hidden" id="processing">
+  <div class="progress-bar">
+    <div class="progress" id="progress2"></div>
+  </div>
+  <div class="loader"></div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="recursos/js/scope-api.js"></script>
+<script>
+// ============================================================
+//  SCOPE — index.html  (Splash → Login → Autenticar → Redirect)
+// ============================================================
+
+// ── Partículas de fundo ──────────────────────────────────────
+(function iniciarParticulas() {
+  const canvas = document.getElementById('particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function criarPontos(n) {
+    pts = [];
+    for (let i = 0; i < n; i++) {
+      pts.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4,
+        r: Math.random() * 2 + 1,
+      });
+    }
+  }
+  criarPontos(55);
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fill();
+    });
+    // Linhas entre pontos próximos
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 110) {
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(255,255,255,${0.12 * (1 - dist/110)})`;
+          ctx.lineWidth = .6;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Utilitários de secções ───────────────────────────────────
+function mostrar(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id)?.classList.remove('hidden');
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('loginErro');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 500);
+}
+
+function limparErro() {
+  const el = document.getElementById('loginErro');
+  if (el) el.style.display = 'none';
+}
+
+// ── Toggle visibilidade da senha ─────────────────────────────
+document.getElementById('togglePassword')?.addEventListener('click', function () {
+  const inp = document.getElementById('password');
+  const icon = this;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    inp.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+});
+
+// ── Permitir Enter nos campos de login ───────────────────────
+['username', 'password'].forEach(id => {
+  document.getElementById(id)?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') entrar();
+  });
+});
+
+// ── Limpar erro ao digitar ───────────────────────────────────
+['username', 'password'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', limparErro);
+});
+
+// ── Barra de progresso animada ───────────────────────────────
+function animarBarra(elId, duracao, cb) {
+  const el = document.getElementById(elId);
+  if (!el) { cb && cb(); return; }
+  let p = 0;
+  const step = 100 / (duracao / 30);
+  const iv = setInterval(() => {
+    p = Math.min(p + step + Math.random() * step * .5, 100);
+    el.style.width = p + '%';
+    if (p >= 100) { clearInterval(iv); setTimeout(cb, 200); }
+  }, 30);
+}
+
+// ── SPLASH → LOGIN ────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  animarBarra('progress', 1800, () => {
+    mostrar('login');
+    document.getElementById('username')?.focus();
+  });
+});
+
+// ── REDIRECIONAMENTOS por perfil ─────────────────────────────
+const DESTINOS = {
+  professor:     'dashboard_professor.html',
+  coordenador:   'dashboard_coordenador.html',
+  administrador: 'dashboard_admin.html',
+  encarregado:   'portal_encarregado.html',
+};
+
+// ── FUNÇÃO PRINCIPAL DE LOGIN ────────────────────────────────
+async function entrar() {
+  limparErro();
+
+  const email = document.getElementById('username').value.trim();
+  const senha = document.getElementById('password').value;
+
+  // Validação básica client-side
+  if (!email) { mostrarErro('Introduz o teu email ou nome de utilizador.'); return; }
+  if (!senha)  { mostrarErro('Introduz a tua palavra-passe.'); return; }
+
+  // Desactivar botão durante o pedido
+  const btn = document.querySelector('.btn-login');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> A verificar…';
+
+  try {
+    const resp = await SCOPE.login(email, senha);
+
+    if (resp.status === 'ok') {
+      // Guardar dados da sessão no localStorage (para os dashboards lerem)
+      localStorage.setItem('scope_user', JSON.stringify({
+        nome:          resp.nome,
+        perfil:        resp.perfil,
+        email:         email,
+        referencia_id: resp.referencia_id ?? null,
+      }));
+
+      // Mostrar ecrã de processamento com barra a 100%
+      mostrar('processing');
+      animarBarra('progress2', 1200, () => {
+        window.location.href = resp.redirect || DESTINOS[resp.perfil] || 'index.html';
+      });
+
+    } else {
+      // Credenciais inválidas
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Entrar no Sistema';
+      mostrarErro(resp.mensagem || 'Email ou palavra-passe incorrectos.');
+
+      // Vibrar campo de senha
+      const pwEl = document.getElementById('password');
+      pwEl.value = '';
+      pwEl.classList.add('input-erro');
+      setTimeout(() => pwEl.classList.remove('input-erro'), 600);
+      pwEl.focus();
+    }
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Entrar no Sistema';
+    mostrarErro('Sem ligação ao servidor. Verifica se o XAMPP está activo.');
+  }
+}
+
+// ── LOGOUT (chamado pelos dashboards) ────────────────────────
+function logout() {
+  localStorage.removeItem('scope_user');
+  window.location.href = '/scope/index.html';
+}
+</script>
+</body>
+</html>

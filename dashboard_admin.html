@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE — Administrador</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b:#2563EB;--bd:#1d4ed8;--bm:#3b82f6;--bp:#eff6ff;--bl:#dbeafe;
+  --g:#059669;--gd:#047857;--gp:#ecfdf5;--gl:#d1fae5;
+  --y:#d97706;--yp:#fffbeb;--yl:#fde68a;
+  --r:#dc2626;--rd:#b91c1c;--rp:#fef2f2;--rl:#fee2e2;
+  --pu:#7c3aed;--pup:#f5f3ff;--pul:#ede9fe;
+  --o:#ea580c;--op:#fff7ed;
+  --s0:#ffffff;--s50:#f8fafc;--s100:#f1f5f9;--s150:#eef2f7;
+  --s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;
+  --s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;
+  --shadow-xs:0 1px 2px rgba(0,0,0,.06);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.1);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.13);
+  --r6:6px;--r8:8px;--r10:10px;--r12:12px;--r14:14px;--r20:20px;
+  --sw:248px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-size:13px}
+body{font-family:'DM Sans',sans-serif;background:var(--s100);color:var(--s800);display:flex;height:100vh;overflow:hidden;line-height:1.5}
+code,kbd,.mono{font-family:'DM Mono',monospace}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--s400)}
+
+/* ════════ SIDEBAR ════════ */
+.sb{width:var(--sw);background:linear-gradient(180deg,#0c2d6b 0%,#0f3d91 40%,#1a4faa 100%);height:100vh;display:flex;flex-direction:column;flex-shrink:0;box-shadow:3px 0 20px rgba(12,45,107,.35);z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px)}
+.sb-brand{padding:20px 16px 15px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{width:40px;height:40px;background:white;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.sb-logo img{width:26px;height:26px;object-fit:contain}
+.sb-logo-fb{width:26px;height:26px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:6px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white}
+.sb-wordmark{font-size:17px;font-weight:700;color:white;letter-spacing:2.5px;display:block}
+.sb-role{font-size:9px;color:rgba(255,255,255,.38);letter-spacing:1.2px;text-transform:uppercase;margin-top:1px;display:block}
+.sb-nav{flex:1;padding:10px 8px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-sec{font-size:9px;font-weight:600;color:rgba(255,255,255,.28);letter-spacing:1.8px;padding:11px 10px 3px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.nav-sec::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r8);cursor:pointer;color:rgba(255,255,255,.55);font-size:12.5px;font-weight:500;transition:all .15s;border:none;background:none;font-family:inherit;width:100%;text-align:left}
+.ni i{width:15px;text-align:center;font-size:11px;flex-shrink:0;opacity:.8}
+.ni .lbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ni:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
+.ni.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+.ni.active i{color:#93c5fd;opacity:1}
+.nb-badge{background:var(--r);color:white;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;flex-shrink:0}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.su-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#818cf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;border:2px solid rgba(255,255,255,.15)}
+.su-name{font-size:12px;font-weight:600;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.su-role{font-size:10px;color:rgba(255,255,255,.38);margin-top:1px}
+.btn-logout{background:none;border:none;color:rgba(255,255,255,.35);font-size:14px;cursor:pointer;padding:5px;transition:all .18s;flex-shrink:0;border-radius:6px}
+.btn-logout:hover{color:#fca5a5;background:rgba(255,255,255,.07)}
+
+/* ════════ MAIN ════════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:white;height:54px;padding:0 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--s200);flex-shrink:0;box-shadow:var(--shadow-xs)}
+.tb-ham{display:none;background:none;border:none;font-size:15px;color:var(--s600);cursor:pointer;padding:5px 8px;border-radius:var(--r8);transition:background .15s}
+.tb-ham:hover{background:var(--s100)}
+.tb-title{font-size:14px;font-weight:700;color:var(--s800)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--bp);border:1.5px solid rgba(37,99,235,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--b)}
+.tb-date{font-size:11px;color:var(--s400);font-weight:500;white-space:nowrap}
+.page{flex:1;overflow-y:auto;padding:18px 20px 44px}
+.view{display:none}.view.active{display:block}
+
+/* ════════ TYPOGRAPHY ════════ */
+.page-title{font-size:18px;font-weight:700;color:var(--s800);margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--s500)}
+.sec-label{font-size:10px;font-weight:700;color:var(--s400);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--s200)}
+
+/* ════════ CARDS ════════ */
+.card{background:white;border-radius:var(--r14);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:12px;border:1px solid rgba(0,0,0,.04)}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--s100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-title{font-size:13px;font-weight:700;color:var(--s800);display:flex;align-items:center;gap:7px}
+.card-title i{color:var(--b);font-size:11px}
+.card-sub{font-size:11px;color:var(--s400)}
+.card-body{padding:14px 16px}
+.card-body.np{padding:0}
+
+/* ════════ STAT CARDS ════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:white;border-radius:var(--r14);padding:14px 16px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,.04);position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s;cursor:default}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.stat-card.c-b::before{background:var(--b)}.stat-card.c-g::before{background:var(--g)}.stat-card.c-y::before{background:var(--y)}.stat-card.c-r::before{background:var(--r)}.stat-card.c-p::before{background:var(--pu)}.stat-card.c-o::before{background:var(--o)}
+.stat-icon{width:36px;height:36px;border-radius:var(--r10);display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px}
+.stat-card.c-b .stat-icon{background:var(--bp);color:var(--b)}.stat-card.c-g .stat-icon{background:var(--gp);color:var(--g)}.stat-card.c-y .stat-icon{background:var(--yp);color:var(--y)}.stat-card.c-r .stat-icon{background:var(--rp);color:var(--r)}.stat-card.c-p .stat-icon{background:var(--pup);color:var(--pu)}.stat-card.c-o .stat-icon{background:var(--op);color:var(--o)}
+.stat-val{font-size:22px;font-weight:800;line-height:1;margin-bottom:3px}
+.stat-card.c-b .stat-val{color:var(--b)}.stat-card.c-g .stat-val{color:var(--g)}.stat-card.c-y .stat-val{color:var(--y)}.stat-card.c-r .stat-val{color:var(--r)}.stat-card.c-p .stat-val{color:var(--pu)}.stat-card.c-o .stat-val{color:var(--o)}
+.stat-label{font-size:10px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+
+/* ════════ GRIDS ════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+
+/* ════════ TABLE ════════ */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.6px;border-bottom:2px solid var(--s100);white-space:nowrap;background:var(--s50)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--s100);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:var(--s50)}
+.tbl .ops{display:flex;gap:4px;align-items:center}
+.id-chip{font-family:'DM Mono',monospace;font-size:10px;background:var(--s100);padding:2px 7px;border-radius:5px;color:var(--s600);font-weight:500}
+
+/* ════════ BADGES ════════ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.badge.g{background:var(--gp);color:var(--gd)}.badge.y{background:var(--yp);color:var(--y)}.badge.r{background:var(--rp);color:var(--rd)}.badge.b{background:var(--bp);color:var(--bd)}.badge.p{background:var(--pup);color:var(--pu)}.badge.s{background:var(--s100);color:var(--s600)}.badge.o{background:var(--op);color:var(--o)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.g{background:var(--g)}.dot.r{background:var(--r)}.dot.y{background:var(--y)}.dot.s{background:var(--s400)}
+
+/* ════════ BUTTONS ════════ */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r10);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .17s;border:none;white-space:nowrap;line-height:1}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,var(--b),var(--bd));color:white}
+.btn.primary:hover:not(:disabled){box-shadow:0 4px 14px rgba(37,99,235,.3);transform:translateY(-1px)}
+.btn.success{background:linear-gradient(135deg,var(--g),var(--gd));color:white}
+.btn.success:hover:not(:disabled){box-shadow:0 4px 14px rgba(5,150,105,.3);transform:translateY(-1px)}
+.btn.ghost{background:var(--s100);color:var(--s600);border:1px solid var(--s200)}
+.btn.ghost:hover{background:var(--s150);color:var(--s800)}
+.btn.danger{background:var(--rp);color:var(--r);border:1px solid var(--rl)}
+.btn.danger:hover{background:var(--r);color:white}
+.btn.warn{background:var(--yp);color:var(--y);border:1px solid var(--yl)}
+.btn.warn:hover{background:var(--y);color:white}
+.btn.outline-b{background:var(--bp);color:var(--b);border:1px solid var(--bl)}
+.btn.outline-b:hover{background:var(--b);color:white}
+.btn.sm{padding:5px 10px;font-size:11px;border-radius:var(--r8)}
+.btn.xs{padding:3px 8px;font-size:10px;border-radius:6px}
+.btn.icon-only{padding:6px 8px}
+
+/* ════════ FORM ════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.g1{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg.span2{grid-column:span 2}
+.fg.span3{grid-column:span 3}
+.fl{font-size:10px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.6px}
+.fi,.fs,.ft{width:100%;padding:8px 11px;border:1.5px solid var(--s200);border-radius:var(--r8);font-family:inherit;font-size:12.5px;color:var(--s800);background:var(--s50);outline:none;transition:all .18s;line-height:1.4}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--b);background:white;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.fi::placeholder{color:var(--s400)}
+.ft{resize:vertical;min-height:70px}
+
+/* ════════ SEARCH ════════ */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--s50);border:1.5px solid var(--s200);border-radius:var(--r10);padding:8px 13px;transition:all .18s}
+.search-bar:focus-within{border-color:var(--b);background:white;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.search-bar i{color:var(--s400);font-size:12px;flex-shrink:0}
+.search-bar input{flex:1;border:none;background:none;font-family:inherit;font-size:12.5px;color:var(--s800);outline:none}
+.search-bar input::placeholder{color:var(--s400)}
+
+/* ════════ FILTER BAR ════════ */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filter-pill{padding:5px 13px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:11px;font-weight:600;color:var(--s600);cursor:pointer;transition:all .15s}
+.filter-pill.active{background:var(--b);border-color:var(--b);color:white}
+.filter-pill:hover:not(.active){border-color:var(--b);color:var(--b)}
+.fsel{padding:5px 12px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:11px;color:var(--s700);cursor:pointer;outline:none;transition:border-color .15s;font-weight:600}
+.fsel:focus{border-color:var(--b)}
+
+/* ════════ PBAR ════════ */
+.pbar-bg{height:5px;background:var(--s100);border-radius:10px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:10px}
+.pbar-fill.hi{background:linear-gradient(90deg,var(--g),#34d399)}.pbar-fill.me{background:linear-gradient(90deg,var(--y),#fbbf24)}.pbar-fill.lo{background:linear-gradient(90deg,var(--r),#f87171)}
+
+/* ════════ ALERT ════════ */
+.alert{display:flex;gap:10px;padding:10px 14px;border-radius:var(--r10);margin-bottom:8px}
+.alert:last-child{margin-bottom:0}
+.alert.r{background:var(--rp);border-left:3px solid var(--r)}.alert.y{background:var(--yp);border-left:3px solid var(--y)}.alert.g{background:var(--gp);border-left:3px solid var(--g)}.alert.b{background:var(--bp);border-left:3px solid var(--b)}
+.alert-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.alert.r .alert-ico{background:rgba(220,38,38,.12);color:var(--r)}.alert.y .alert-ico{background:rgba(217,119,6,.1);color:var(--y)}.alert.g .alert-ico{background:rgba(5,150,105,.1);color:var(--g)}.alert.b .alert-ico{background:rgba(37,99,235,.1);color:var(--b)}
+.alert-title{font-size:12.5px;font-weight:600;color:var(--s800)}
+.alert-sub{font-size:11px;color:var(--s500);margin-top:1px}
+
+/* ════════ AVATAR ROW ════════ */
+.av-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r10);border:1.5px solid var(--s100);transition:all .15s;background:white}
+.av-row:hover{border-color:var(--bl);background:var(--bp)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;box-shadow:0 2px 5px rgba(0,0,0,.15)}
+.av.lg{width:38px;height:38px;font-size:13px}
+.ai{flex:1;min-width:0}
+.an{font-size:13px;font-weight:600;color:var(--s800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asub{font-size:10.5px;color:var(--s400);margin-top:1px}
+
+/* ════════ RFID READER CARD ════════ */
+.rfid-reader-card{background:white;border-radius:var(--r14);border:1.5px solid var(--s200);padding:14px 16px;transition:all .2s;position:relative;overflow:hidden}
+.rfid-reader-card:hover{border-color:var(--bl);box-shadow:var(--shadow-md)}
+.rfid-reader-card.online{border-left:4px solid var(--g)}
+.rfid-reader-card.offline{border-left:4px solid var(--r)}
+.rfid-reader-card.warning{border-left:4px solid var(--y)}
+.reader-pulse{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.reader-pulse.on{background:var(--g);animation:pulse-g 2s infinite}
+.reader-pulse.off{background:var(--r)}
+.reader-pulse.warn{background:var(--y);animation:pulse-y 2s infinite}
+@keyframes pulse-g{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.5)}50%{box-shadow:0 0 0 5px rgba(5,150,105,0)}}
+@keyframes pulse-y{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,.5)}50%{box-shadow:0 0 0 5px rgba(217,119,6,0)}}
+
+/* ════════ MODAL ════════ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(5px);z-index:500;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:white;border-radius:var(--r20);width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.22);animation:modalIn .24s cubic-bezier(.34,1.56,.64,1);overflow:hidden;max-height:92vh;display:flex;flex-direction:column}
+.modal.wide{max-width:620px}
+.modal.sm{max-width:420px}
+@keyframes modalIn{from{opacity:0;transform:scale(.93) translateY(-10px)}}
+.modal-head{background:linear-gradient(135deg,var(--b),var(--bd));padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-head h3{font-size:14px;font-weight:700;color:white;display:flex;align-items:center;gap:8px}
+.modal-close{background:rgba(255,255,255,.18);border:none;color:white;width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.modal-close:hover{background:rgba(255,255,255,.3)}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--s100);display:flex;justify-content:flex-end;gap:8px;background:var(--s50);flex-shrink:0}
+
+/* ════════ TOAST ════════ */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s900);color:white;padding:10px 16px;border-radius:var(--r10);font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);z-index:9999;max-width:300px;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.tg{border-left:4px solid var(--g)}.toast.ty{border-left:4px solid var(--y)}.toast.tr{border-left:4px solid var(--r)}.toast.tb{border-left:4px solid var(--b)}
+
+/* ════════ ACTIVITY FEED ════════ */
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--s100);align-items:flex-start}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.feed-text{font-size:12px;color:var(--s700);line-height:1.45}
+.feed-time{font-size:10px;color:var(--s400);margin-top:2px}
+
+/* ════════ BANNER ════════ */
+.admin-banner{background:linear-gradient(135deg,#0c2d6b 0%,#1a4faa 55%,#2563eb 100%);border-radius:var(--r14);padding:20px 24px;color:white;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 28px rgba(12,45,107,.3)}
+.admin-banner::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.admin-banner::after{content:'';position:absolute;bottom:-70px;right:80px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.03)}
+.banner-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.banner-kpis{display:flex;gap:10px;flex-wrap:wrap}
+.banner-kpi{text-align:center;background:rgba(255,255,255,.12);border-radius:var(--r10);padding:10px 18px;border:1px solid rgba(255,255,255,.1)}
+.banner-kpi-n{font-size:22px;font-weight:800;line-height:1}
+.banner-kpi-l{font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+
+/* ════════ PAGE HEADER ════════ */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.ph-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ════════ CONF CARD ════════ */
+.conf-card{background:white;border-radius:var(--r14);padding:18px;border:1px solid var(--s200);box-shadow:var(--shadow-sm);height:100%}
+.conf-card h3{font-size:13px;font-weight:700;color:var(--s800);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.conf-card h3 i{color:var(--b);font-size:12px}
+.conf-card p{font-size:11px;color:var(--s400);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--s100)}
+.conf-save{width:100%;margin-top:14px;padding:9px;border-radius:var(--r10)}
+
+/* ════════ LOG TABLE ════════ */
+.log-type{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;min-width:60px;text-align:center}
+.log-type.login{background:var(--gp);color:var(--gd)}.log-type.logout{background:var(--s100);color:var(--s500)}.log-type.create{background:var(--bp);color:var(--bd)}.log-type.update{background:var(--yp);color:var(--y)}.log-type.delete{background:var(--rp);color:var(--rd)}
+
+/* ════════ PERM GRID ════════ */
+.perm-row{display:grid;grid-template-columns:1fr repeat(3,80px);gap:0;border-bottom:1px solid var(--s100);padding:8px 0;align-items:center;font-size:12px}
+.perm-row:last-child{border-bottom:none}
+.perm-check{width:18px;height:18px;accent-color:var(--b);cursor:pointer}
+.perm-head{font-weight:700;color:var(--s400);font-size:10px;text-transform:uppercase;letter-spacing:.6px;text-align:center}
+
+/* ════════ HORÁRIO ════════ */
+.horario-filter{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+
+/* ════════ FOOTER ════════ */
+.page-footer{background:white;border-top:1px solid var(--s200);padding:10px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0}
+.footer-copy{font-size:10.5px;color:var(--s400)}
+.footer-link{font-size:10.5px;color:var(--b);cursor:pointer;text-decoration:none;font-weight:600}
+.footer-link:hover{text-decoration:underline}
+
+/* ════════ RESPONSIVE ════════ */
+@media(max-width:1100px){
+  .g2,.g3,.g12,.g21{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  body{overflow:auto}
+  .sb{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);transition:transform .28s}
+  .sb.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .main{width:100%;height:100vh;overflow:hidden}
+  .tb-ham{display:block}
+  .tb-date{display:none}
+  .page{padding:14px 14px 40px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr!important}
+  .fg.span2,.fg.span3{grid-column:span 1}
+  .ph{flex-direction:column}
+  .banner-kpis{gap:6px}
+  .page-footer{padding:8px 14px}
+}
+@media(max-width:480px){
+  .topbar{padding:0 14px;height:50px}
+  .tb-title{font-size:13px}
+  .page{padding:12px 12px 36px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat-val{font-size:18px}
+  .chip span.ch-txt{display:none}
+  .banner-kpis{gap:6px}
+  .banner-kpi{padding:8px 12px}
+  .banner-kpi-n{font-size:18px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sb-overlay" id="sbOv" onclick="closeSb()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <img src="icon.png" alt="S" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="sb-logo-fb">S</div>
+    </div>
+    <div>
+      <span class="sb-wordmark">SCOPE</span>
+      <span class="sb-role">Administrador</span>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Principal</div>
+    <button class="ni active" id="nav-painel" onclick="ir('painel')"><i class="fa fa-gauge-high"></i><span class="lbl">Visão Geral</span></button>
+    <div class="nav-sec">Gestão Académica</div>
+    <button class="ni" id="nav-turmas" onclick="ir('turmas')"><i class="fa fa-school"></i><span class="lbl">Turmas</span></button>
+    <button class="ni" id="nav-disciplinas" onclick="ir('disciplinas')"><i class="fa fa-book-open"></i><span class="lbl">Disciplinas</span></button>
+    <button class="ni" id="nav-cadastro" onclick="ir('cadastro')"><i class="fa fa-layer-group"></i><span class="lbl">Cadastro</span></button>
+    <button class="ni" id="nav-horarios" onclick="ir('horarios')"><i class="fa fa-calendar-week"></i><span class="lbl">Horários</span></button>
+    <button class="ni" id="nav-assiduidade" onclick="ir('assiduidade')"><i class="fa fa-user-check"></i><span class="lbl">Assiduidade</span></button>
+    <button class="ni" id="nav-substituicoes" onclick="ir('substituicoes')"><i class="fa fa-arrows-rotate"></i><span class="lbl">Ausências e Cobertura</span><span class="nb-badge" id="nbSubs">1</span></button>
+    <div class="nav-sec">Alunos</div>
+    <button class="ni" id="nav-alunos" onclick="ir('alunos')"><i class="fa fa-user-graduate"></i><span class="lbl">Gestão de Alunos</span></button>
+    <button class="ni" id="nav-rfid" onclick="ir('rfid')"><i class="fa fa-id-card"></i><span class="lbl">Cartões e Leitores RFID</span></button>
+    <div class="nav-sec">Sistema</div>
+    <button class="ni" id="nav-utilizadores" onclick="ir('utilizadores')"><i class="fa fa-users-gear"></i><span class="lbl">Utilizadores</span></button>
+    <button class="ni" id="nav-configuracoes" onclick="ir('configuracoes')"><i class="fa fa-sliders"></i><span class="lbl">Configurações</span></button>
+  </nav>
+  <div class="sb-user">
+    <div class="su-av" id="adminAv">JJ</div>
+    <div style="flex:1;min-width:0">
+      <div class="su-name" id="adminNome">Julisandra Jorge</div>
+      <div class="su-role">Administrador · SCOPE</div>
+    </div>
+    <button class="btn-logout" onclick="sair()" title="Terminar sessão"><i class="fa fa-right-from-bracket"></i></button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="tb-ham" onclick="openSb()"><i class="fa fa-bars"></i></button>
+    <span class="tb-title" id="tbTitle">Visão Geral</span>
+    <div class="tb-right">
+      <div class="chip"><i class="fa fa-shield-halved"></i><span class="ch-txt"> Admin · SCOPE</span></div>
+      <span class="tb-date" id="tbDate"></span>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!--  VISÃO GERAL -->
+
+    <div class="view active" id="view-painel">
+      <div class="admin-banner">
+        <div class="banner-inner">
+          <div>
+            <div style="font-size:22px;font-weight:800;margin-bottom:3px">Painel de Administração</div>
+            <div style="font-size:13px;opacity:.75" id="bannerSub">—</div>
+          </div>
+          <div class="banner-kpis">
+            <div class="banner-kpi"><div class="banner-kpi-n">7</div><div class="banner-kpi-l">Alunos</div></div>
+            <div class="banner-kpi"><div class="banner-kpi-n">11</div><div class="banner-kpi-l">Professores</div></div>
+            <div class="banner-kpi"><div class="banner-kpi-n">1</div><div class="banner-kpi-l">Turma</div></div>
+            <div class="banner-kpi"><div class="banner-kpi-n" id="bkpiLeitores">2</div><div class="banner-kpi-l">Leitores RFID</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card c-b"><div class="stat-icon"><i class="fa fa-user-graduate"></i></div><div class="stat-val">7</div><div class="stat-label">Alunos Ativos</div></div>
+        <div class="stat-card c-g"><div class="stat-icon"><i class="fa fa-tower-broadcast"></i></div><div class="stat-val" id="stLeitoresOn">1</div><div class="stat-label">Leitores Online</div></div>
+        <div class="stat-card c-y"><div class="stat-icon"><i class="fa fa-id-card"></i></div><div class="stat-val" id="stRFIDHoje">14</div><div class="stat-label">Leituras Hoje</div></div>
+        <div class="stat-card c-r"><div class="stat-icon"><i class="fa fa-bell"></i></div><div class="stat-val" id="stAlertas">2</div><div class="stat-label">Alertas Ativos</div></div>
+      </div>
+
+      <!-- Leitores RFID + Alertas -->
+      <div class="g2">
+        <!-- LEITORES RFID -->
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-tower-broadcast"></i>Leitores RFID</span>
+            <button class="btn outline-b sm" onclick="ir('rfid')"><i class="fa fa-arrow-right"></i>Gerir</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px" id="painelLeitores"></div>
+        </div>
+        <!-- ALERTAS -->
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-bell"></i>Alertas do Sistema</span>
+            <span class="card-sub" id="alertasCount">—</span>
+          </div>
+          <div class="card-body" id="painelAlertas"></div>
+        </div>
+      </div>
+
+      <!-- RFID Hoje + Atividades -->
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-chart-bar"></i>Resumo RFID — Hoje</span>
+            <button class="btn ghost sm" onclick="ir('rfid')"><i class="fa fa-list"></i>Ver Tudo</button>
+          </div>
+          <div class="card-body" id="rfidResumo"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-clock-rotate-left"></i>Atividades Recentes</span>
+            <button class="btn ghost sm" onclick="ir('utilizadores')">Ver Logs</button>
+          </div>
+          <div class="card-body" id="feedAtividades"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TURMAS -->
+    <div class="view" id="view-turmas">
+      <div class="ph">
+        <div>
+          <div class="page-title">Gestão de Turmas</div>
+          <div class="page-sub">Gerir turmas, coordenadores e alunos associados</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn ghost sm"><i class="fa fa-download"></i>Exportar</button>
+          <button class="btn primary" onclick="openModal('modalTurma','novo')"><i class="fa fa-plus"></i>Nova Turma</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-pill active" onclick="setFPill(this,'todos')">Todas</button>
+        <button class="filter-pill" onclick="setFPill(this,'ativa')">Ativas</button>
+        <button class="filter-pill" onclick="setFPill(this,'inativa')">Inativas</button>
+        <select class="fsel"><option>Todos os turnos</option><option>Tarde</option><option>Manhã</option></select>
+        <div class="search-bar" style="flex:1;max-width:280px">
+          <i class="fa fa-magnifying-glass"></i>
+          <input type="text" placeholder="Pesquisar turma…" oninput="filterTurmas(this.value)">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body np">
+          <div class="tbl-wrap"><table class="tbl" id="tblTurmas">
+            <thead><tr><th>ID</th><th>Nome</th><th>Classe</th><th>Turno</th><th>Curso</th><th>Sala</th><th>Alunos</th><th>Status</th><th style="min-width:160px">Operações</th></tr></thead>
+            <tbody id="tblTurmasBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCIPLINAS -->
+    <div class="view" id="view-disciplinas">
+      <div class="ph">
+        <div><div class="page-title">Disciplinas</div><div class="page-sub">Registo de disciplinas, professores e carga horária</div></div>
+        <div class="ph-actions">
+          <button class="btn primary" onclick="openModal('modalDisc','novo')"><i class="fa fa-plus"></i>Nova Disciplina</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="search-bar" style="flex:1;max-width:320px">
+          <i class="fa fa-magnifying-glass"></i>
+          <input type="text" placeholder="Pesquisar disciplina ou professor…" oninput="filterDiscs(this.value)">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>ID</th><th>Disciplina</th><th>Professor</th><th>Carga Horária</th><th>Turma(s)</th><th>Status</th><th>Operações</th></tr></thead>
+          <tbody id="tblDiscsBody"></tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="view" id="view-cadastro">
+      <div class="ph">
+        <div><div class="page-title">Cadastro</div><div class="page-sub">Classes, cursos, turnos e salas do sistema</div></div>
+      </div>
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-layer-group"></i>Classes</span>
+            <button class="btn primary sm" onclick="openModal('modalClasse','novo')"><i class="fa fa-plus"></i>Nova</button>
+          </div>
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>ID</th><th>Nome</th><th>Curso</th><th>Operações</th></tr></thead>
+            <tbody id="tblClassesBody"></tbody>
+          </table></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-graduation-cap"></i>Cursos</span>
+            <button class="btn primary sm" onclick="openModal('modalCurso','novo')"><i class="fa fa-plus"></i>Novo</button>
+          </div>
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>ID</th><th>Nome do Curso</th><th>Operações</th></tr></thead>
+            <tbody id="tblCursosBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-clock"></i>Turnos</span>
+            <button class="btn primary sm" onclick="openModal('modalPeriodo','novo')"><i class="fa fa-plus"></i>Novo</button>
+          </div>
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>ID</th><th>Nome</th><th>Horário</th><th>Operações</th></tr></thead>
+            <tbody id="tblPeriodosBody"></tbody>
+          </table></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <span class="card-title"><i class="fa fa-door-open"></i>Salas</span>
+            <button class="btn primary sm" onclick="openModal('modalSala','novo')"><i class="fa fa-plus"></i>Nova</button>
+          </div>
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>ID</th><th>Sala</th><th>Capacidade</th><th>RFID</th><th>Operações</th></tr></thead>
+            <tbody id="tblSalasBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HORÁRIOS — com filtro por turma/professor -->
+    <div class="view" id="view-horarios">
+      <div class="ph">
+        <div><div class="page-title">Horários</div><div class="page-sub">Grelha semanal</div></div>
+        <div class="ph-actions">
+          <button class="btn ghost sm"><i class="fa fa-download"></i>Exportar</button>
+          <button class="btn primary sm" onclick="openModal('modalAula','novo')"><i class="fa fa-plus"></i>Adicionar Aula</button>
+        </div>
+      </div>
+      <div class="horario-filter card" style="margin-bottom:8px">
+        <div class="card-body" style="padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--s500)"><i class="fa fa-filter" style="color:var(--b)"></i>Filtrar:</div>
+          <select class="fsel" id="hFiltroTurma" onchange="buildHorario()">
+            <option value="">Todas as turmas</option>
+            <option value="12CFB">12ª CFB</option>
+          </select>
+          <select class="fsel" id="hFiltroProf" onchange="buildHorario()">
+            <option value="">Todos os professores</option>
+          </select>
+          <div style="margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--s600)">
+            <span><i class="fa fa-clock" style="color:var(--b);margin-right:4px"></i>1º: 13:00–13:45</span>
+            <span><i class="fa fa-clock" style="color:var(--b);margin-right:4px"></i>2º: 13:45–14:30</span>
+            <span style="color:var(--y)"><i class="fa fa-bell" style="margin-right:4px"></i>Intervalo: 14:30–14:45</span>
+            <span><i class="fa fa-clock" style="color:var(--b);margin-right:4px"></i>3º/4º: 14:45–16:15</span>
+            <span style="color:var(--y)"><i class="fa fa-bell" style="margin-right:4px"></i>Intervalo: 16:15–16:30</span>
+            <span><i class="fa fa-clock" style="color:var(--b);margin-right:4px"></i>5º/6º: 16:30–18:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="overflow-x:auto;padding:10px 16px 16px">
+          <div id="horarioGrid" style="display:grid;grid-template-columns:64px repeat(6,1fr);gap:3px;min-width:700px;font-size:11px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSIDUIDADE -->
+    <div class="view" id="view-assiduidade">
+      <div class="ph">
+        <div><div class="page-title">Assiduidade</div><div class="page-sub">Registos de presença, validação e classificação</div></div>
+        <div class="ph-actions">
+          <button class="btn ghost sm"><i class="fa fa-download"></i>Exportar</button>
+          <button class="btn primary sm" onclick="openModal('modalAssid','novo')"><i class="fa fa-plus"></i>Registar</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-pill active" onclick="setFPill(this,'todos')">Todos</button>
+        <button class="filter-pill" onclick="setFPill(this,'assiduo')"><span class="dot g" style="margin-right:4px"></span>Presente Assíduo</button>
+        <button class="filter-pill" onclick="setFPill(this,'atrasado')"><span class="dot y" style="margin-right:4px"></span>Presente Atrasado</button>
+        <button class="filter-pill" onclick="setFPill(this,'falta')"><span class="dot r" style="margin-right:4px"></span>Falta</button>
+        <select class="fsel" id="assidTurmaFil"><option>12ª CFB</option></select>
+        <input type="date" class="fsel" id="assidDataFil">
+      </div>
+      <div class="card">
+        <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>ID</th><th>Aluno</th><th>Turma</th><th>Data</th><th>Hora Entrada</th><th>Estado</th><th>Validado</th><th>Operações</th></tr></thead>
+          <tbody id="tblAssidBody"></tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- AUSÊNCIAS E COBERTURA -->
+    <div class="view" id="view-substituicoes">
+      <div class="ph">
+        <div><div class="page-title">Ausências e Cobertura</div><div class="page-sub">Gerir ausências de professores e cobertura de aulas</div></div>
+        <button class="btn primary" onclick="openModal('modalSub','novo')"><i class="fa fa-plus"></i>Registar</button>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card c-r"><div class="stat-icon"><i class="fa fa-circle-xmark"></i></div><div class="stat-val" id="stSemProfSubs">1</div><div class="stat-label">Sem Prof.</div></div>
+        <div class="stat-card c-b"><div class="stat-icon"><i class="fa fa-arrows-rotate"></i></div><div class="stat-val">0</div><div class="stat-label">Com Substituto</div></div>
+        <div class="stat-card c-y"><div class="stat-icon"><i class="fa fa-ban"></i></div><div class="stat-val">0</div><div class="stat-label">Canceladas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="fa fa-triangle-exclamation"></i>Aulas Pendentes de Cobertura</span></div>
+        <div class="card-body" id="listaSubs"></div>
+      </div>
+    </div>
+
+    <!-- GESTÃO DE ALUNOS -->
+    <div class="view" id="view-alunos">
+      <div class="ph">
+        <div><div class="page-title">Gestão de Alunos</div><div class="page-sub">Cadastro, transferências e gestão de estado dos alunos</div></div>
+        <div class="ph-actions">
+          <button class="btn ghost sm"><i class="fa fa-download"></i>Exportar</button>
+          <button class="btn primary" onclick="openModal('modalAluno','novo')"><i class="fa fa-plus"></i>Novo Aluno</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-pill active" onclick="setFPill(this,'todos')">Todos</button>
+        <button class="filter-pill" onclick="setFPill(this,'ativo')">Ativos</button>
+        <button class="filter-pill" onclick="setFPill(this,'inativo')">Inativos</button>
+        <button class="filter-pill" onclick="setFPill(this,'transferido')">Transferidos</button>
+        <select class="fsel"><option>12ª CFB</option></select>
+        <div class="search-bar" style="flex:1;max-width:280px">
+          <i class="fa fa-magnifying-glass"></i>
+          <input type="text" placeholder="Nome, nº processo…" oninput="filterAlunos(this.value)">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>ID</th><th>Nome</th><th>Turma</th><th>Curso</th><th>Classe</th><th>Cartão RFID</th><th>Status</th><th>Operações</th></tr></thead>
+          <tbody id="tblAlunosBody"></tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- CARTÕES E LEITORES RFID -->
+    <div class="view" id="view-rfid">
+      <!-- Tab row -->
+      <div style="display:flex;gap:2px;margin-bottom:14px;background:var(--s100);border-radius:var(--r10);padding:3px;width:fit-content">
+        <button class="filter-pill active" id="rtab-cartoes" onclick="setRtab('cartoes',this)" style="border-radius:var(--r8)">Cartões RFID</button>
+        <button class="filter-pill" id="rtab-leitores" onclick="setRtab('leitores',this)" style="border-radius:var(--r8)">Leitores</button>
+        <button class="filter-pill" id="rtab-historico" onclick="setRtab('historico',this)" style="border-radius:var(--r8)">Histórico de Leituras</button>
+      </div>
+
+      <!-- Cartões -->
+      <div id="rt-cartoes">
+        <div class="ph">
+          <div><div class="page-title">Cartões RFID</div><div class="page-sub">Associação e gestão de cartões por aluno</div></div>
+          <button class="btn primary" onclick="openModal('modalCartao','novo')"><i class="fa fa-id-card"></i>Associar Cartão</button>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-pill active" onclick="setFPill(this,'todos')">Todos</button>
+          <button class="filter-pill" onclick="setFPill(this,'ativo')"><span class="dot g" style="margin-right:4px"></span>Ativos</button>
+          <button class="filter-pill" onclick="setFPill(this,'inativo')"><span class="dot r" style="margin-right:4px"></span>Inativos</button>
+          <button class="filter-pill" onclick="setFPill(this,'sem_cartao')"><span class="dot s" style="margin-right:4px"></span>Sem Cartão</button>
+          <div class="search-bar" style="flex:1;max-width:260px">
+            <i class="fa fa-magnifying-glass"></i>
+            <input type="text" placeholder="UID ou nome do aluno…">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Proc.</th><th>Aluno</th><th>UID do Cartão</th><th>Turma</th><th>Status</th><th>Operações</th></tr></thead>
+            <tbody id="tblRFIDBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+      <!-- Leitores -->
+      <div id="rt-leitores" style="display:none">
+        <div class="ph">
+          <div><div class="page-title">Leitores RFID</div><div class="page-sub">Estado, configuração e monitorização dos leitores instalados</div></div>
+          <button class="btn primary" onclick="openModal('modalLeitor','novo')"><i class="fa fa-plus"></i>Novo Leitor</button>
+        </div>
+        <div id="leitoresGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+      </div>
+
+      <!-- Histórico -->
+      <div id="rt-historico" style="display:none">
+        <div class="ph">
+          <div><div class="page-title">Histórico de Leituras</div><div class="page-sub">Registo completo de entradas e saídas via RFID</div></div>
+          <button class="btn ghost sm"><i class="fa fa-download"></i>Exportar</button>
+        </div>
+        <div class="filter-bar">
+          <select class="fsel"><option>Todos os leitores</option><option>RFID-01 — Lab. Ciências</option><option>RFID-02 — Sala 12</option></select>
+          <input type="date" class="fsel" id="histRfidData">
+        </div>
+        <div class="card">
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Data/Hora</th><th>Aluno</th><th>UID</th><th>Leitor</th><th>Estado</th></tr></thead>
+            <tbody id="tblHistRfidBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UTILIZADORES -->
+    <div class="view" id="view-utilizadores">
+      <div class="ph">
+        <div><div class="page-title">Gestão de Utilizadores</div><div class="page-sub">Perfis, permissões e registos de acesso</div></div>
+        <button class="btn primary" onclick="openModal('modalUser','novo')"><i class="fa fa-plus"></i>Novo Utilizador</button>
+      </div>
+      <div style="display:flex;gap:2px;margin-bottom:14px;background:var(--s100);border-radius:var(--r10);padding:3px;width:fit-content">
+        <button class="filter-pill active" id="utab-contas" onclick="setUtab('contas',this)" style="border-radius:var(--r8)">Contas</button>
+        <button class="filter-pill" id="utab-perms" onclick="setUtab('perms',this)" style="border-radius:var(--r8)">Permissões</button>
+        <button class="filter-pill" id="utab-logs" onclick="setUtab('logs',this)" style="border-radius:var(--r8)">Logs de Acesso</button>
+      </div>
+      <div id="ut-contas">
+        <div class="card">
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>ID</th><th>Nome</th><th>Perfil</th><th>Último Acesso</th><th>Status</th><th>Operações</th></tr></thead>
+            <tbody id="tblUsersBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+      <div id="ut-perms" style="display:none">
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i class="fa fa-shield-halved"></i>Matriz de Permissões por Perfil</span></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr repeat(3,80px);gap:0;margin-bottom:4px">
+              <div></div>
+              <div class="perm-head">Admin</div>
+              <div class="perm-head">Coord.</div>
+              <div class="perm-head">Prof.</div>
+            </div>
+            <div id="permMatrix"></div>
+          </div>
+        </div>
+      </div>
+      <div id="ut-logs" style="display:none">
+        <div class="filter-bar">
+          <select class="fsel"><option>Todos os utilizadores</option><option>Julisandra Jorge</option><option>Arnásio Mavunda</option><option>Jorgina Ferreira</option></select>
+          <select class="fsel"><option>Todos os tipos</option><option>Login</option><option>Logout</option><option>Criar</option><option>Atualizar</option><option>Eliminar</option></select>
+          <input type="date" class="fsel">
+        </div>
+        <div class="card">
+          <div class="card-body np"><div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Data/Hora</th><th>Utilizador</th><th>Tipo</th><th>Descrição</th><th>IP</th></tr></thead>
+            <tbody id="tblLogsBody"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="view" id="view-configuracoes">
+      <div class="ph" style="margin-bottom:16px">
+        <div><div class="page-title">Configurações</div><div class="page-sub">Parâmetros globais do sistema SCOPE</div></div>
+      </div>
+      <div class="g2">
+        <div class="conf-card">
+          <h3><i class="fa fa-clock"></i>Regras de Presença</h3>
+          <p>Critérios automáticos de assiduidade dos alunos</p>
+          <div class="fg"><label class="fl"><i class="fa fa-clock" style="color:var(--g);margin-right:4px"></i>Hora Limite — Presente</label><input type="time" class="fi" value="13:10"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl"><i class="fa fa-clock" style="color:var(--y);margin-right:4px"></i>Hora Limite — Atraso</label><input type="time" class="fi" value="13:30"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl"><i class="fa fa-percent" style="color:var(--b);margin-right:4px"></i>% Mínima de Assiduidade</label><input type="number" class="fi" value="75" min="0" max="100"></div>
+          <button class="btn primary conf-save" onclick="showToast('Regras de presença guardadas','tg')"><i class="fa fa-floppy-disk"></i>Guardar Regras</button>
+        </div>
+     
+        <div class="conf-card">
+          <h3><i class="fa fa-school"></i>Informações da Escola</h3>
+          <p>Dados institucionais usados em documentos e relatórios</p>
+          <div class="fg"><label class="fl">Nome da Escola</label><input type="text" class="fi" value="Escola Politécnica do Huambo"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl">Ano Letivo</label><input type="text" class="fi" value="2025/2026"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl">Morada</label><input type="text" class="fi" value=" Rua Vicente Ferreira 60-64 -Cidade Baixa, Huambo, Angola"></div>
+          <button class="btn primary conf-save" onclick="showToast('Informações da escola guardadas','tg')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="conf-card">
+          <h3><i class="fa fa-bell"></i>Notificações Automáticas</h3>
+          <p>Alertas enviados automaticamente pelo sistema</p>
+          <div class="fg"><label class="fl"><i class="fa fa-envelope" style="color:var(--b);margin-right:4px"></i>Email do Coordenador</label><input type="email" class="fi" placeholder="coordenador@EPH.ao"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl"><i class="fa fa-triangle-exclamation" style="color:var(--r);margin-right:4px"></i>Alerta de Faltas (Nº)</label><input type="number" class="fi" value="5" min="1"></div>
+          <div class="fg" style="margin-top:10px"><label class="fl">Método de Notificação</label>
+            <select class="fi"><option>Email</option><option>Notificação no sistema</option><option>Ambos</option></select>
+          </div>
+          <button class="btn primary conf-save" onclick="showToast('Notificações configuradas','tg')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+        </div>
+        <div class="conf-card">
+          <h3><i class="fa fa-gear"></i>Manutenção do Sistema</h3>
+          <p>Operações técnicas e de manutenção do SCOPE</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn ghost" style="width:100%;justify-content:center" onclick="showToast('Cache limpo com sucesso','tg')"><i class="fa fa-broom"></i>Limpar Cache</button>
+            <button class="btn outline-b" style="width:100%;justify-content:center" onclick="showToast('A exportar backup…','tb')"><i class="fa fa-database"></i>Exportar Backup</button>
+            <div style="height:1px;background:var(--s100);margin:4px 0"></div>
+            <button class="btn danger" style="width:100%;justify-content:center" onclick="confirmReset()"><i class="fa fa-rotate-left"></i>Reset Dados do Dia</button>
+            <p style="font-size:11px;color:var(--s400);text-align:center"><i class="fa fa-triangle-exclamation" style="color:var(--y);margin-right:3px"></i>Apaga registos temporários do dia atual</p>
+          </div>
+        </div>
+      </div>
+      <!-- Sobre o Sistema -->
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="fa fa-circle-info"></i>Sobre o SCOPE</span></div>
+        <div class="card-body">
+          <div class="g2" style="margin-bottom:0">
+            <div>
+              <div style="font-size:16px;font-weight:800;color:var(--b);letter-spacing:2px;margin-bottom:4px">SCOPE</div>
+              <div style="font-size:11px;color:var(--s500);margin-bottom:12px">Sistema de Controlo de Presença Escolare</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+                <div style="display:flex;gap:6px"><span style="color:var(--s400);width:100px">Versão</span><strong>1.0.0</strong></div>
+                <div style="display:flex;gap:6px"><span style="color:var(--s400);width:100px">Ano Letivo</span><strong>2025/2026</strong></div>
+                <div style="display:flex;gap:6px"><span style="color:var(--s400);width:100px">Escola</span><strong>Escola Politécnica do Huambo</strong></div>
+                <div style="display:flex;gap:6px"><span style="color:var(--s400);width:100px">Tecnologia</span><strong>HTML5 · CSS3 · JavaScript · RFID</strong></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Equipa de Desenvolvimento</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div class="av-row"><div class="av" style="background:#2563eb">AM</div><div class="ai"><div class="an">Arnásio Mavunda</div><div class="asub">Desenvolvimento Full-stack</div></div></div>
+                <div class="av-row"><div class="av" style="background:#7c3aed">JF</div><div class="ai"><div class="an">Jorgina Ferreira</div><div class="asub">Desenvolvimento Full-stack</div></div></div>
+                <div class="av-row"><div class="av" style="background:#0891b2">JJ</div><div class="ai"><div class="an">Julisandra Jorge</div><div class="asub">Desenvolvimento Full-stack</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /page -->
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+    <span class="footer-copy">© 2026 SCOPE - Todos os direitos reservados</span> 
+  </div>
+</div> <!-- /main -->
+
+<!-- MODALS  -->
+
+<!-- MODAL TURMA -->
+<div class="overlay" id="modalTurma">
+  <div class="modal">
+    <div class="modal-head"><h3><i class="fa fa-school"></i><span id="mTurmaTitle">Nova Turma</span></h3><button class="modal-close" onclick="closeModal('modalTurma')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Nome da Turma</label><input type="text" class="fi" id="tNome" placeholder="Ex: 12ª CFB"></div>
+        <div class="fg"><label class="fl">Classe</label><select class="fi" id="tClasse"><option>10ª Classe</option><option>11ª Classe</option><option>12ª Classe</option><option>13ª Classe</option></select></div>
+        <div class="fg"><label class="fl">Curso</label>
+          <select class="fi" id="tCurso">
+            <option>Ciências Físicas e Biológicas</option>
+            <option>Ciências Económicas e Jurídicas</option>
+            <option>Curso Técnico de Informática</option>
+            <option>Contabilidade e Gestão</option>
+            <option>Obras de Construção Civil</option>
+            <option>Eletrónica</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Turno</label><select class="fi" id="tPeriodo"><option>Tarde</option><option>Manhã</option></select></div>
+        <div class="fg"><label class="fl">Sala Principal</label><input type="text" class="fi" id="tSala" placeholder="Ex: Sala 12"></div>
+        <div class="fg"><label class="fl">Ano Letivo</label><input type="text" class="fi" id="tAno" value="2025/2026"></div>
+        <div class="fg span2"><label class="fl">Status</label><select class="fi" id="tStatus"><option value="ativa">Ativa</option><option value="inativa">Inativa </option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalTurma')">Cancelar</button>
+      <button class="btn primary" onclick="saveTurma()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DISCIPLINA -->
+<div class="overlay" id="modalDisc">
+  <div class="modal">
+    <div class="modal-head"><h3><i class="fa fa-book-open"></i><span id="mDiscTitle">Nova Disciplina</span></h3><button class="modal-close" onclick="closeModal('modalDisc')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg span2"><label class="fl">Nome da Disciplina</label><input type="text" class="fi" id="dNome" placeholder="Ex: Matemática"></div>
+        <div class="fg"><label class="fl">Professor Responsável</label><select class="fi" id="dProf"><option value="">Selecionar...</option></select></div>
+        <div class="fg"><label class="fl">Carga Horária (h/semana)</label><input type="number" class="fi" id="dCarga" placeholder="Ex: 4" min="1" max="20"></div>
+        <div class="fg"><label class="fl">Turma</label><select class="fi" id="dTurma"><option>12ª CFB</option></select></div>
+        <div class="fg"><label class="fl">Status</label><select class="fi" id="dStatus"><option value="ativa">Ativa</option><option value="inativa">Inativa</option></select></div>
+      </div>
+      <div style="background:var(--bp);border-radius:var(--r8);padding:8px 12px;font-size:11px;color:var(--b);margin-top:10px"><i class="fa fa-circle-info" style="margin-right:5px"></i>Um professor pode ser associado a disciplinas em múltiplas turmas.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalDisc')">Cancelar</button>
+      <button class="btn primary" onclick="saveDisc()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALUNO -->
+<div class="overlay" id="modalAluno">
+  <div class="modal wide">
+    <div class="modal-head"><h3><i class="fa fa-user-graduate"></i><span id="mAlunoTitle">Novo Aluno</span></h3><button class="modal-close" onclick="closeModal('modalAluno')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Nº Ordem</label><input type="number" class="fi" id="aOrd" placeholder="Ex: 8"></div>
+        <div class="fg"><label class="fl">Nº Processo</label><input type="text" class="fi" id="aProc" placeholder="Ex: 3000"></div>
+        <div class="fg span2"><label class="fl">Nome Completo</label><input type="text" class="fi" id="aNome" placeholder="Nome completo do aluno"></div>
+        <div class="fg"><label class="fl">Turma</label><select class="fi" id="aTurma"><option value="12CFB">12ª CFB</option></select></div>
+        <div class="fg"><label class="fl">Classe</label><select class="fi" id="aClasse"><option>12ª Classe</option><option>11ª Classe</option></select></div>
+        <div class="fg"><label class="fl">Curso</label>
+          <select class="fi" id="aCurso">
+            <option>Ciências Físicas e Biológicas</option>
+            <option>Ciências Económicas e Jurídicas</option>
+            <option>Curso Técnico de Informática</option>
+            <option>Contabilidade e Gestão</option>
+            <option>Obras de Construção Civil</option>
+            <option>Eletrónica</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Status</label><select class="fi" id="aStatus"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
+        <div class="fg span2"><label class="fl">UID Cartão RFID (opcional)</label><input type="text" class="fi" id="aRfid" placeholder="Ex: A4:3F:BC:01"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalAluno')">Cancelar</button>
+      <button class="btn primary" onclick="saveAluno()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UTILIZADOR -->
+<div class="overlay" id="modalUser">
+  <div class="modal">
+    <div class="modal-head"><h3><i class="fa fa-user-gear"></i><span id="mUserTitle">Novo Utilizador</span></h3><button class="modal-close" onclick="closeModal('modalUser')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg span2"><label class="fl">Nome Completo</label><input type="text" class="fi" id="uNome" placeholder="Nome do utilizador"></div>
+        <div class="fg"><label class="fl">Nome de Utilizador</label><input type="text" class="fi" id="uUsername" placeholder="Ex: jferrer"></div>
+        <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="uEmail" placeholder="email@EPH.ao"></div>
+        <div class="fg"><label class="fl">Perfil</label><select class="fi" id="uPerfil"><option value="admin">Administrador</option><option value="coordenador">Coordenador</option><option value="professor">Professor</option></select></div>
+        <div class="fg"><label class="fl">Status</label><select class="fi" id="uStatus"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
+        <div class="fg span2"><label class="fl">Password Temporária</label><input type="password" class="fi" id="uPass" placeholder="Mínimo 8 caracteres"></div>
+      </div>
+      <div style="background:var(--bp);border-radius:var(--r8);padding:9px 12px;font-size:11px;color:var(--b);margin-top:10px"><i class="fa fa-circle-info" style="margin-right:5px"></i>O utilizador deverá alterar a password no primeiro acesso.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalUser')">Cancelar</button>
+      <button class="btn primary" onclick="saveUser()"><i class="fa fa-floppy-disk"></i>Criar Conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUBSTITUIÇÃO -->
+<div class="overlay" id="modalSub">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-arrows-rotate"></i>Registar Ausência / Cobertura</h3><button class="modal-close" onclick="closeModal('modalSub')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Aula</label>
+        <select class="fi" id="subAula">
+          <option value="">Selecionar aula…</option>
+          <option>Matemática — Seg 13:00–14:30 (Alberto)</option>
+          <option>Física — Qui 14:45–16:15 (Euclides)</option>
+          <option>Língua Inglesa — Sex 13:00–13:45 (Jelson)</option>
+          <option>Língua Portuguesa — Sex 13:45–14:30 (A. Chipaco)</option>
+          <option>Biologia — Seg 14:45–16:15 (A. Gourgel)</option>
+          <option>Geologia — Ter 14:45–16:15 (Margarido)</option>
+          <option>Química — Qua 14:45–16:15 (Beatriz)</option>
+          <option>Filosofia — Qui 16:30–18:00 (João Cassoma)</option>
+          <option>Ed. Física — Sex 08:00 (Edgar Somak)</option>
+        </select>
+      </div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">Data</label><input type="date" class="fi" id="subData"></div>
+        <div class="fg"><label class="fl">Ação</label>
+          <select class="fi" id="subAcao" onchange="toggleSubAcao(this.value)">
+            <option value="sem_prof">Marcar Sem Professor</option>
+            <option value="substituto">Definir Substituto</option>
+            <option value="cancelar">Cancelar Aula</option>
+          </select>
+        </div>
+      </div>
+      <div id="subDiv" style="display:none;margin-top:10px">
+        <div class="fg"><label class="fl">Professor Substituto</label>
+          <select class="fi" id="subProf">
+            <option value="">Selecionar…</option>
+            <option>Alberto</option><option>Euclides</option><option>Jelson</option>
+            <option>A. Chipaco</option><option>A. Gourgel</option><option>Margarido</option>
+            <option>Beatriz</option><option>Madaleno</option><option>João Cassoma</option>
+            <option>L. Magalhães</option><option>Edgar Somak</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalSub')">Cancelar</button>
+      <button class="btn primary" onclick="saveSub()"><i class="fa fa-check"></i>Registar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CARTÃO RFID -->
+<div class="overlay" id="modalCartao">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-id-card"></i>Gerir Cartão RFID</h3><button class="modal-close" onclick="closeModal('modalCartao')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Aluno</label><select class="fi" id="cAluno"><option value="">Selecionar aluno…</option></select></div>
+      <div class="fg" style="margin-top:10px"><label class="fl">UID do Cartão</label><input type="text" class="fi" id="cUID" placeholder="Ex: A4:3F:BC:01"></div>
+      <div class="fg" style="margin-top:10px"><label class="fl">Ação</label>
+        <select class="fi" id="cAcao">
+          <option value="associar">Associar Novo Cartão</option>
+          <option value="substituir">Substituir Cartão</option>
+          <option value="desativar">Desativar Cartão</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalCartao')">Cancelar</button>
+      <button class="btn primary" onclick="saveCartao()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LEITOR -->
+<div class="overlay" id="modalLeitor">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-tower-broadcast"></i>Novo Leitor RFID</h3><button class="modal-close" onclick="closeModal('modalLeitor')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Nome / Localização</label><input type="text" class="fi" id="lNome" placeholder="Ex: Laboratório de Ciências"></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">ID do Leitor</label><input type="text" class="fi" id="lId" placeholder="Ex: RFID-03"></div>
+        <div class="fg"><label class="fl">Sala Associada</label><select class="fi" id="lSala"><option>Sala 12</option><option>Sala 10</option><option>Lab. Ciências</option><option>Sala 12</option><option>Alpendre</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalLeitor')">Cancelar</button>
+      <button class="btn primary" onclick="saveLeitor()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER TURMA -->
+<div class="overlay" id="modalVerTurma">
+  <div class="modal wide">
+    <div class="modal-head"><h3><i class="fa fa-school"></i><span id="vTurmaTitulo">12ª CFB — Detalhes</span></h3><button class="modal-close" onclick="closeModal('modalVerTurma')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body" id="vTurmaBody"></div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalVerTurma')">Fechar</button>
+      <button class="btn primary" onclick="ir('alunos');closeModal('modalVerTurma')"><i class="fa fa-users"></i>Ver Alunos</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAIS CADASTRO -->
+<div class="overlay" id="modalClasse">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-layer-group"></i>Nova Classe</h3><button class="modal-close" onclick="closeModal('modalClasse')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Nome</label><input type="text" class="fi" id="clNome" placeholder="Ex: 12ª Classe"></div>
+      <div class="fg" style="margin-top:10px"><label class="fl">Curso Associado</label>
+        <select class="fi">
+          <option>Ciências Físicas e Biológicas</option><option>Ciências Económicas e Jurídicas</option>
+          <option>Curso Técnico de Informática</option><option>Contabilidade e Gestão</option>
+          <option>Obras de Construção Civil</option><option>Eletrónica</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalClasse')">Cancelar</button>
+      <button class="btn primary" onclick="saveCadastro('classe')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalCurso">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-graduation-cap"></i>Novo Curso</h3><button class="modal-close" onclick="closeModal('modalCurso')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Nome do Curso</label><input type="text" class="fi" placeholder="Ex: Eletrónica"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalCurso')">Cancelar</button>
+      <button class="btn primary" onclick="saveCadastro('curso')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalPeriodo">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-clock"></i>Novo Turno</h3><button class="modal-close" onclick="closeModal('modalPeriodo')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Nome</label><select class="fi"><option>Tarde</option><option>Manhã</option></select></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">Início</label><input type="time" class="fi" value="13:00"></div>
+        <div class="fg"><label class="fl">Fim</label><input type="time" class="fi" value="18:00"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalPeriodo')">Cancelar</button>
+      <button class="btn primary" onclick="saveCadastro('periodo')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalSala">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-door-open"></i>Nova Sala</h3><button class="modal-close" onclick="closeModal('modalSala')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Identificação da Sala</label><input type="text" class="fi" placeholder="Ex: Sala B12"></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">Capacidade</label><input type="number" class="fi" placeholder="Ex: 35" min="1"></div>
+        <div class="fg"><label class="fl">RFID Instalado</label><select class="fi"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalSala')">Cancelar</button>
+      <button class="btn primary" onclick="saveCadastro('sala')"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalAula">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-calendar-plus"></i>Adicionar Aula ao Horário</h3><button class="modal-close" onclick="closeModal('modalAula')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Turma</label>
+        <select class="fi" id="haTurma"><option value="12CFB">12ª CFB</option></select>
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl">Disciplina</label><select class="fi" id="haDisc"></select></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">Dia da Semana</label>
+          <select class="fi" id="haDia"><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option><option value="6">Sábado</option></select>
+        </div>
+        <div class="fg"><label class="fl">Início</label><input type="time" class="fi" id="haInicio" value="13:00"></div>
+        <div class="fg"><label class="fl">Fim</label><input type="time" class="fi" id="haFim" value="13:45"></div>
+        <div class="fg"><label class="fl">Sala</label><input type="text" class="fi" id="haSala" placeholder="Ex: Sala B12"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalAula')">Cancelar</button>
+      <button class="btn primary" onclick="saveAula()"><i class="fa fa-floppy-disk"></i>Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modalAssid">
+  <div class="modal sm">
+    <div class="modal-head"><h3><i class="fa fa-user-check"></i>Registar Presença</h3><button class="modal-close" onclick="closeModal('modalAssid')"><i class="fa fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Aluno</label><select class="fi" id="asAluno"></select></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fg"><label class="fl">Data</label><input type="date" class="fi" id="asData"></div>
+        <div class="fg"><label class="fl">Hora de Entrada</label><input type="time" class="fi" id="asHora" value="13:00"></div>
+        <div class="fg span2"><label class="fl">Estado</label>
+          <select class="fi" id="asEstado">
+            <option value="assiduo">Presente Assíduo</option>
+            <option value="atrasado">Presente Atrasado</option>
+            <option value="falta">Falta</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modalAssid')">Cancelar</button>
+      <button class="btn primary" onclick="saveAssid()"><i class="fa fa-floppy-disk"></i>Registar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="recursos/js/scope-api.js"></script>
+<script>
+/* DATA */
+let ALUNOS=[
+  {id:1,ord:1,nproc:'1650',nome:'Agnalda Kunjikisse Jelembi Vapor',     turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4682816'},
+  {id:2,ord:2,nproc:'405', nome:'Alexandre Fernando Monteiro Pereira',  turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4710756'},
+  {id:3,ord:3,nproc:'2027',nome:'Domingos Caselo Kalwiji Samanjata',    turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4713470'},
+  {id:4,ord:4,nproc:'2543',nome:'Haziel Simboyala Chitau Hamuyela Tchitavila',turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4732271'},
+  {id:5,ord:5,nproc:'260', nome:'Larissa Fato Botelho',                 turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4737708'},
+  {id:6,ord:6,nproc:'774', nome:'Luís Caison Zango Caica',              turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'4742167'},
+  {id:7,ord:7,nproc:'2556',nome:'Maria Da Conceição José Pena',         turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:'5882869'},
+];
+const PROFS=[
+  {id:1,nome:'Alberto',    disc:'Matemática'},{id:2,nome:'Euclides',   disc:'Física'},
+  {id:3,nome:'Jelson',     disc:'Língua Inglesa'},{id:4,nome:'A. Chipaco',disc:'Língua Portuguesa'},
+  {id:5,nome:'A. Gourgel', disc:'Biologia'},{id:6,nome:'Margarido',   disc:'Geologia'},
+  {id:7,nome:'Beatriz',    disc:'Química'},{id:8,nome:'Madaleno',    disc:'Empreendedorismo'},
+  {id:9,nome:'João Cassoma',disc:'Filosofia'},{id:10,nome:'L. Magalhães',disc:'Geometria Descritiva'},
+  {id:11,nome:'Edgar Somak',disc:'Educação Física'},
+];
+let TURMAS=[{id:'T001',nome:'12ª CFB',classe:'12ª',turno:'Tarde',curso:'Ciências Físicas e Biológicas',sala:'Sala B12',alunos:7,status:'ativa',ano:'2025/2026'}];
+let DISCS=[
+  {id:'D001',nome:'Matemática',          prof:'Alberto',      carga:4,turma:'12ª CFB',status:'ativa'},
+  {id:'D002',nome:'Física',              prof:'Euclides',     carga:3,turma:'12ª CFB',status:'ativa'},
+  {id:'D003',nome:'Língua Inglesa',      prof:'Jelson',       carga:2,turma:'12ª CFB',status:'ativa'},
+  {id:'D004',nome:'Língua Portuguesa',   prof:'A. Chipaco',   carga:3,turma:'12ª CFB',status:'ativa'},
+  {id:'D005',nome:'Biologia',            prof:'A. Gourgel',   carga:3,turma:'12ª CFB',status:'ativa'},
+  {id:'D006',nome:'Geologia',            prof:'Margarido',    carga:2,turma:'12ª CFB',status:'ativa'},
+  {id:'D007',nome:'Química',             prof:'Beatriz',      carga:3,turma:'12ª CFB',status:'ativa'},
+  {id:'D008',nome:'Empreendedorismo',    prof:'Madaleno',     carga:2,turma:'12ª CFB',status:'ativa'},
+  {id:'D009',nome:'Filosofia',           prof:'João Cassoma', carga:2,turma:'12ª CFB',status:'ativa'},
+  {id:'D010',nome:'Geom. Descritiva',    prof:'L. Magalhães', carga:2,turma:'12ª CFB',status:'ativa'},
+  {id:'D011',nome:'Educação Física',     prof:'Edgar Somak',  carga:2,turma:'12ª CFB',status:'ativa'},
+];
+let CLASSES=[{id:'CL01',nome:'12ª Classe',curso:'CFB'},{id:'CL02',nome:'11ª Classe',curso:'CFB'},{id:'CL03',nome:'10ª Classe',curso:'CFB'}];
+let CURSOS=[
+  {id:'CU01',nome:'Ciências Físicas e Biológicas'},
+  {id:'CU02',nome:'Ciências Económicas e Jurídicas'},
+  {id:'CU03',nome:'Curso Técnico de Informática'},
+  {id:'CU04',nome:'Contabilidade e Gestão'},
+  {id:'CU05',nome:'Obras de Construção Civil'},
+  {id:'CU06',nome:'Eletrónica'},
+
+];
+let PERIODOS=[{id:'P001',nome:'Tarde',horario:'13:00–18:00'},{id:'P002',nome:'Manhã',horario:'07:30–12:30'}];
+let SALAS=[
+  {id:'S001',nome:'Sala B12',cap:35,rfid:'Sim'},
+  {id:'S002',nome:'Sala B10',cap:35,rfid:'Não'},
+  {id:'S003',nome:'Lab. Ciências',cap:24,rfid:'Sim'},
+  {id:'S004',nome:'Sala 12',cap:35,rfid:'Sim'},
+  {id:'S005',nome:'Alpendre',cap:100,rfid:'Não'},
+];
+let LEITORES=[
+  {id:'RFID-01',nome:'Laboratório de Ciências',sala:'Lab. Ciências',status:'online',ultima_uid:'D1:5E:AA:03',ultimo_aluno:'Haziel Simboyala',tempo:'há 3 min',leituras_hoje:8},
+  {id:'RFID-02',nome:'Sala 12',sala:'Sala 12',status:'offline',ultima_uid:'F6:4C:EE:18',ultimo_aluno:'Luís Caison Zango',tempo:'há 2h 10m',leituras_hoje:0},
+];
+const RFID_HOJE={total:14,validas:13,desconhecidas:1,ultima:{aluno:'Haziel Simboyala',uid:'D1:5E:AA:03',leitor:'RFID-01 — Lab. Ciências',tempo:'há 3 min'}};
+const HIST_RFID=[
+  {dt:'06/03 14:32',aluno:'Haziel Simboyala',uid:'D1:5E:AA:03',leitor:'RFID-01 — Lab. Ciências',est:'valida'},
+  {dt:'06/03 14:18',aluno:'Larissa Fato Botelho',uid:'E5:7F:BB:12',leitor:'RFID-01 — Lab. Ciências',est:'valida'},
+  {dt:'06/03 13:52',aluno:'Agnalda Kunjikisse',uid:'A4:3F:BC:01',leitor:'RFID-01 — Lab. Ciências',est:'valida'},
+  {dt:'06/03 13:45',aluno:'Alexandre Fernando',uid:'B2:1A:CC:09',leitor:'RFID-01 — Lab. Ciências',est:'valida'},
+  {dt:'06/03 13:32',aluno:'Desconhecido',uid:'XX:00:00:00',leitor:'RFID-01 — Lab. Ciências',est:'desconhecida'},
+];
+const HORARIO=[
+  {dia:1,ti:'13:00',tf:'14:30',prof:'Alberto',    disc:'Matemática',        turma:'12CFB',est:'confirmada'},
+  {dia:2,ti:'13:00',tf:'14:30',prof:'Alberto',    disc:'Matemática',        turma:'12CFB',est:'confirmada'},
+  {dia:3,ti:'13:00',tf:'14:30',prof:'Euclides',   disc:'Física',            turma:'12CFB',est:'confirmada'},
+  {dia:4,ti:'14:45',tf:'16:15',prof:'Euclides',   disc:'Física',            turma:'12CFB',est:'confirmada'},
+  {dia:4,ti:'13:00',tf:'13:45',prof:'Jelson',     disc:'Língua Inglesa',    turma:'12CFB',est:'confirmada'},
+  {dia:5,ti:'16:30',tf:'18:00',prof:'Jelson',     disc:'Língua Inglesa',    turma:'12CFB',est:'confirmada'},
+  {dia:4,ti:'13:45',tf:'14:30',prof:'A. Chipaco', disc:'Língua Portuguesa', turma:'12CFB',est:'confirmada'},
+  {dia:5,ti:'13:00',tf:'14:30',prof:'A. Chipaco', disc:'Língua Portuguesa', turma:'12CFB',est:'confirmada'},
+  {dia:1,ti:'14:45',tf:'16:15',prof:'A. Gourgel', disc:'Biologia',          turma:'12CFB',est:'confirmada'},
+  {dia:2,ti:'16:30',tf:'18:00',prof:'A. Gourgel', disc:'Biologia',          turma:'12CFB',est:'confirmada'},
+  {dia:2,ti:'14:45',tf:'16:15',prof:'Margarido',  disc:'Geologia',          turma:'12CFB',est:'sem_prof'},
+  {dia:3,ti:'14:45',tf:'16:15',prof:'Beatriz',    disc:'Química',           turma:'12CFB',est:'confirmada'},
+  {dia:1,ti:'16:30',tf:'18:00',prof:'Beatriz',    disc:'Química',           turma:'12CFB',est:'confirmada'},
+  {dia:5,ti:'14:45',tf:'16:15',prof:'Madaleno',   disc:'Empreendedorismo',  turma:'12CFB',est:'confirmada'},
+  {dia:4,ti:'16:30',tf:'18:00',prof:'João Cassoma',disc:'Filosofia',        turma:'12CFB',est:'confirmada'},
+  {dia:3,ti:'16:30',tf:'18:00',prof:'L. Magalhães',disc:'Geom. Descritiva', turma:'12CFB',est:'confirmada'},
+  {dia:5,ti:'08:00',tf:'09:30',prof:'Edgar Somak', disc:'Educação Física',  turma:'12CFB',est:'confirmada'},
+];
+let SUBS=[{id:1,disc:'Geologia',prof:'Beatriz',dia_txt:'Terça',h:'14:45–16:15',estado:'sem_prof',sub:null,data:'03/03/2026'}];
+let USERS=[
+  {id:'U001',nome:'Julisandra Jorge',  username:'jjorge',   email:'jjorge@escola.ao',    perfil:'admin',       status:'ativo', acesso:'Hoje 14:22'},
+  {id:'U002',nome:'Arnásio Mavunda',   username:'amavunda', email:'amavunda@escola.ao',  perfil:'admin',       status:'ativo', acesso:'Hoje 08:02'},
+  {id:'U003',nome:'Jorgina Ferreira',  username:'jferreira',email:'jferreira@escola.ao', perfil:'admin',       status:'ativo', acesso:'Hoje 09:30'},
+  {id:'U004',nome:'André Chipaco',     username:'achipaco', email:'achipaco@escola.ao',  perfil:'coordenador', status:'ativo', acesso:'Hoje 13:00'},
+  {id:'U005',nome:'Edgar Somak',       username:'esomak',   email:'esomak@escola.ao',    perfil:'professor',   status:'ativo', acesso:'Hoje 08:00'},
+];
+let ASSID=[
+  {id:'AS001',aluno:'Agnalda Kunjikisse Jelembi Vapor',   turma:'12ª CFB',data:'05/03/2026',hora:'13:00',estado:'assiduo',valido:true},
+  {id:'AS002',aluno:'Alexandre Fernando Monteiro Pereira',turma:'12ª CFB',data:'05/03/2026',hora:'13:18',estado:'atrasado',valido:true},
+  {id:'AS003',aluno:'Domingos Caselo Kalwiji Samanjata',  turma:'12ª CFB',data:'05/03/2026',hora:'—',    estado:'falta',   valido:false},
+  {id:'AS004',aluno:'Haziel Simboyala Chitau Hamuyela Tchitavila',turma:'12ª CFB',data:'05/03/2026',hora:'13:02',estado:'assiduo',valido:true},
+  {id:'AS005',aluno:'Larissa Fato Botelho',               turma:'12ª CFB',data:'05/03/2026',hora:'13:05',estado:'assiduo', valido:true},
+];
+const LOGS=[
+  {dt:'06/03 14:22',user:'Julisandra Jorge',  tipo:'login', desc:'Início de sessão — Admin',              ip:'192.168.1.5'},
+  {dt:'06/03 14:00',user:'Arnásio Mavunda',   tipo:'update',desc:'Aluno atualizado: Domingos Caselo',      ip:'192.168.1.8'},
+  {dt:'06/03 13:45',user:'Jorgina Ferreira',  tipo:'create',desc:'Nova ocorrência registada',              ip:'192.168.1.12'},
+  {dt:'06/03 11:05',user:'Arnásio Mavunda',   tipo:'login', desc:'Início de sessão — Admin',              ip:'192.168.1.8'},
+  {dt:'05/03 09:30',user:'Jorgina Ferreira',  tipo:'logout',desc:'Encerramento de sessão',                 ip:'192.168.1.12'},
+  {dt:'05/03 09:00',user:'Jorgina Ferreira',  tipo:'login', desc:'Início de sessão — Admin',              ip:'192.168.1.12'},
+  {dt:'05/03 08:45',user:'Julisandra Jorge',  tipo:'delete',desc:'Substituição eliminada: Geologia',       ip:'192.168.1.5'},
+];
+const PERMS=[
+  {item:'Ver Painel Geral',         admin:true,coord:true, prof:false},
+  {item:'Gestão de Turmas',         admin:true,coord:false,prof:false},
+  {item:'Gestão de Alunos',         admin:true,coord:true, prof:false},
+  {item:'Gestão de Disciplinas',    admin:true,coord:false,prof:false},
+  {item:'Ver Horários',             admin:true,coord:true, prof:true},
+  {item:'Registar Assiduidade',     admin:true,coord:true, prof:true},
+  {item:'Gestão de Utilizadores',   admin:true,coord:false,prof:false},
+  {item:'Configurações do Sistema', admin:true,coord:false,prof:false},
+  {item:'Ver Relatórios',           admin:true,coord:true, prof:false},
+  {item:'Cartões RFID',             admin:true,coord:false,prof:false},
+];
+const CORS=['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#6366f1','#0d9488','#9333ea','#16a34a','#ca8a04'];
+const DIAS_LABEL=['Seg','Ter','Qua','Qui','Sex','Sáb'];
+const SLOTS=[
+  {ti:'13:00',tf:'13:45'},{ti:'13:45',tf:'14:30'},
+  {ti:'14:30',tf:'14:45',int:true},
+  {ti:'14:45',tf:'15:30'},{ti:'15:30',tf:'16:15'},
+  {ti:'16:15',tf:'16:30',int:true},
+  {ti:'16:30',tf:'17:15'},{ti:'17:15',tf:'18:00'},
+];
+function ini(n){const p=n.trim().split(' ');return(p[0][0]+(p[p.length-1]?.[0]||'')).toUpperCase()}
+
+/* CLOCK */
+function tick(){
+  const n=new Date();
+  document.getElementById('tbDate').textContent=n.toLocaleDateString('pt-PT',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('bannerSub').textContent=n.toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+  document.getElementById('assidDataFil').value=n.toISOString().split('T')[0];
+  document.getElementById('asData').value=n.toISOString().split('T')[0];
+  document.getElementById('subData').value=n.toISOString().split('T')[0];
+  document.getElementById('histRfidData').value=n.toISOString().split('T')[0];
+}
+tick();setInterval(tick,60000);
+
+/* PAINEL */
+function renderPainel(){
+  // Leitores no painel
+  document.getElementById('stLeitoresOn').textContent=LEITORES.filter(l=>l.status==='online').length;
+  document.getElementById('stRFIDHoje').textContent=RFID_HOJE.total;
+  const alertasN=SUBS.filter(s=>s.estado==='sem_prof').length + LEITORES.filter(l=>l.status==='offline').length;
+  document.getElementById('stAlertas').textContent=alertasN;
+  document.getElementById('bkpiLeitores').textContent=LEITORES.length;
+
+  // Painel Leitores
+  document.getElementById('painelLeitores').innerHTML=LEITORES.map(l=>`
+    <div class="rfid-reader-card ${l.status}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+            <span class="reader-pulse ${l.status==='online'?'on':l.status==='warning'?'warn':'off'}"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--s800)">${l.nome}</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--s400);display:flex;align-items:center;gap:5px">
+            <span style="font-family:'DM Mono',monospace">${l.id}</span>
+            <span>·</span>
+            <span>${l.sala}</span>
+          </div>
+        </div>
+        <span class="badge ${l.status==='online'?'g':'r'}"><span class="dot ${l.status==='online'?'g':'r'}"></span>${l.status==='online'?'Online':'Offline'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:10px">
+        <div style="background:var(--s50);border-radius:6px;padding:6px 8px">
+          <div style="color:var(--s400);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Última Leitura</div>
+          <div style="font-weight:600;font-family:'DM Mono',monospace;font-size:10.5px">${l.ultima_uid}</div>
+          <div style="color:var(--s500);margin-top:1px">${l.ultimo_aluno}</div>
+        </div>
+        <div style="background:var(--s50);border-radius:6px;padding:6px 8px">
+          <div style="color:var(--s400);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Leituras Hoje</div>
+          <div style="font-size:18px;font-weight:800;color:${l.status==='online'?'var(--g)':'var(--s400)'}">${l.leituras_hoje}</div>
+          <div style="color:var(--s500);margin-top:1px">${l.tempo}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${l.status==='offline'?`<button class="btn warn sm" onclick="reconectarLeitor('${l.id}')"><i class="fa fa-rotate"></i>Reconectar</button>`:''}
+        <button class="btn ghost sm" onclick="ir('rfid');setTimeout(()=>setRtab('leitores',document.getElementById('rtab-leitores')),100)"><i class="fa fa-sliders"></i>Gerir</button>
+      </div>
+    </div>`).join('');
+
+  // Alertas
+  const alertas=[];
+  SUBS.filter(s=>s.estado==='sem_prof').forEach(s=>alertas.push({tipo:'r',ico:'circle-xmark',titulo:`${s.disc} — ${s.dia_txt} ${s.h}`,sub:`Prof. ${s.prof} ausente · ${s.data}`,acao:`<button class="btn warn xs" style="margin-top:5px" onclick="openModal('modalSub')"><i class="fa fa-arrows-rotate"></i>Definir cobertura</button>`}));
+  LEITORES.filter(l=>l.status==='offline').forEach(l=>alertas.push({tipo:'r',ico:'wifi',titulo:`Leitor ${l.id} — ${l.nome}`,sub:`Offline desde ${l.tempo}`,acao:`<button class="btn warn xs" style="margin-top:5px" onclick="reconectarLeitor('${l.id}')"><i class="fa fa-rotate"></i>Reconectar</button>`}));
+  alertas.push({tipo:'y',ico:'triangle-exclamation',titulo:'Domingos Caselo — 12ª CFB',sub:'5 faltas não justificadas este mês',acao:''});
+  document.getElementById('alertasCount').textContent=alertas.length+' alertas';
+  document.getElementById('painelAlertas').innerHTML=alertas.length
+    ?alertas.map(a=>`<div class="alert ${a.tipo}"><div class="alert-ico"><i class="fa fa-${a.ico}"></i></div><div><div class="alert-title">${a.titulo}</div><div class="alert-sub">${a.sub}</div>${a.acao}</div></div>`).join('')
+    :`<div style="text-align:center;padding:22px;color:var(--s400)"><i class="fa fa-circle-check" style="font-size:28px;color:var(--g);display:block;margin-bottom:8px"></i>Sem alertas ativos</div>`;
+
+  // RFID Resumo Hoje
+  document.getElementById('rfidResumo').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+      <div style="background:var(--gp);border-radius:var(--r10);padding:12px;text-align:center;border:1px solid var(--gl)">
+        <div style="font-size:24px;font-weight:800;color:var(--g)">${RFID_HOJE.validas}</div>
+        <div style="font-size:10px;color:var(--gd);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Válidas</div>
+      </div>
+      <div style="background:var(--rp);border-radius:var(--r10);padding:12px;text-align:center;border:1px solid var(--rl)">
+        <div style="font-size:24px;font-weight:800;color:var(--r)">${RFID_HOJE.desconhecidas}</div>
+        <div style="font-size:10px;color:var(--rd);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Desconhecidas</div>
+      </div>
+    </div>
+    <div style="background:var(--s50);border-radius:var(--r10);padding:10px 12px;border:1px solid var(--s200)">
+      <div style="font-size:9px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Última Leitura</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">HS</div>
+        <div>
+          <div style="font-size:12px;font-weight:600">${RFID_HOJE.ultima.aluno}</div>
+          <div style="font-size:10px;color:var(--s400);font-family:'DM Mono',monospace">${RFID_HOJE.ultima.uid}</div>
+          <div style="font-size:10px;color:var(--s400)">${RFID_HOJE.ultima.leitor} · <strong>${RFID_HOJE.ultima.tempo}</strong></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Feed atividades
+  document.getElementById('feedAtividades').innerHTML=LOGS.slice(0,5).map(l=>`
+    <div class="feed-item">
+      <div class="feed-dot" style="background:${l.tipo==='login'?'var(--g)':l.tipo==='logout'?'var(--s400)':l.tipo==='delete'?'var(--r)':'var(--b)'}"></div>
+      <div><div class="feed-text"><strong>${l.user}</strong> — ${l.desc}</div><div class="feed-time">${l.dt}</div></div>
+    </div>`).join('');
+
+  // NBSubs
+  const sems=SUBS.filter(s=>s.estado==='sem_prof').length;
+  document.getElementById('nbSubs').textContent=sems;
+  document.getElementById('stSemProfSubs').textContent=sems;
+}
+renderPainel();
+
+function reconectarLeitor(id){
+  showToast(`A reconectar leitor ${id}…`,'tb');
+  setTimeout(()=>{
+    const l=LEITORES.find(x=>x.id===id);
+    if(l){l.status='online';renderPainel();renderLeitoresPage();}
+    showToast(`Leitor ${id} reconectado!`,'tg');
+  },2200);
+}
+
+/* TURMAS */
+function renderTurmas(lista){
+  document.getElementById('tblTurmasBody').innerHTML=(lista||TURMAS).map(t=>`<tr>
+    <td><span class="id-chip">${t.id}</span></td>
+    <td style="font-weight:700">${t.nome}</td>
+    <td>${t.classe}</td>
+    <td><span class="badge b">${t.turno}</span></td>
+    <td style="font-size:11.5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.curso}</td>
+    <td>${t.sala}</td>
+    <td><span style="font-weight:700;color:var(--b)">${t.alunos}</span></td>
+    <td><span class="badge ${t.status==='ativa'?'g':'s'}"><span class="dot ${t.status==='ativa'?'g':'s'}"></span>${t.status==='ativa'?'Ativa':'Inativa'}</span></td>
+    <td class="ops">
+      <button class="btn ghost xs" onclick="verTurma('${t.id}')"><i class="fa fa-eye"></i>Ver</button>
+      <button class="btn outline-b xs" onclick="editTurma('${t.id}')"><i class="fa fa-pen"></i>Editar</button>
+      <button class="btn danger xs" onclick="toggleTurmaStatus('${t.id}')"><i class="fa fa-${t.status==='ativa'?'lock':'lock-open'}"></i></button>
+    </td>
+  </tr>`).join('');
+}
+renderTurmas();
+function filterTurmas(q){renderTurmas(TURMAS.filter(t=>t.nome.toLowerCase().includes(q.toLowerCase())))}
+function toggleTurmaStatus(id){
+  const t=TURMAS.find(x=>x.id===id);
+  if(!t)return;
+  const novoStatus=t.status==='ativa'?'inativa':'ativa';
+  if(!confirm(`${novoStatus==='inativa'?'Desativar':'Ativar'} a turma ${t.nome}?`))return;
+  t.status=novoStatus;renderTurmas();showToast(`Turma ${novoStatus==='ativa'?'ativada':'desativada'}`,'tg');
+}
+function editTurma(id){
+  const t=TURMAS.find(x=>x.id===id);
+  document.getElementById('mTurmaTitle').textContent='Editar Turma';
+  document.getElementById('tNome').value=t.nome;
+  document.getElementById('tSala').value=t.sala;
+  document.getElementById('tAno').value=t.ano;
+  openModal('modalTurma');
+}
+function saveTurma(){
+  const nome=document.getElementById('tNome').value.trim();
+  if(!nome){showToast('Nome da turma obrigatório','ty');return}
+  const nt={id:'T'+String(TURMAS.length+1).padStart(3,'0'),nome,classe:document.getElementById('tClasse').value,turno:document.getElementById('tPeriodo').value,curso:document.getElementById('tCurso').value,sala:document.getElementById('tSala').value||'—',alunos:0,status:'ativa',ano:document.getElementById('tAno').value};
+  TURMAS.push(nt);renderTurmas();closeModal('modalTurma');showToast('Turma criada','tg');
+  // Add to horario filter
+  const sel=document.getElementById('hFiltroTurma');
+  const opt=document.createElement('option');opt.value=nt.id;opt.textContent=nt.nome;sel.appendChild(opt);
+}
+function verTurma(id){
+  const t=TURMAS.find(x=>x.id===id);
+  document.getElementById('vTurmaTitulo').textContent=t.nome+' — Detalhes';
+  document.getElementById('vTurmaBody').innerHTML=`
+    <div class="g2" style="margin-bottom:12px">
+      <div><div class="sec-label">Informações Gerais</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${[['Nome',t.nome],['Classe',t.classe],['Curso',t.curso],['Turno',t.turno],['Sala',t.sala],['Ano Letivo',t.ano],['Status',t.status==='ativa'?'<span class="badge g">Ativa</span>':'<span class="badge s">Inativa</span>']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--s100)"><span style="color:var(--s500);font-weight:600">${l}</span><span style="font-weight:600">${v}</span></div>`).join('')}
+        </div>
+      </div>
+      <div><div class="sec-label">Alunos (${t.alunos})</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${ALUNOS.filter(a=>a.turma==='12CFB').slice(0,5).map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px"><div class="av" style="background:${CORS[i%CORS.length]};width:26px;height:26px;font-size:9px">${ini(a.nome)}</div>${a.nome}</div>`).join('')}
+          ${ALUNOS.length>5?`<div style="font-size:11px;color:var(--s400);margin-top:4px">…e mais ${ALUNOS.length-5} alunos</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  openModal('modalVerTurma');
+}
+
+/* DISCIPLINAS  */
+function renderDiscs(lista){
+  document.getElementById('tblDiscsBody').innerHTML=(lista||DISCS).map(d=>`<tr>
+    <td><span class="id-chip">${d.id}</span></td>
+    <td style="font-weight:700">${d.nome}</td>
+    <td>${d.prof}</td>
+    <td><span style="font-weight:700;color:var(--b)">${d.carga}h/sem</span></td>
+    <td>${d.turma}</td>
+    <td><span class="badge ${d.status==='ativa'?'g':'s'}">${d.status==='ativa'?'Ativa':'Inativa'}</span></td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="editDisc('${d.id}')"><i class="fa fa-pen"></i>Editar</button>
+      <button class="btn danger xs" onclick="removeDisc('${d.id}')"><i class="fa fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+renderDiscs();
+function filterDiscs(q){q=q.toLowerCase();renderDiscs(DISCS.filter(d=>d.nome.toLowerCase().includes(q)||d.prof.toLowerCase().includes(q)))}
+function editDisc(id){
+  const d=DISCS.find(x=>x.id===id);
+  document.getElementById('mDiscTitle').textContent='Editar Disciplina';
+  document.getElementById('dNome').value=d.nome;document.getElementById('dCarga').value=d.carga;
+  openModal('modalDisc');
+}
+function removeDisc(id){if(!confirm('Remover esta disciplina?'))return;DISCS=DISCS.filter(x=>x.id!==id);renderDiscs();showToast('Disciplina removida','ty')}
+function saveDisc(){
+  const nome=document.getElementById('dNome').value.trim();
+  if(!nome){showToast('Nome obrigatório','ty');return}
+  DISCS.push({id:'D'+String(DISCS.length+1).padStart(3,'0'),nome,prof:document.getElementById('dProf').value||'—',carga:parseInt(document.getElementById('dCarga').value)||2,turma:document.getElementById('dTurma').value,status:'ativa'});
+  renderDiscs();closeModal('modalDisc');showToast('Disciplina adicionada','tg');
+}
+
+/* CADASTROS  */
+function renderCadastros(){
+  document.getElementById('tblClassesBody').innerHTML=CLASSES.map(c=>`<tr>
+    <td><span class="id-chip">${c.id}</span></td><td style="font-weight:600">${c.nome}</td><td>${c.curso}</td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="showToast('Editar classe','tb')"><i class="fa fa-pen"></i></button>
+      <button class="btn danger xs" onclick="removeItem(CLASSES,'${c.id}');renderCadastros();showToast('Removido','ty')"><i class="fa fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('tblCursosBody').innerHTML=CURSOS.map(c=>`<tr>
+    <td><span class="id-chip">${c.id}</span></td><td style="font-weight:600">${c.nome}</td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="showToast('Editar curso','tb')"><i class="fa fa-pen"></i></button>
+      <button class="btn danger xs" onclick="removeItem(CURSOS,'${c.id}');renderCadastros();showToast('Removido','ty')"><i class="fa fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('tblPeriodosBody').innerHTML=PERIODOS.map(p=>`<tr>
+    <td><span class="id-chip">${p.id}</span></td><td style="font-weight:600">${p.nome}</td><td>${p.horario}</td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="showToast('Editar turno','tb')"><i class="fa fa-pen"></i></button>
+      <button class="btn danger xs" onclick="removeItem(PERIODOS,'${p.id}');renderCadastros();showToast('Removido','ty')"><i class="fa fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('tblSalasBody').innerHTML=SALAS.map(s=>`<tr>
+    <td><span class="id-chip">${s.id}</span></td><td style="font-weight:600">${s.nome}</td><td>${s.cap}</td>
+    <td><span class="badge ${s.rfid==='Sim'?'g':'s'}">${s.rfid}</span></td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="editSala('${s.id}')"><i class="fa fa-pen"></i></button>
+      <button class="btn danger xs" onclick="removeItem(SALAS,'${s.id}');renderCadastros();showToast('Removido','ty')"><i class="fa fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+renderCadastros();
+function removeItem(arr,id){const i=arr.findIndex(x=>x.id===id);if(i>-1)arr.splice(i,1)}
+function editSala(id){showToast('Editar sala','tb')}
+function saveCadastro(tipo){closeModal('modal'+tipo.charAt(0).toUpperCase()+tipo.slice(1));renderCadastros();showToast(tipo.charAt(0).toUpperCase()+tipo.slice(1)+' adicionado(a)','tg')}
+
+/* HORÁRIO — com filtro por turma/professor */
+function buildHorario(){
+  const turmaFil=document.getElementById('hFiltroTurma')?.value||'';
+  const profFil=document.getElementById('hFiltroProf')?.value||'';
+  const horarioFiltrado=HORARIO.filter(h=>{
+    if(turmaFil&&h.turma!==turmaFil)return false;
+    if(profFil&&h.prof!==profFil)return false;
+    return true;
+  });
+
+  const g=document.getElementById('horarioGrid');g.innerHTML='';
+  const H=(html,style)=>{const d=document.createElement('div');d.innerHTML=html;if(style)Object.assign(d.style,style);g.appendChild(d);return d};
+  const hs={background:'var(--s100)',borderRadius:'6px',padding:'6px 4px',textAlign:'center',fontWeight:'700',fontSize:'10px',color:'var(--s600)'};
+  H('',hs);DIAS_LABEL.forEach(d=>H(d,hs));
+  SLOTS.forEach(slot=>{
+    const ts={background:'var(--s50)',borderRadius:'6px',padding:'5px 3px',textAlign:'center',fontSize:'10px',color:'var(--s400)',fontWeight:'600',display:'flex',alignItems:'center',justifyContent:'center'};
+    if(slot.int){
+      H('<span style="font-size:8px;color:#d97706">🔔</span>',ts);
+      for(let d=0;d<6;d++)H('<div style="font-size:8.5px;text-align:center;color:#d97706;font-weight:700;background:#fffbeb;border-radius:6px;padding:4px;display:flex;align-items:center;justify-content:center;height:100%">Intervalo</div>',{borderRadius:'6px',background:'transparent',minHeight:'36px',display:'flex',alignItems:'center'});
+      return;
+    }
+    H(`<div style="line-height:1.3">${slot.ti}<br><span style="font-size:8px">${slot.tf}</span></div>`,ts);
+    for(let dia=1;dia<=6;dia++){
+      const aulas=horarioFiltrado.filter(h=>h.dia===dia&&h.ti===slot.ti);
+      if(aulas.length){
+        const cellDiv=H('',{borderRadius:'6px',padding:'3px',minHeight:'42px',display:'flex',flexDirection:'column',gap:'2px'});
+        aulas.forEach(aula=>{
+          const isSP=aula.est==='sem_prof';
+          const d=document.createElement('div');
+          d.style.cssText=`background:${isSP?'#fef2f2':'#eff6ff'};border:1.5px solid ${isSP?'rgba(220,38,38,.3)':'rgba(37,99,235,.2)'};border-radius:5px;padding:4px 5px;flex:1;cursor:pointer;transition:all .15s`;
+          d.innerHTML=`<div style="font-size:9.5px;font-weight:700;color:${isSP?'#dc2626':'#1d4ed8'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${aula.disc}</div><div style="font-size:8.5px;color:#64748b;margin-top:1px">${aula.prof}</div>${profFil||turmaFil?`<div style="font-size:8px;color:var(--s400)">${aula.turma||''}</div>`:''}`;
+          d.title=`${aula.disc} · ${aula.prof} (${slot.ti}–${slot.tf})`;
+          d.onmouseenter=()=>{d.style.boxShadow='0 2px 8px rgba(0,0,0,.12)';d.style.transform='translateY(-1px)'};
+          d.onmouseleave=()=>{d.style.boxShadow='';d.style.transform=''};
+          cellDiv.appendChild(d);
+        });
+      } else {
+        H('',{borderRadius:'6px',background:'transparent',minHeight:'42px'});
+      }
+    }
+  });
+}
+
+function populateHorarioFilters(){
+  const profSel=document.getElementById('hFiltroProf');
+  if(!profSel)return;
+  const profs=[...new Set(HORARIO.map(h=>h.prof))].sort();
+  profSel.innerHTML='<option value="">Todos os professores</option>'+profs.map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+
+/*  ASSIDUIDADE  */
+function renderAssid(){
+  const eb={assiduo:'<span class="badge g"><span class="dot g"></span>Presente Assíduo</span>',atrasado:'<span class="badge y"><span class="dot y"></span>Atrasado</span>',falta:'<span class="badge r"><span class="dot r"></span>Falta</span>'};
+  document.getElementById('tblAssidBody').innerHTML=ASSID.map(a=>`<tr>
+    <td><span class="id-chip">${a.id}</span></td>
+    <td style="font-size:12px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.aluno}</td>
+    <td>${a.turma}</td><td>${a.data}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:11px">${a.hora}</td>
+    <td>${eb[a.estado]||a.estado}</td>
+    <td>${a.valido?'<span class="badge g"><i class="fa fa-check" style="font-size:8px"></i>Sim</span>':'<span class="badge y">Pendente</span>'}</td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="showToast('A editar registo…','tb')"><i class="fa fa-pen"></i></button>
+      <button class="btn ${a.valido?'ghost':'success'} xs" onclick="toggleAssidValid(${ASSID.indexOf(a)})">
+        <i class="fa fa-${a.valido?'rotate-left':'check'}"></i>${a.valido?'Revogar':'Validar'}
+      </button>
+    </td>
+  </tr>`).join('');
+}
+renderAssid();
+function toggleAssidValid(i){ASSID[i].valido=!ASSID[i].valido;renderAssid();showToast(ASSID[i].valido?'Validado':'Validação removida',ASSID[i].valido?'tg':'ty')}
+function saveAssid(){
+  const al=document.getElementById('asAluno').value;
+  if(!al){showToast('Seleciona o aluno','ty');return}
+  ASSID.unshift({id:'AS'+String(ASSID.length+1).padStart(3,'0'),aluno:al,turma:'12ª CFB',data:document.getElementById('asData').value,hora:document.getElementById('asHora').value,estado:document.getElementById('asEstado').value,valido:false});
+  renderAssid();closeModal('modalAssid');showToast('Presença registada','tg');
+}
+
+/* ════════ SUBSTITUIÇÕES ════════ */
+function renderSubs(){
+  const sems=SUBS.filter(s=>s.estado==='sem_prof').length;
+  document.getElementById('stSemProfSubs').textContent=sems;
+  document.getElementById('nbSubs').textContent=sems;
+  document.getElementById('listaSubs').innerHTML=SUBS.length?SUBS.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--s100)">
+      <div style="width:38px;height:38px;border-radius:var(--r10);background:${s.estado==='sem_prof'?'var(--rp)':'var(--bp)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">
+        <i class="fa fa-${s.estado==='sem_prof'?'circle-xmark':'arrows-rotate'}" style="color:${s.estado==='sem_prof'?'var(--r)':'var(--b)'}"></i>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${s.disc} — ${s.dia_txt} ${s.h}</div>
+        <div style="font-size:11px;color:var(--s500);margin-top:2px">Prof. titular: <strong>${s.prof}</strong> · ${s.data}</div>
+        ${s.sub?`<div style="font-size:11px;color:var(--b);margin-top:2px"><i class="fa fa-arrows-rotate" style="margin-right:4px"></i>Substituto: ${s.sub}</div>`:''}
+      </div>
+      <span class="badge ${s.estado==='sem_prof'?'r':'b'}">${s.estado==='sem_prof'?'Sem Prof.':'Cobertura'}</span>
+      <div class="ops">
+        ${s.estado==='sem_prof'?`<button class="btn warn sm" onclick="openModal('modalSub')"><i class="fa fa-arrows-rotate"></i>Cobertura</button>`:''}
+        <button class="btn danger sm" onclick="removeSub(${s.id})"><i class="fa fa-trash"></i></button>
+      </div>
+    </div>`).join('')
+    :`<div style="text-align:center;padding:24px;color:var(--s400)"><i class="fa fa-circle-check" style="font-size:28px;color:var(--g);display:block;margin-bottom:8px"></i>Sem ausências pendentes</div>`;
+}
+renderSubs();
+function removeSub(id){if(!confirm('Eliminar este registo?'))return;SUBS=SUBS.filter(x=>x.id!==id);renderSubs();renderPainel();showToast('Eliminado','ty')}
+function toggleSubAcao(v){document.getElementById('subDiv').style.display=v==='substituto'?'block':'none'}
+function saveSub(){
+  const aula=document.getElementById('subAula').value;
+  if(!aula){showToast('Seleciona a aula','ty');return}
+  const acao=document.getElementById('subAcao').value;
+  showToast(acao==='sem_prof'?'Marcado sem professor':acao==='substituto'?'Substituto definido':'Aula cancelada','tg');
+  closeModal('modalSub');
+}
+
+/* ALUNOS  */
+function renderAlunos(lista){
+  document.getElementById('tblAlunosBody').innerHTML=(lista||ALUNOS).map((a,i)=>`<tr>
+    <td><span class="id-chip">${a.nproc}</span></td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="av" style="background:${CORS[i%CORS.length]};width:26px;height:26px;font-size:9px">${ini(a.nome)}</div><span style="font-weight:600;font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${a.nome}</span></div></td>
+    <td>${a.turma}</td>
+    <td style="font-size:11.5px">${a.curso}</td>
+    <td>${a.classe}ª</td>
+    <td><span style="font-family:'DM Mono',monospace;font-size:10.5px;background:var(--s100);padding:2px 6px;border-radius:5px;color:var(--s600)">${a.rfid||'—'}</span></td>
+    <td><span class="badge ${a.status==='ativo'?'g':'s'}"><span class="dot ${a.status==='ativo'?'g':'s'}"></span>${a.status==='ativo'?'Ativo':'Inativo'}</span></td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="editAluno(${a.id})"><i class="fa fa-pen"></i></button>
+      <button class="btn warn xs" onclick="showToast('Transferência registada','ty')"><i class="fa fa-arrows-rotate"></i></button>
+      <button class="btn danger xs" onclick="toggleAlunoStatus(${a.id})"><i class="fa fa-${a.status==='ativo'?'ban':'check'}"></i></button>
+    </td>
+  </tr>`).join('');
+  const ops=ALUNOS.map(a=>`<option value="${a.nome}">${a.nome}</option>`).join('');
+  document.getElementById('cAluno').innerHTML='<option value="">Selecionar aluno…</option>'+ops;
+  document.getElementById('asAluno').innerHTML=ops;
+}
+renderAlunos();
+function filterAlunos(q){q=q.toLowerCase();renderAlunos(ALUNOS.filter(a=>a.nome.toLowerCase().includes(q)||a.nproc.includes(q)))}
+function editAluno(id){
+  const a=ALUNOS.find(x=>x.id===id);
+  document.getElementById('mAlunoTitle').textContent='Editar Aluno';
+  document.getElementById('aOrd').value=a.ord;document.getElementById('aProc').value=a.nproc;
+  document.getElementById('aNome').value=a.nome;document.getElementById('aRfid').value=a.rfid||'';
+  openModal('modalAluno');
+}
+function toggleAlunoStatus(id){
+  const a=ALUNOS.find(x=>x.id===id);
+  if(!a||!confirm(`${a.status==='ativo'?'Desativar':'Ativar'} aluno ${a.nome.split(' ')[0]}?`))return;
+  a.status=a.status==='ativo'?'inativo':'ativo';renderAlunos();showToast('Estado atualizado','tg');
+}
+function saveAluno(){
+  const nome=document.getElementById('aNome').value.trim();
+  if(!nome){showToast('Nome obrigatório','ty');return}
+  const novo={id:ALUNOS.length+1,ord:parseInt(document.getElementById('aOrd').value)||ALUNOS.length+1,nproc:document.getElementById('aProc').value||'—',nome,turma:'12CFB',classe:'12ª',curso:'CFB',status:'ativo',rfid:document.getElementById('aRfid').value||''};
+  ALUNOS.push(novo);renderAlunos();closeModal('modalAluno');showToast('Aluno guardado','tg');
+}
+
+/* RFID — cartões + leitores + histórico */
+function renderRFID(){
+  document.getElementById('tblRFIDBody').innerHTML=ALUNOS.map((a,i)=>`<tr>
+    <td><span class="id-chip">${a.nproc}</span></td>
+    <td><div style="display:flex;align-items:center;gap:7px"><div class="av" style="background:${CORS[i%CORS.length]};width:26px;height:26px;font-size:9px">${ini(a.nome)}</div><span style="font-size:12px;font-weight:600">${a.nome}</span></div></td>
+    <td><span style="font-family:'DM Mono',monospace;font-size:11px;background:var(--s50);border:1px solid var(--s200);padding:2px 8px;border-radius:5px">${a.rfid||'—'}</span></td>
+    <td>${a.turma}</td>
+    <td><span class="badge ${a.rfid?'g':'s'}"><span class="dot ${a.rfid?'g':'s'}"></span>${a.rfid?'Ativo':'Sem cartão'}</span></td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="openModal('modalCartao')"><i class="fa fa-arrows-rotate"></i>${a.rfid?'Substituir':'Associar'}</button>
+      ${a.rfid?`<button class="btn danger xs" onclick="desativarCartao(${a.id})"><i class="fa fa-ban"></i>Desativar</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+renderRFID();
+
+function renderLeitoresPage(){
+  const grid=document.getElementById('leitoresGrid');
+  if(!grid)return;
+  grid.innerHTML=LEITORES.map(l=>`
+    <div class="rfid-reader-card ${l.status}" style="height:fit-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:40px;height:40px;border-radius:var(--r10);background:${l.status==='online'?'var(--gp)':'var(--rp)'};display:flex;align-items:center;justify-content:center;font-size:18px;color:${l.status==='online'?'var(--g)':'var(--r)'}"><i class="fa fa-tower-broadcast"></i></div>
+          <div>
+            <div style="font-size:13px;font-weight:700">${l.nome}</div>
+            <div style="font-size:10px;color:var(--s400);font-family:'DM Mono',monospace">${l.id}</div>
+          </div>
+        </div>
+        <span class="badge ${l.status==='online'?'g':'r'}"><span class="reader-pulse ${l.status==='online'?'on':'off'}" style="margin-right:3px"></span>${l.status==='online'?'Online':'Offline'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+        ${[['Sala',l.sala],['Leituras Hoje',l.leituras_hoje],['Último Aluno',l.ultimo_aluno],['Último acesso',l.tempo]].map(([k,v])=>`
+          <div style="background:var(--s50);border-radius:6px;padding:7px 9px">
+            <div style="font-size:9px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${k}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--s700)">${v}</div>
+          </div>`).join('')}
+      </div>
+      <div style="font-size:9px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Último UID lido</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;background:var(--s100);padding:5px 9px;border-radius:6px;margin-bottom:10px;color:var(--s700)">${l.ultima_uid}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${l.status==='offline'?`<button class="btn warn sm" onclick="reconectarLeitor('${l.id}')"><i class="fa fa-rotate"></i>Reconectar</button>`:'<button class="btn ghost sm" onclick="showToast(\'Leitor OK\',\'tg\')"><i class="fa fa-circle-check"></i>Diagnóstico</button>'}
+        <button class="btn danger sm" onclick="showToast('Leitor removido','ty')"><i class="fa fa-trash"></i>Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderHistRfid(){
+  document.getElementById('tblHistRfidBody').innerHTML=HIST_RFID.map(h=>`<tr>
+    <td style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--s500)">${h.dt}</td>
+    <td style="font-weight:600">${h.aluno}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:11px;background:var(--s50);padding:2px 6px;border-radius:4px">${h.uid}</td>
+    <td style="font-size:11px">${h.leitor}</td>
+    <td><span class="badge ${h.est==='valida'?'g':'r'}">${h.est==='valida'?'Válida':'Desconhecida'}</span></td>
+  </tr>`).join('');
+}
+renderHistRfid();
+
+function desativarCartao(id){
+  if(!confirm('Desativar o cartão deste aluno?'))return;
+  const a=ALUNOS.find(x=>x.id===id);if(a){a.rfid='';}
+  renderRFID();renderAlunos();showToast('Cartão desativado','ty');
+}
+function saveCartao(){
+  const al=document.getElementById('cAluno').value;
+  const uid=document.getElementById('cUID').value.trim();
+  if(!al){showToast('Seleciona o aluno','ty');return}
+  if(!uid&&document.getElementById('cAcao').value!=='desativar'){showToast('Introduz o UID','ty');return}
+  const a=ALUNOS.find(x=>x.nome===al);
+  if(a){a.rfid=document.getElementById('cAcao').value==='desativar'?'':uid}
+  renderRFID();renderAlunos();closeModal('modalCartao');showToast('Cartão atualizado','tg');
+}
+function saveLeitor(){
+  const nome=document.getElementById('lNome').value.trim();
+  if(!nome){showToast('Nome obrigatório','ty');return}
+  LEITORES.push({id:document.getElementById('lId').value||'RFID-0'+LEITORES.length,nome,sala:document.getElementById('lSala').value,status:'offline',ultima_uid:'—',ultimo_aluno:'—',tempo:'—',leituras_hoje:0});
+  renderLeitoresPage();renderPainel();closeModal('modalLeitor');showToast('Leitor adicionado','tg');
+}
+
+let curRtab='cartoes';
+function setRtab(tab,btn){
+  document.querySelectorAll('[id^="rtab-"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['cartoes','leitores','historico'].forEach(t=>document.getElementById('rt-'+t).style.display=t===tab?'block':'none');
+  curRtab=tab;
+  if(tab==='leitores')renderLeitoresPage();
+  if(tab==='historico')renderHistRfid();
+}
+
+/* UTILIZADORES */
+function renderUsers(){
+  const pc={admin:'<span class="badge p">Admin</span>',coordenador:'<span class="badge b">Coordenador</span>',professor:'<span class="badge g">Professor</span>'};
+  document.getElementById('tblUsersBody').innerHTML=USERS.map((u,i)=>`<tr>
+    <td><span class="id-chip">${u.id}</span></td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="av" style="background:${CORS[i%CORS.length]};width:26px;height:26px;font-size:9px">${ini(u.nome)}</div><div><div style="font-weight:600;font-size:12px">${u.nome}</div><div style="font-size:10px;color:var(--s400)">${u.username}</div></div></div></td>
+    <td>${pc[u.perfil]||u.perfil}</td>
+    <td style="font-size:11px;color:var(--s500)">${u.acesso}</td>
+    <td><span class="badge ${u.status==='ativo'?'g':'s'}"><span class="dot ${u.status==='ativo'?'g':'s'}"></span>${u.status==='ativo'?'Ativo':'Inativo'}</span></td>
+    <td class="ops">
+      <button class="btn outline-b xs" onclick="showToast('Editar utilizador','tb')"><i class="fa fa-pen"></i>Editar</button>
+      <button class="btn ${u.status==='ativo'?'danger':'success'} xs" onclick="toggleUser('${u.id}')">
+        <i class="fa fa-${u.status==='ativo'?'ban':'check'}"></i>${u.status==='ativo'?'Desativar':'Ativar'}
+      </button>
+    </td>
+  </tr>`).join('');
+}
+renderUsers();
+function toggleUser(id){const u=USERS.find(x=>x.id===id);if(u){u.status=u.status==='ativo'?'inativo':'ativo';renderUsers();showToast('Estado alterado','tg')}}
+function saveUser(){
+  const nome=document.getElementById('uNome').value.trim();
+  if(!nome){showToast('Nome obrigatório','ty');return}
+  USERS.push({id:'U'+String(USERS.length+1).padStart(3,'0'),nome,username:document.getElementById('uUsername').value||nome.split(' ')[0].toLowerCase(),email:document.getElementById('uEmail').value,perfil:document.getElementById('uPerfil').value,status:'ativo',acesso:'—'});
+  renderUsers();closeModal('modalUser');showToast('Utilizador criado','tg');
+}
+
+function renderPerms(){
+  document.getElementById('permMatrix').innerHTML=PERMS.map(p=>`
+    <div class="perm-row">
+      <div style="font-size:12px;font-weight:500">${p.item}</div>
+      <div style="text-align:center"><input type="checkbox" class="perm-check" ${p.admin?'checked':''} onchange="showToast('Permissão atualizada','tg')"></div>
+      <div style="text-align:center"><input type="checkbox" class="perm-check" ${p.coord?'checked':''} onchange="showToast('Permissão atualizada','tg')"></div>
+      <div style="text-align:center"><input type="checkbox" class="perm-check" ${p.prof?'checked':''} onchange="showToast('Permissão atualizada','tg')"></div>
+    </div>`).join('');
+}
+renderPerms();
+
+function renderLogs(){
+  document.getElementById('tblLogsBody').innerHTML=LOGS.map(l=>`<tr>
+    <td style="font-family:'DM Mono',monospace;font-size:10.5px;color:var(--s500);white-space:nowrap">${l.dt}</td>
+    <td style="font-weight:600;font-size:12px">${l.user}</td>
+    <td><span class="log-type ${l.tipo}">${l.tipo}</span></td>
+    <td style="font-size:12px;color:var(--s600)">${l.desc}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--s400)">${l.ip}</td>
+  </tr>`).join('');
+}
+renderLogs();
+
+let curUtab='contas';
+function setUtab(tab,btn){
+  document.querySelectorAll('[id^="utab-"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['contas','perms','logs'].forEach(t=>document.getElementById('ut-'+t).style.display=t===tab?'block':'none');
+  curUtab=tab;
+}
+
+/* SELECTS */
+function populateSelects(){
+  const ps=document.getElementById('dProf');
+  ps.innerHTML='<option value="">Selecionar…</option>'+PROFS.map(p=>`<option value="${p.nome}">${p.nome}</option>`).join('');
+  const hs=document.getElementById('haDisc');
+  if(hs)hs.innerHTML=DISCS.map(d=>`<option value="${d.nome}">${d.nome}</option>`).join('');
+}
+populateSelects();
+
+/*  NAVIGATION  */
+const TITULOS={painel:'Visão Geral',turmas:'Gestão de Turmas',disciplinas:'Disciplinas',cadastro:'Cadastro',horarios:'Horários',assiduidade:'Assiduidade',substituicoes:'Ausências e Cobertura',alunos:'Gestão de Alunos',rfid:'Cartões e Leitores RFID',utilizadores:'Gestão de Utilizadores',configuracoes:'Configurações'};
+function ir(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  document.getElementById('tbTitle').textContent=TITULOS[v]||v;
+  if(v==='horarios'){populateHorarioFilters();setTimeout(buildHorario,80);}
+  closeSb();
+}
+function openSb(){document.getElementById('sidebar').classList.add('open');document.getElementById('sbOv').classList.add('open')}
+function closeSb(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbOv').classList.remove('open')}
+
+/* MODALS */
+function openModal(id,mode,ref){
+  if(mode==='novo'){
+    if(id==='modalAluno'){document.getElementById('mAlunoTitle').textContent='Novo Aluno';['aOrd','aProc','aNome','aRfid'].forEach(f=>document.getElementById(f).value='')}
+    if(id==='modalTurma'){document.getElementById('mTurmaTitle').textContent='Nova Turma';['tNome','tSala'].forEach(f=>document.getElementById(f).value='')}
+    if(id==='modalDisc'){document.getElementById('mDiscTitle').textContent='Nova Disciplina';['dNome','dCarga'].forEach(f=>document.getElementById(f).value='')}
+    if(id==='modalUser'){document.getElementById('mUserTitle').textContent='Novo Utilizador';['uNome','uUsername','uEmail','uPass'].forEach(f=>document.getElementById(f).value='')}
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+/* HELPERS */
+function setFPill(btn,val){
+  const parent=btn.parentElement;
+  parent.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function saveAula(){
+  const disc=document.getElementById('haDisc')?.value;
+  const dia=document.getElementById('haDia')?.value;
+  const ini=document.getElementById('haInicio')?.value;
+  const fim=document.getElementById('haFim')?.value;
+  if(!disc||!ini||!fim){showToast('Preenche todos os campos','ty');return}
+  const p=DISCS.find(d=>d.nome===disc);
+  HORARIO.push({dia:parseInt(dia),ti:ini,tf:fim,prof:p?p.prof:'—',disc,turma:document.getElementById('haTurma')?.value||'12CFB',est:'confirmada'});
+  closeModal('modalAula');setTimeout(()=>{populateHorarioFilters();buildHorario();},100);showToast('Aula adicionada ao horário','tg');
+}
+function confirmReset(){if(confirm('⚠️ Confirmar reset dos dados do dia?\nEsta ação não pode ser desfeita.'))showToast('Reset do dia executado','tr')}
+function sair(){if(confirm('Terminar sessão?'))window.location.href='scope-login.html'}
+
+let toastT;
+function showToast(msg,cls='tg'){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<i class="fa fa-${cls==='tg'?'check-circle':cls==='ty'?'exclamation-circle':cls==='tr'?'times-circle':'info-circle'}"></i>${msg}`;
+  t.className=`toast ${cls} show`;clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// Init
+setTimeout(()=>{populateHorarioFilters();buildHorario();},200);
+</script>
+</body>
+</html>

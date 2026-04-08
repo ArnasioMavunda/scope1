@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE — Coordenador</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b:#1E4ED8;--bm:#2563EB;--bl:#3B82F6;--bp:#EFF6FF;--bd:#1E3A8A;
+  --g:#10B981;--gp:#ECFDF5;--y:#F59E0B;--yp:#FFFBEB;
+  --r:#EF4444;--rp:#FEF2F2;--o:#F97316;--op:#FFF7ED;--p:#8B5CF6;--pp:#F5F3FF;
+  --s50:#F8FAFC;--s100:#F1F5F9;--s200:#E2E8F0;--s400:#94A3B8;--s600:#475569;--s700:#334155;--s800:#1E293B;
+  --sh:0 4px 16px rgba(0,0,0,.10);--shs:0 1px 3px rgba(0,0,0,.07);
+  --rad:14px;--rads:9px;--sw:238px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var(--s800);display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sw);background:linear-gradient(180deg,#0f3d91 0%,#1a4faa 100%);height:100vh;display:flex;flex-direction:column;flex-shrink:0;box-shadow:2px 0 20px rgba(15,61,145,.3);z-index:50}
+.sb-brand{padding:18px 16px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo{width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo img{width:24px;height:24px;object-fit:contain}
+.sb-name{font-size:17px;font-weight:800;color:white;letter-spacing:2.5px}
+.sb-sub{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.8px;margin-top:1px;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.8px;padding:10px 10px 3px;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .18s;border:none;background:none;font-family:inherit;width:100%;text-align:left}
+.ni i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.ni:hover{background:rgba(255,255,255,.1);color:white}
+.ni.active{background:rgba(255,255,255,.17);color:white;font-weight:700}
+.ni.active i{color:#7dd3fc}
+.nb{margin-left:auto;background:var(--r);color:white;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+.sb-ft{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:9px}
+.sb-av{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.45)}
+.btn-out{background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:4px;transition:color .2s;flex-shrink:0}
+.btn-out:hover{color:#fca5a5}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:white;padding:0 22px;height:54px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--s200);flex-shrink:0;box-shadow:var(--shs)}
+.tb-title{font-size:15px;font-weight:700}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chip{display:flex;align-items:center;gap:5px;background:var(--bp);border:1.5px solid rgba(37,99,235,.22);border-radius:20px;padding:4px 11px;font-size:11px;font-weight:600;color:var(--bm)}
+.tb-date{font-size:11px;color:var(--s400);white-space:nowrap}
+.page{flex:1;overflow-y:auto;padding:18px 20px 36px}
+.view{display:none}.view.active{display:block}
+.banner{background:linear-gradient(135deg,#0f3d91 0%,#1a4faa 55%,#2563eb 100%);border-radius:var(--rad);padding:20px 24px;color:white;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 28px rgba(15,61,145,.25)}
+.banner::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05)}
+.banner-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.banner h2{font-size:22px;font-weight:800;margin-bottom:3px}
+.banner p{font-size:13px;opacity:.8}
+.banner-stats{display:flex;gap:22px;flex-wrap:wrap}
+.bst{text-align:center}
+.bst-n{font-size:26px;font-weight:800;line-height:1}
+.bst-l{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.sc{background:white;border-radius:var(--rad);padding:13px 15px;display:flex;align-items:center;gap:11px;box-shadow:var(--shs);position:relative;overflow:hidden;transition:transform .18s}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.sc::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:14px 0 0 14px}
+.sc.sg::before{background:var(--g)}.sc.sy::before{background:var(--y)}.sc.sr::before{background:var(--r)}.sc.sb::before{background:var(--bl)}.sc.sp::before{background:var(--p)}
+.sc-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sc.sg .sc-ic{background:var(--gp);color:var(--g)}.sc.sy .sc-ic{background:var(--yp);color:var(--y)}.sc.sr .sc-ic{background:var(--rp);color:var(--r)}.sc.sb .sc-ic{background:var(--bp);color:var(--bl)}.sc.sp .sc-ic{background:var(--pp);color:var(--p)}
+.sc-n{font-size:24px;font-weight:800;line-height:1;margin-bottom:1px}
+.sc.sg .sc-n{color:var(--g)}.sc.sy .sc-n{color:var(--y)}.sc.sr .sc-n{color:var(--r)}.sc.sb .sc-n{color:var(--bl)}.sc.sp .sc-n{color:var(--p)}
+.sc-l{font-size:10px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.card{background:white;border-radius:var(--rad);box-shadow:var(--shs);overflow:hidden;margin-bottom:13px}
+.card:last-child{margin-bottom:0}
+.ch{padding:12px 16px;border-bottom:1px solid var(--s100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.ct{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.ct i{color:var(--bm);font-size:12px}
+.cs{font-size:11px;color:var(--s400)}
+.cb{padding:13px 16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.g{background:var(--gp);color:var(--g)}.badge.y{background:var(--yp);color:var(--y)}.badge.r{background:var(--rp);color:var(--r)}.badge.b{background:var(--bp);color:var(--bm)}.badge.p{background:var(--pp);color:var(--p)}
+.aluno-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--rads);border:1.5px solid var(--s100);margin-bottom:6px;transition:all .18s}
+.aluno-row:hover{background:var(--s50);border-color:var(--s200)}
+.aluno-row:last-child{margin-bottom:0}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;flex-shrink:0}
+.ai{flex:1;min-width:0}
+.an{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asub{font-size:11px;color:var(--s400);margin-top:1px}
+.pbar-bg{flex:1;height:5px;background:var(--s100);border-radius:10px;overflow:hidden;min-width:50px}
+.pbar-f{height:100%;border-radius:10px}
+.pbar-f.hi{background:var(--g)}.pbar-f.me{background:var(--y)}.pbar-f.lo{background:var(--r)}
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--s100);white-space:nowrap}
+.table td{padding:9px 12px;border-bottom:1px solid var(--s100);vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover td{background:var(--s50)}
+.alerta{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--rads);border-left:3px solid var(--r);background:var(--rp);margin-bottom:8px;transition:all .2s}
+.alerta:hover{background:rgba(239,68,68,.1)}
+.alerta.y{border-left-color:var(--y);background:var(--yp)}.alerta.y:hover{background:rgba(245,158,11,.1)}
+.alerta.b{border-left-color:var(--bm);background:var(--bp)}.alerta.b:hover{background:rgba(37,99,235,.1)}
+.alerta-ic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.alerta .alerta-ic{background:rgba(239,68,68,.12);color:var(--r)}.alerta.y .alerta-ic{background:rgba(245,158,11,.12);color:var(--y)}.alerta.b .alerta-ic{background:rgba(37,99,235,.1);color:var(--bm)}
+.alerta-t{font-size:13px;font-weight:600}
+.alerta-s{font-size:11px;color:var(--s400);margin-top:1px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--rads);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;border:none}
+.btn.prim{background:linear-gradient(135deg,var(--bm),var(--b));color:white}
+.btn.prim:hover{box-shadow:0 4px 14px rgba(37,99,235,.3);transform:translateY(-1px)}
+.btn.sec{background:var(--s100);color:var(--s600);border:1.5px solid var(--s200)}
+.btn.sec:hover{background:var(--s200)}
+.btn.g-btn{background:rgba(16,185,129,.1);color:var(--g);border:none}
+.btn.g-btn:hover{background:var(--g);color:white}
+.btn.r-btn{background:var(--rp);color:var(--r);border:none}
+.btn.r-btn:hover{background:var(--r);color:white}
+.fsel{padding:6px 12px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;color:var(--s600);cursor:pointer;outline:none}
+.fsel:focus{border-color:var(--bm)}
+.filter-btn{padding:6px 14px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;font-weight:600;color:var(--s600);cursor:pointer;transition:all .18s}
+.filter-btn.active{background:var(--bm);border-color:var(--bm);color:white}
+/* OCORRÊNCIAS */
+.oc-card{border:1.5px solid var(--s200);border-radius:var(--rads);padding:14px;margin-bottom:10px;transition:all .2s}
+.oc-card:hover{border-color:var(--bl);box-shadow:var(--shs)}
+.oc-card:last-child{margin-bottom:0}
+.oc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.oc-aluno{font-size:13px;font-weight:700}
+.oc-data{font-size:11px;color:var(--s400);margin-top:2px}
+.oc-desc{font-size:13px;font-weight:600;color:var(--s800);margin-bottom:4px}
+.oc-motivo{font-size:12px;color:var(--s600);line-height:1.5;margin-bottom:10px}
+.oc-ft{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* SEARCH */
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--s50);border:1.5px solid var(--s200);border-radius:var(--rads);padding:8px 12px;margin-bottom:12px;transition:all .2s}
+.search-wrap:focus-within{border-color:var(--bm);background:white}
+.search-wrap i{color:var(--s400);font-size:13px}
+.search-wrap input{flex:1;border:none;background:none;font-family:inherit;font-size:13px;color:var(--s800);outline:none}
+/* CHART BARS */
+.chart-wrap{padding:10px 0;overflow-x:auto}
+.bar-chart{display:flex;align-items:flex-end;gap:12px;min-height:140px;padding:0 4px}
+.bar-group{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:50px}
+.bars{display:flex;gap:3px;align-items:flex-end;height:120px}
+.bar{border-radius:5px 5px 0 0;min-width:14px;transition:opacity .2s;cursor:pointer}
+.bar:hover{opacity:.8}
+.bar-lbl{font-size:10px;font-weight:600;color:var(--s400)}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 0 0;font-size:11px}
+.leg-item{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--s600)}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+/* PIE */
+.pie-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:8px 0}
+.pie-svg{flex-shrink:0}
+.pie-legend{display:flex;flex-direction:column;gap:8px}
+.pie-leg-item{display:flex;align-items:center;gap:8px}
+.pie-leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.pie-leg-lbl{font-size:12px;font-weight:600;color:var(--s800)}
+.pie-leg-val{font-size:11px;color:var(--s400)}
+.prof-row{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:var(--rads);border:1.5px solid var(--s100);margin-bottom:6px;transition:all .18s}
+.prof-row:hover{background:var(--s50)}
+.nchip{background:var(--s100);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--s600)}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s800);color:white;padding:10px 15px;border-radius:11px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--sh);transform:translateY(80px);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1);z-index:999;max-width:290px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.tg{border-left:4px solid var(--g)}.toast.ty{border-left:4px solid var(--y)}.toast.tr{border-left:4px solid var(--r)}.toast.tb{border-left:4px solid var(--bl)}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo"><img src="recursos/Imagens/icon.png" alt="SCOPE" onerror="this.style.display='none'"></div>
+    <div><div class="sb-name">SCOPE</div><div class="sb-sub">Coordenador</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Principal</div>
+    <button class="ni active" id="nav-visao" onclick="ir('visao')"><i class="fa fa-gauge-high"></i>Visão Geral</button>
+    <button class="ni" id="nav-turma" onclick="ir('turma')"><i class="fa fa-school"></i>Ver Turma</button>
+    <div class="nav-sec">Análise</div>
+    <button class="ni" id="nav-relatorios" onclick="ir('relatorios')"><i class="fa fa-chart-column"></i>Relatórios e Estatísticas</button>
+    <button class="ni" id="nav-aulas" onclick="ir('aulas')"><i class="fa fa-calendar-day"></i>Aulas de Hoje</button>
+    <div class="nav-sec">Gestão</div>
+    <button class="ni" id="nav-ocorrencias" onclick="ir('ocorrencias')">
+      <i class="fa fa-triangle-exclamation"></i>Ocorrências
+      <span class="nb" id="nbOc">3</span>
+    </button>
+    <button class="ni" id="nav-professores" onclick="ir('professores')"><i class="fa fa-chalkboard-user"></i>Professores</button>
+  </nav>
+  <div class="sb-ft">
+    <div class="sb-av">AC</div>
+    <div style="flex:1;min-width:0"><div class="sb-uname">A. Chipaco</div><div class="sb-urole">Coordenador · 12ª CFB</div></div>
+    <button class="btn-out" onclick="if(confirm('Terminar sessão?'))SCOPE.logout()" title="Sair"><i class="fa fa-right-from-bracket"></i></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title" id="tbTitle">Visão Geral</span>
+    <div class="tb-right">
+      <div class="chip"><i class="fa fa-user-shield"></i>Coordenador · 12ª CFB</div>
+      <span class="tb-date" id="tbDate"></span>
+    </div>
+  </div>
+  <div class="page">
+
+    <!-- VISÃO GERAL -->
+    <div class="view active" id="view-visao">
+      <div class="banner">
+        <div class="banner-top">
+          <div>
+            <h2>Painel de Coordenação</h2>
+            <p id="bannerData">—</p>
+          </div>
+          <div class="banner-stats">
+            <div class="bst"><div class="bst-n">1</div><div class="bst-l">Turma</div></div>
+            <div class="bst"><div class="bst-n" id="bstAlunos">7</div><div class="bst-l">Alunos</div></div>
+            <div class="bst"><div class="bst-n">11</div><div class="bst-l">Professores</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="sc sb"><div class="sc-ic"><i class="fa fa-chart-pie"></i></div><div><div class="sc-n" id="stPresMedia">—</div><div class="sc-l">Presença Média</div></div></div>
+        <div class="sc sr"><div class="sc-ic"><i class="fa fa-circle-exclamation"></i></div><div><div class="sc-n" id="stRisco">3</div><div class="sc-l">Alunos em Risco</div></div></div>
+        <div class="sc sy"><div class="sc-ic"><i class="fa fa-bell"></i></div><div><div class="sc-n" id="stAlertas">2</div><div class="sc-l">Alertas Ativos</div></div></div>
+        <div class="sc sg"><div class="sc-ic"><i class="fa fa-circle-check"></i></div><div><div class="sc-n" id="stSemOc">—</div><div class="sc-l">Regulares</div></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-bell"></i>Alertas</span><span class="cs">2 ativos</span></div>
+          <div class="cb" id="alertasList">
+            <div class="alerta">
+              <div class="alerta-ic"><i class="fa fa-exclamation"></i></div>
+              <div><div class="alerta-t">Domingos Caselo — 12ª CFB</div><div class="alerta-s">6 faltas não justificadas — risco de reprovação</div></div>
+            </div>
+            <div class="alerta y">
+              <div class="alerta-ic"><i class="fa fa-clock"></i></div>
+              <div><div class="alerta-t">Alexandre Fernando — 12ª CFB</div><div class="alerta-s">3 atrasos consecutivos esta semana</div></div>
+            </div>
+            <div class="alerta b">
+              <div class="alerta-ic"><i class="fa fa-wifi"></i></div>
+              <div><div class="alerta-t">Leitor RFID — Sala B12</div><div class="alerta-s">Sinal intermitente nas últimas 2 horas</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-chalkboard-user"></i>Professores em Aula</span><span class="cs">Agora</span></div>
+          <div class="cb">
+            <div class="prof-row">
+              <div class="av" style="background:#3B82F6;width:32px;height:32px">AC</div>
+              <div class="ai"><div class="an">A. Chipaco</div><div class="asub">Língua Portuguesa · Sala B12</div></div>
+              <span class="badge g">Online</span>
+            </div>
+            <div class="prof-row">
+              <div class="av" style="background:#8B5CF6;width:32px;height:32px">Al</div>
+              <div class="ai"><div class="an">Alberto</div><div class="asub">Matemática · 13:00</div></div>
+              <span class="badge" style="background:var(--s100);color:var(--s400)">Aguarda</span>
+            </div>
+            <div class="prof-row">
+              <div class="av" style="background:#F97316;width:32px;height:32px">Eu</div>
+              <div class="ai"><div class="an">Euclides</div><div class="asub">Física · 14:45</div></div>
+              <span class="badge" style="background:var(--s100);color:var(--s400)">Aguarda</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-chart-bar"></i>Taxa de Presença — 12ª CFB (Março 2026)</span>
+          <button class="btn sec" style="font-size:11px;padding:5px 11px" onclick="ir('relatorios')"><i class="fa fa-download"></i>Exportar</button>
+        </div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="table">
+            <thead><tr><th>Nº</th><th>Aluno</th><th>Presenças</th><th>Faltas</th><th>Atrasos</th><th>% Assiduidade</th><th>Estado</th></tr></thead>
+            <tbody id="resumoBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VER TURMA -->
+    <div class="view" id="view-turma">
+      <div class="card" style="margin-bottom:14px">
+        <div class="cb">
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:28px;font-weight:800;color:var(--bm)">12ª CFB</div>
+              <div style="font-size:13px;color:var(--s400);margin-top:2px">Ciências Físicas e Biológicas · 12.º Ano</div>
+              <div style="margin-top:14px;display:flex;gap:20px;flex-wrap:wrap">
+                <div><div style="font-size:22px;font-weight:800" id="turmaNumAlunos">7</div><div style="font-size:11px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px">Alunos</div></div>
+                <div><div style="font-size:22px;font-weight:800;color:var(--g)" id="turmaMedia">—</div><div style="font-size:11px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px">Assiduidade</div></div>
+                <div><div style="font-size:22px;font-weight:800;color:var(--bm)">11</div><div style="font-size:11px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px">Professores</div></div>
+                <div><div style="font-size:22px;font-weight:800;color:var(--r)" id="turmaEmRisco">—</div><div style="font-size:11px;color:var(--s400);text-transform:uppercase;letter-spacing:.5px">Em Risco</div></div>
+              </div>
+            </div>
+            <div style="background:var(--bp);border-radius:var(--rad);padding:16px 20px;min-width:180px">
+              <div style="font-size:11px;color:var(--s400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Leitor RFID</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--g)">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--g);display:inline-block"></span>Sala B12 — Online
+              </div>
+              <div style="font-size:11px;color:var(--s400);margin-top:5px">RFID-B12-001 · Coord: A. Chipaco</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-users-rectangle"></i>Análise Detalhada — 7 Alunos</span>
+          <button class="btn sec" style="font-size:11px;padding:5px 11px" onclick="ir('relatorios')"><i class="fa fa-download"></i>Exportar Relatório</button>
+        </div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="table">
+            <thead><tr><th>Nº</th><th>Aluno</th><th>Proc.</th><th>% Presença</th><th>Faltas</th><th>Atrasos</th><th>Estado</th><th>Ações</th></tr></thead>
+            <tbody id="turmaDetBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div class="view" id="view-relatorios">
+      <!-- Painel de exportação PDF -->
+      <div style="background:white;border-radius:14px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shs);border:1px solid var(--s200)">
+        <div style="font-size:13px;font-weight:700;color:var(--s800);margin-bottom:14px;display:flex;align-items:center;gap:7px">
+          <i class="fa fa-file-pdf" style="color:#ef4444"></i>Exportar Relatório PDF
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
+          <div style="border:1.5px solid var(--s200);border-radius:11px;padding:14px;cursor:pointer;transition:border-color .18s" id="relCard-mensal" onclick="selRelCard('mensal')">
+            <div style="font-size:22px;margin-bottom:6px">📅</div>
+            <div style="font-size:13px;font-weight:700;color:var(--s800)">Mensal</div>
+            <div style="font-size:11px;color:var(--s400);margin-top:2px">Resumo do mês actual</div>
+          </div>
+          <div style="border:1.5px solid var(--s200);border-radius:11px;padding:14px;cursor:pointer;transition:border-color .18s" id="relCard-semanal" onclick="selRelCard('semanal')">
+            <div style="font-size:22px;margin-bottom:6px">📆</div>
+            <div style="font-size:13px;font-weight:700;color:var(--s800)">Semanal</div>
+            <div style="font-size:11px;color:var(--s400);margin-top:2px">Esta semana</div>
+          </div>
+          <div style="border:1.5px solid var(--s200);border-radius:11px;padding:14px;cursor:pointer;transition:border-color .18s" id="relCard-trimestral" onclick="selRelCard('trimestral')">
+            <div style="font-size:22px;margin-bottom:6px">📊</div>
+            <div style="font-size:13px;font-weight:700;color:var(--s800)">Trimestral</div>
+            <div style="font-size:11px;color:var(--s400);margin-top:2px">Trimestre actual</div>
+          </div>
+          <div style="border:1.5px solid var(--s200);border-radius:11px;padding:14px;cursor:pointer;transition:border-color .18s" id="relCard-custom" onclick="selRelCard('custom')">
+            <div style="font-size:22px;margin-bottom:6px">🗓️</div>
+            <div style="font-size:13px;font-weight:700;color:var(--s800)">Personalizado</div>
+            <div style="font-size:11px;color:var(--s400);margin-top:2px">Escolher período</div>
+          </div>
+        </div>
+        <div id="relDatasCustom" style="display:none;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--s600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Início</label>
+            <input type="date" id="relDataInicio" style="padding:7px 10px;border:1.5px solid var(--s200);border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--s600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Fim</label>
+            <input type="date" id="relDataFim" style="padding:7px 10px;border:1.5px solid var(--s200);border-radius:8px;font-family:inherit;font-size:13px;outline:none">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn prim" id="btnGerarPDF" onclick="gerarRelatorioPDF()" style="font-size:13px;padding:9px 18px;gap:7px">
+            <i class="fa fa-file-pdf"></i> Gerar e Descarregar PDF
+          </button>
+          <button class="btn sec" onclick="gerarRelatorioPDF('inline')" style="font-size:12px;padding:9px 14px;gap:6px">
+            <i class="fa fa-eye"></i> Pré-visualizar
+          </button>
+          <span style="font-size:11px;color:var(--s400)" id="relStatus"></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <button class="filter-btn active" onclick="setF(this,'semana')">Esta Semana</button>
+        <button class="filter-btn" onclick="setF(this,'mes')">Este Mês</button>
+        <button class="filter-btn" onclick="setF(this,'trimestre')">Trimestre</button>
+      </div>
+      <div class="stats-row">
+        <div class="sc sg"><div class="sc-ic"><i class="fa fa-circle-check"></i></div><div><div class="sc-n" id="stTotP">—</div><div class="sc-l">Total Presenças</div></div></div>
+        <div class="sc sb"><div class="sc-ic"><i class="fa fa-chart-pie"></i></div><div><div class="sc-n" id="stTaxaR">—</div><div class="sc-l">Taxa Presença</div></div></div>
+        <div class="sc sr"><div class="sc-ic"><i class="fa fa-circle-xmark"></i></div><div><div class="sc-n" id="stTotF">—</div><div class="sc-l">Total Ausências</div></div></div>
+        <div class="sc sy"><div class="sc-ic"><i class="fa fa-clock"></i></div><div><div class="sc-n" id="stTotAt">—</div><div class="sc-l">F. Disciplinares</div></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-chart-column"></i>Evolução Mensal de Presenças</span></div>
+          <div class="cb">
+            <div class="chart-wrap">
+              <div class="bar-chart" id="barChart"></div>
+            </div>
+            <div class="chart-legend">
+              <span class="leg-item"><span class="leg-dot" style="background:var(--g)"></span>Presenças</span>
+              <span class="leg-item"><span class="leg-dot" style="background:var(--r)"></span>Ausências</span>
+              <span class="leg-item"><span class="leg-dot" style="background:var(--y)"></span>Atrasos</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fa fa-chart-pie"></i>Distribuição — Março 2026</span></div>
+          <div class="cb">
+            <div class="pie-wrap">
+              <svg class="pie-svg" width="120" height="120" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--g)" stroke-width="20" stroke-dasharray="255 69" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--r)" stroke-width="20" stroke-dasharray="50 274" stroke-dashoffset="-255" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--y)" stroke-width="20" stroke-dasharray="19 305" stroke-dashoffset="-305" transform="rotate(-90 60 60)"/>
+                <text x="60" y="64" text-anchor="middle" font-size="14" font-weight="800" fill="var(--s800)" font-family="Plus Jakarta Sans">81%</text>
+              </svg>
+              <div class="pie-legend">
+                <div class="pie-leg-item"><div class="pie-leg-dot" style="background:var(--g)"></div><div><div class="pie-leg-lbl">Presenças</div><div class="pie-leg-val">68 (81%)</div></div></div>
+                <div class="pie-leg-item"><div class="pie-leg-dot" style="background:var(--r)"></div><div><div class="pie-leg-lbl">Ausências</div><div class="pie-leg-val">16 (10%)</div></div></div>
+                <div class="pie-leg-item"><div class="pie-leg-dot" style="background:var(--y)"></div><div><div class="pie-leg-lbl">Atrasos</div><div class="pie-leg-val">8 (9%)</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-table"></i>Taxa por Aluno — Março 2026</span></div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="table">
+            <thead><tr><th>Nº</th><th>Aluno</th><th>Presenças</th><th>Atrasos</th><th>Faltas</th><th>% Assiduidade</th><th>Estado</th></tr></thead>
+            <tbody id="relBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-graduation-cap"></i>Taxa por Disciplina</span></div>
+        <div class="cb">
+          <div id="discTaxa"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AULAS DE HOJE -->
+    <div class="view" id="view-aulas">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-calendar-day"></i>Aulas Hoje — 12ª CFB</span><span class="cs" id="aulasHojeData"></span></div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="table">
+            <thead><tr><th>Hora</th><th>Disciplina</th><th>Professor</th><th>Sala</th><th>Estado</th></tr></thead>
+            <tbody id="aulasBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCORRÊNCIAS -->
+    <div class="view" id="view-ocorrencias">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div>
+          <div style="font-size:18px;font-weight:800">Gestão de Ocorrências</div>
+          <div style="font-size:12px;color:var(--s400);margin-top:3px">Registo de advertências e ocorrências disciplinares</div>
+        </div>
+        <button class="btn prim" onclick="toast('Formulário de nova ocorrência…','tb')"><i class="fa fa-plus"></i>Nova Ocorrência</button>
+      </div>
+      <div class="stats-row">
+        <div class="sc sb"><div class="sc-ic"><i class="fa fa-list-check"></i></div><div><div class="sc-n" id="stOcTotal">—</div><div class="sc-l">Total</div></div></div>
+        <div class="sc sy"><div class="sc-ic"><i class="fa fa-hourglass-half"></i></div><div><div class="sc-n" id="stOcPend">—</div><div class="sc-l">Pendentes</div></div></div>
+        <div class="sc sg"><div class="sc-ic"><i class="fa fa-circle-check"></i></div><div><div class="sc-n" id="stOcRes">—</div><div class="sc-l">Resolvidas</div></div></div>
+        <div class="sc sr"><div class="sc-ic"><i class="fa fa-triangle-exclamation"></i></div><div><div class="sc-n" id="stOcGrav">—</div><div class="sc-l">Graves</div></div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-filter"></i>Filtrar</span></div>
+        <div class="cb">
+          <div class="search-wrap">
+            <i class="fa fa-magnifying-glass"></i>
+            <input type="text" placeholder="Pesquisar por aluno, número ou descrição…" oninput="filterOc(this.value)">
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="filter-btn active" onclick="setOcF(this,'todos')">Todos</button>
+            <button class="filter-btn" onclick="setOcF(this,'pendente')">Pendente</button>
+            <button class="filter-btn" onclick="setOcF(this,'analise')">Em Análise</button>
+            <button class="filter-btn" onclick="setOcF(this,'resolvida')">Resolvida</button>
+          </div>
+        </div>
+      </div>
+      <div id="ocList"></div>
+    </div>
+
+    <!-- PROFESSORES -->
+    <div class="view" id="view-professores">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa fa-chalkboard-user"></i>Docentes — 12ª CFB</span><span class="cs" id="profCount">a carregar…</span></div>
+        <div class="cb" id="profList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="recursos/js/scope-api.js"></script>
+<script>
+// ── Estado global ─────────────────────────────────────────────
+let ALUNOS = [];
+let OCORRENCIAS = [];
+
+// ── Utilitários ───────────────────────────────────────────────
+function pcc(p){ return p>=85?'hi':p>=70?'me':'lo'; }
+
+// ── Avatar colorido ───────────────────────────────────────────
+function avatar(nome, i, sz=26){
+  return `<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${SCOPE_CORES[i%SCOPE_CORES.length]};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*0.42)}px;font-weight:700;color:white;flex-shrink:0">${scopeIniciais(nome)}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CARREGAR DADOS DA API
+// ════════════════════════════════════════════════════════════════
+
+async function carregarEstatisticas(){
+  const resp = await SCOPE.estatisticas();
+  if(resp.status !== 'ok'){
+    console.warn('[SCOPE] estatisticas:', resp.mensagem);
+    return;
+  }
+  // A API retorna: id, nome, total, presencas, ausencias, faltas_disc, taxa
+  ALUNOS = resp.dados.map((a, i) => ({
+    id:    a.id,
+    ord:   i + 1,
+    nome:  a.nome,
+    p:     parseInt(a.presencas)   || 0,
+    f:     parseInt(a.ausencias)   || 0,
+    fd:    parseInt(a.faltas_disc) || 0,
+    t:     parseInt(a.total)       || 0,
+    taxa:  parseFloat(a.taxa)      || 0,
+  }));
+
+  // Calcular totais globais
+  const totP   = ALUNOS.reduce((s,a) => s + a.p, 0);
+  const totF   = ALUNOS.reduce((s,a) => s + a.f, 0);
+  const totA   = ALUNOS.reduce((s,a) => s + a.fd, 0);
+  const totT   = ALUNOS.reduce((s,a) => s + a.t, 0);
+  const taxaM  = totT > 0 ? Math.round(totP / totT * 100) : 0;
+  const emRisco = ALUNOS.filter(a => a.taxa < 75).length;
+  const semOc   = ALUNOS.filter(a => a.taxa >= 85).length;
+
+  // ── Actualizar banner ──────────────────────────────────────
+  const bEl = document.getElementById('bstAlunos');
+  if(bEl) bEl.textContent = ALUNOS.length;
+
+  // ── Actualizar cards de estatística (Visão Geral) ──────────
+  const el = (id) => document.getElementById(id);
+  if(el('stPresMedia'))  el('stPresMedia').textContent  = taxaM + '%';
+  if(el('stRisco'))      el('stRisco').textContent      = emRisco;
+  if(el('stSemOc'))      el('stSemOc').textContent      = semOc;
+
+  // ── Alertas dinâmicos ──────────────────────────────────────
+  const alertasRisco = ALUNOS.filter(a => a.taxa < 75);
+  const alertEl = document.getElementById('alertasList');
+  if(alertEl){
+    if(alertasRisco.length === 0){
+      alertEl.innerHTML = '<div class="alerta b"><div class="alerta-ic"><i class="fa fa-circle-check"></i></div><div><div class="alerta-t">Sem alertas críticos</div><div class="alerta-s">Todos os alunos com assiduidade aceitável.</div></div></div>';
+    } else {
+      alertEl.innerHTML = alertasRisco.map(a => `
+        <div class="alerta">
+          <div class="alerta-ic"><i class="fa fa-exclamation"></i></div>
+          <div>
+            <div class="alerta-t">${a.nome}</div>
+            <div class="alerta-s">${a.f} falta(s) — ${a.taxa}% assiduidade — risco de reprovação</div>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Cards de estatística (view Relatórios) ─────────────────
+  if(el('stTotP'))   el('stTotP').textContent  = totP;
+  if(el('stTaxaR'))  el('stTaxaR').textContent  = taxaM + '%';
+  if(el('stTotF'))   el('stTotF').textContent  = totF;
+  if(el('stTotAt'))  el('stTotAt').textContent  = totA;
+
+  // ── Render tabelas ─────────────────────────────────────────
+  rResumo();
+  rTurmaDet();
+  rRelatorio();
+  rDiscTaxa();
+}
+
+async function carregarOcorrencias(){
+  const resp = await fetch('api/turma.php?acao=listar_ocorrencias&turma=1').then(r=>r.json()).catch(()=>({status:'erro'}));
+  if(resp.status !== 'ok') return;
+  OCORRENCIAS = resp.ocorrencias;
+
+  // Actualizar badge na sidebar
+  const nb = document.getElementById('nbOc');
+  if(nb) nb.textContent = OCORRENCIAS.length;
+
+  // Actualizar cards ocorrências
+  const el = (id) => document.getElementById(id);
+  if(el('stOcTotal'))   el('stOcTotal').textContent   = OCORRENCIAS.length;
+  if(el('stOcPend'))    el('stOcPend').textContent    = 0; // tabela não tem estado ainda
+  if(el('stOcRes'))     el('stOcRes').textContent     = 0;
+  if(el('stOcGrav'))    el('stOcGrav').textContent    = 0;
+
+  rOcorrencias();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RENDER TABELAS
+// ════════════════════════════════════════════════════════════════
+
+function rResumo(){
+  const el = document.getElementById('resumoBody');
+  if(!el) return;
+  if(!ALUNOS.length){ el.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--s400)">Sem dados de presença para este período.</td></tr>'; return; }
+  el.innerHTML = ALUNOS.map((a,i) => {
+    const cls = a.taxa>=85?'g':a.taxa>=70?'y':'r';
+    return `<tr>
+      <td><span class="nchip">${a.ord}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">${avatar(a.nome,i)}<span style="font-weight:600">${a.nome}</span></div></td>
+      <td style="color:var(--g);font-weight:700">${a.p}</td>
+      <td style="color:${a.f>3?'var(--r)':'var(--s600)'};font-weight:${a.f>3?700:400}">${a.f}</td>
+      <td style="color:${a.fd>0?'var(--y)':'var(--s400)'};font-weight:${a.fd>0?700:400}">${a.fd}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="pbar-bg"><div class="pbar-f ${pcc(a.taxa)}" style="width:${Math.min(a.taxa,100)}%"></div></div><span style="font-size:12px;font-weight:700;min-width:34px;color:${a.taxa>=85?'var(--g)':a.taxa>=70?'var(--y)':'var(--r)'}">${a.taxa}%</span></div></td>
+      <td><span class="badge ${cls}">${a.taxa>=85?'Regular':a.taxa>=70?'Em risco':'Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function rTurmaDet(){
+  const el = document.getElementById('turmaDetBody');
+  if(!el) return;
+  if(!ALUNOS.length){ el.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--s400)">Sem dados.</td></tr>'; return; }
+  el.innerHTML = ALUNOS.map((a,i) => {
+    const cls = a.taxa>=85?'g':a.taxa>=70?'y':'r';
+    return `<tr>
+      <td><span class="nchip">${a.ord}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">${avatar(a.nome,i)}<span style="font-weight:600">${a.nome}</span></div></td>
+      <td style="font-size:11px;color:var(--s400)">${a.id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="pbar-bg"><div class="pbar-f ${pcc(a.taxa)}" style="width:${Math.min(a.taxa,100)}%"></div></div><span style="font-size:12px;font-weight:700;min-width:34px;color:${a.taxa>=85?'var(--g)':a.taxa>=70?'var(--y)':'var(--r)'}">${a.taxa}%</span></div></td>
+      <td style="color:${a.f>3?'var(--r)':'var(--s600)'};font-weight:${a.f>3?700:400}">${a.f}</td>
+      <td style="color:${a.fd>0?'var(--y)':'var(--s400)'};font-weight:${a.fd>0?700:400}">${a.fd}</td>
+      <td><span class="badge ${cls}">${a.taxa>=85?'Regular':a.taxa>=70?'Em risco':'Crítico'}</span></td>
+      <td><button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="verAluno(${a.id},'${a.nome.replace(/'/g,"\'")}')"><i class="fa fa-eye"></i>Ver</button></td>
+    </tr>`;
+  }).join('');
+  // Actualizar contadores na card de turma
+  const el2 = document.getElementById('turmaNumAlunos'); if(el2) el2.textContent = ALUNOS.length;
+  const el3 = document.getElementById('turmaMedia');     if(el3) el3.textContent = (ALUNOS.reduce((s,a)=>s+a.taxa,0)/Math.max(ALUNOS.length,1)).toFixed(1)+'%';
+  const el4 = document.getElementById('turmaEmRisco');   if(el4) el4.textContent = ALUNOS.filter(a=>a.taxa<75).length;
+}
+
+function rRelatorio(){
+  const el = document.getElementById('relBody');
+  if(!el) return;
+  if(!ALUNOS.length){ el.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--s400)">Sem dados.</td></tr>'; return; }
+  el.innerHTML = ALUNOS.map((a,i) => {
+    const cls = a.taxa>=85?'g':a.taxa>=70?'y':'r';
+    return `<tr>
+      <td><span class="nchip">${a.ord}</span></td>
+      <td style="font-weight:600">${a.nome}</td>
+      <td style="color:var(--g);font-weight:700">${a.p}</td>
+      <td style="color:${a.fd>0?'var(--y)':'var(--s400)'};font-weight:${a.fd>0?700:400}">${a.fd}</td>
+      <td style="color:${a.f>3?'var(--r)':'var(--s600)'};font-weight:${a.f>3?700:400}">${a.f}</td>
+      <td><span style="font-weight:700;color:${a.taxa>=85?'var(--g)':a.taxa>=70?'var(--y)':'var(--r)'}">${a.taxa}%</span></td>
+      <td><span class="badge ${cls}">${a.taxa>=85?'Regular':a.taxa>=70?'Em risco':'Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function rDiscTaxa(){
+  const el = document.getElementById('discTaxa');
+  if(!el) return;
+  // Dados reais por disciplina precisariam de endpoint próprio; mostrar por aluno ordenado
+  if(!ALUNOS.length){ el.innerHTML='<div style="padding:12px;color:var(--s400);font-size:12px">Sem dados.</div>'; return; }
+  const sorted = [...ALUNOS].sort((a,b) => a.taxa - b.taxa);
+  el.innerHTML = sorted.map((a,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--s100)">
+      ${avatar(a.nome, ALUNOS.indexOf(a), 26)}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.nome}</div>
+        <div style="font-size:10px;color:var(--s400)">${a.f} falta(s) · ${a.fd} f. disciplinar</div>
+      </div>
+      <div class="pbar-bg" style="width:80px"><div class="pbar-f ${pcc(a.taxa)}" style="width:${Math.min(a.taxa,100)}%"></div></div>
+      <span style="font-size:12px;font-weight:700;min-width:36px;text-align:right;color:${a.taxa>=85?'var(--g)':a.taxa>=70?'var(--y)':'var(--r)'}">${a.taxa}%</span>
+    </div>`).join('');
+}
+
+async function rAulas(){
+  const el = document.getElementById('aulasBody');
+  const dataEl = document.getElementById('aulasHojeData');
+  if(dataEl) dataEl.textContent = new Date().toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+  if(!el) return;
+
+  // Buscar horário de hoje da API
+  const resp = await SCOPE.listarHorario();
+  if(resp.status !== 'ok'){
+    el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--s400)">Erro ao carregar horário.</td></tr>';
+    return;
+  }
+  const diaSemana = new Date().getDay(); // 0=Dom,1=Seg,...,5=Sex,6=Sab
+  const hoje = resp.horario.filter(h => parseInt(h.dia_semana) === diaSemana);
+  if(!hoje.length){
+    el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--s400)">Sem aulas hoje.</td></tr>';
+    return;
+  }
+  const agora = new Date().toTimeString().substring(0,8);
+  el.innerHTML = hoje.map(h => {
+    const emCurso = agora >= h.hora_inicio && agora <= h.hora_fim;
+    const passou  = agora > h.hora_fim;
+    const estado  = emCurso ? '<span class="badge g"><i class="fa fa-circle" style="font-size:7px"></i> Em Curso</span>'
+                  : passou  ? '<span class="badge" style="background:var(--s100);color:var(--s400)">Concluída</span>'
+                  :           '<span class="badge b">Aguarda</span>';
+    return `<tr${emCurso?' style="background:var(--gp)"':''}>
+      <td style="font-weight:600">${h.hora_inicio.substring(0,5)}–${h.hora_fim.substring(0,5)}</td>
+      <td style="font-weight:600">${h.disciplina}</td>
+      <td>${h.professor}</td>
+      <td style="font-size:12px">${h.sala||'—'}</td>
+      <td>${estado}</td>
+    </tr>`;
+  }).join('');
+}
+
+function rBarChart(){
+  // Gráfico de barras com dados dos alunos (presenças vs faltas)
+  const el = document.getElementById('barChart');
+  if(!el || !ALUNOS.length) return;
+  const max = Math.max(...ALUNOS.map(a => a.t), 1);
+  el.innerHTML = ALUNOS.map((a,i) => `
+    <div class="bar-group">
+      <div class="bars">
+        <div class="bar" style="height:${(a.p/max)*100}px;background:var(--g)" title="${a.nome}: ${a.p} presenças"></div>
+        <div class="bar" style="height:${(a.f/max)*100}px;background:var(--r)" title="${a.nome}: ${a.f} faltas"></div>
+        <div class="bar" style="height:${(a.fd/max)*100}px;background:var(--y)" title="${a.nome}: ${a.fd} f.disc."></div>
+      </div>
+      <div class="bar-lbl" style="font-size:9px">${scopeIniciais(a.nome)}</div>
+    </div>`).join('');
+}
+
+function rOcorrencias(filtro='todos'){
+  const el = document.getElementById('ocList');
+  if(!el) return;
+  const lista = filtro==='todos' ? OCORRENCIAS : OCORRENCIAS.filter(o=>o.estado===filtro);
+  if(!lista.length){
+    el.innerHTML='<div style="text-align:center;padding:32px;color:var(--s400)"><i class="fa fa-folder-open" style="font-size:32px;display:block;margin-bottom:8px;color:var(--s200)"></i>Sem ocorrências registadas.</div>';
+    return;
+  }
+  el.innerHTML = lista.map(o => `
+    <div class="oc-card">
+      <div class="oc-head">
+        <div>
+          <div class="oc-aluno"><i class="fa fa-triangle-exclamation" style="color:var(--y);margin-right:5px"></i>${o.descricao||'—'}</div>
+          <div class="oc-data">${o.data||''} · Prof. ${o.professor||'—'} · Tempo ${o.tempo||'—'}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function verAluno(id, nome){
+  toast('Detalhe de ' + nome + ' — em desenvolvimento.', 'tb');
+}
+
+async function rProfs(){
+  const resp = await SCOPE.listarHorario();
+  if(resp.status !== 'ok') return;
+  const vistos = new Set();
+  const profs = resp.horario.filter(h => {
+    if(vistos.has(h.professor)) return false;
+    vistos.add(h.professor); return true;
+  });
+  const el = document.getElementById('profList');
+  if(!el) return;
+  // Actualizar contador
+  const nc = document.getElementById('profCount'); if(nc) nc.textContent = profs.length + ' professores';
+  el.innerHTML = profs.map((p,i) => `
+    <div class="prof-row">
+      <div class="av" style="background:${SCOPE_CORES[i%SCOPE_CORES.length]};width:32px;height:32px">${scopeIniciais(p.professor)}</div>
+      <div class="ai">
+        <div class="an">${p.professor}</div>
+        <div class="asub">${p.disciplina} · Sala ${p.sala||'—'}</div>
+      </div>
+      <span class="badge g">Ativo</span>
+    </div>`).join('');
+}
+
+function setOcF(btn,f){
+  document.querySelectorAll('#view-ocorrencias .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  rOcorrencias(f);
+}
+function filterOc(q){
+  const q2 = q.toLowerCase();
+  const lista = OCORRENCIAS.filter(o => (o.descricao||'').toLowerCase().includes(q2) || (o.professor||'').toLowerCase().includes(q2));
+  const el = document.getElementById('ocList');
+  if(!el) return;
+  if(!lista.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--s400)">Sem resultados.</div>'; return; }
+  // reutiliza render
+  const bak = OCORRENCIAS; OCORRENCIAS = lista; rOcorrencias(); OCORRENCIAS = bak;
+}
+function setF(btn,periodo){
+  document.querySelectorAll('#view-relatorios .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+
+// ── RELATÓRIOS PDF ────────────────────────────────────────────
+let _relTipo = 'mensal';
+
+function selRelCard(tipo) {
+  _relTipo = tipo;
+  document.querySelectorAll('[id^="relCard-"]').forEach(c => {
+    c.style.borderColor = 'var(--s200)';
+    c.style.background  = 'white';
+  });
+  const sel = document.getElementById('relCard-' + tipo);
+  if (sel) { sel.style.borderColor = 'var(--bm)'; sel.style.background = 'var(--bp)'; }
+  const custom = document.getElementById('relDatasCustom');
+  if (custom) custom.style.display = tipo === 'custom' ? 'flex' : 'none';
+}
+
+async function gerarRelatorioPDF(formato = 'download') {
+  const btn    = document.getElementById('btnGerarPDF');
+  const status = document.getElementById('relStatus');
+  const hoje   = new Date().toISOString().split('T')[0];
+  const ano    = hoje.substring(0,4);
+  const mes    = hoje.substring(5,7);
+  let inicio, fim, tipo = _relTipo;
+
+  if (tipo === 'custom') {
+    inicio = document.getElementById('relDataInicio')?.value;
+    fim    = document.getElementById('relDataFim')?.value;
+    if (!inicio || !fim) { toast('Selecciona as datas de início e fim.','tr'); return; }
+    tipo = 'mensal';
+  } else if (tipo === 'semanal') {
+    const d = new Date(); const dow = d.getDay()||7;
+    const seg = new Date(d); seg.setDate(d.getDate()-dow+1);
+    const sex = new Date(d); sex.setDate(d.getDate()-dow+5);
+    inicio = seg.toISOString().split('T')[0];
+    fim    = sex.toISOString().split('T')[0];
+  } else if (tipo === 'trimestral') {
+    const trim = Math.ceil(parseInt(mes)/3);
+    const mi   = String((trim-1)*3+1).padStart(2,'0');
+    inicio = `${ano}-${mi}-01`; fim = hoje;
+  } else {
+    inicio = `${ano}-${mes}-01`; fim = hoje;
+  }
+
+  if (btn) { btn.disabled=true; btn.innerHTML='<i class="fa fa-circle-notch fa-spin"></i> A gerar PDF…'; }
+  if (status) status.textContent = 'A preparar relatório…';
+
+  // Abre sempre em nova aba — guardar como PDF com Ctrl+P ou botão da página
+  const url = `api/relatorio.php?tipo=${tipo}&inicio=${inicio}&fim=${fim}&formato=inline`;
+  try {
+    window.open(url, '_blank');
+    if (status) status.textContent = '✅ A abrir relatório…';
+    toast('Relatório aberto em nova aba. Usa Ctrl+P para guardar como PDF.', 'tg');
+    setTimeout(() => { if(status) status.textContent=''; }, 5000);
+  } catch(e) {
+    toast('Erro ao gerar relatório.','tr');
+    if (status) status.textContent = '❌ Erro';
+  } finally {
+    if (btn) { btn.disabled=false; btn.innerHTML='<i class="fa fa-file-pdf"></i> Gerar e Descarregar PDF'; }
+  }
+}
+
+const TITLES={visao:'Visão Geral',turma:'Ver Turma',relatorios:'Relatórios e Estatísticas',aulas:'Aulas de Hoje',ocorrencias:'Ocorrências',professores:'Professores'};
+function ir(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  document.getElementById('tbTitle').textContent = TITLES[v]||v;
+  if(v==='aulas')       rAulas();
+  if(v==='professores') rProfs();
+  if(v==='turma')       rTurmaDet();
+  if(v==='relatorios')  { rRelatorio(); selRelCard(_relTipo); }
+  if(v==='ocorrencias') rOcorrencias();
+}
+function toast(msg,c='tg'){ scopeToast(msg,c); }
+
+// INIT
+(async function init(){
+  const user = await SCOPE.verificarSessao(['coordenador','administrador']);
+  if (!user) return;
+  SCOPE.preencherUI(user);
+  const n = new Date();
+  const dataStr = n.toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('tbDate').textContent    = dataStr;
+  document.getElementById('bannerData').textContent = dataStr;
+  selRelCard('mensal');
+  await Promise.all([
+    carregarEstatisticas(),
+    carregarOcorrencias(),
+  ]);
+  rBarChart();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOPE — Portal do Encarregado</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b:#1E4ED8;--bm:#2563EB;--bl:#3B82F6;--bp:#EFF6FF;
+  --g:#10B981;--gp:#ECFDF5;--y:#F59E0B;--yp:#FFFBEB;
+  --r:#EF4444;--rp:#FEF2F2;--p:#8B5CF6;--pp:#F5F3FF;
+  --s50:#F8FAFC;--s100:#F1F5F9;--s200:#E2E8F0;
+  --s400:#94A3B8;--s600:#475569;--s800:#1E293B;
+  --sh:0 4px 16px rgba(0,0,0,.10);--shs:0 1px 3px rgba(0,0,0,.07);
+  --rad:14px;--rads:9px;--sw:240px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var(--s800);display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar{width:var(--sw);background:linear-gradient(180deg,#0f3d91 0%,#1a4faa 100%);height:100vh;display:flex;flex-direction:column;flex-shrink:0;box-shadow:2px 0 20px rgba(15,61,145,.3);z-index:50;transition:transform .3s}
+.sb-brand{padding:18px 16px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo{width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo img{width:24px;height:24px;object-fit:contain}
+.sb-name{font-size:17px;font-weight:800;color:white;letter-spacing:2.5px}
+.sb-role{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.8px;margin-top:1px;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.nav-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1.8px;padding:10px 10px 3px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .18s;border:none;background:none;font-family:inherit;width:100%;text-align:left}
+.nav-item i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.1);color:white}
+.nav-item.active{background:rgba(255,255,255,.17);color:white;font-weight:700}
+.nav-item.active i{color:#7dd3fc}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:9px}
+.sb-av{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.45)}
+.btn-logout{background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:4px;transition:color .2s;flex-shrink:0}
+.btn-logout:hover{color:#fca5a5}
+.sb-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--bm);border:none;border-radius:9px;width:38px;height:38px;color:white;font-size:15px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--sh)}
+
+/* ── MAIN ──────────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:white;padding:0 22px;height:54px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--s200);flex-shrink:0;box-shadow:var(--shs)}
+.tb-title{font-size:15px;font-weight:700;color:var(--s800)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-date{font-size:11px;color:var(--s400);font-weight:500;white-space:nowrap}
+.page{flex:1;overflow-y:auto;padding:18px 20px 36px}
+.view{display:none}.view.active{display:block}
+
+/* ── HERO ──────────────────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,#0f3d91 0%,#1a4faa 50%,#2563eb 100%);border-radius:var(--rad);padding:20px 24px;color:white;position:relative;overflow:hidden;margin-bottom:14px;box-shadow:0 6px 28px rgba(15,61,145,.3)}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.055)}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-bottom:8px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+.hero-nome{font-size:22px;font-weight:800;letter-spacing:.3px}
+.hero-turma{font-size:13px;opacity:.8;margin-top:3px}
+.hero-clock{background:rgba(255,255,255,.13);border-radius:10px;padding:9px 16px;text-align:center;flex-shrink:0}
+.hero-hora{font-size:24px;font-weight:800;letter-spacing:1px}
+.hero-hora-lbl{font-size:9px;opacity:.6;letter-spacing:.5px;margin-top:1px}
+.hero-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hero-info{background:rgba(255,255,255,.1);border-radius:9px;padding:9px 12px}
+.hero-info-lbl{font-size:9px;opacity:.55;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.hero-info-val{font-size:13px;font-weight:700}
+.hero-info-val.ok{color:#4ade80}
+.hero-info-val.warn{color:#fbbf24}
+.hero-info-val.bad{color:#f87171}
+
+/* ── STATS ─────────────────────────────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.sc{background:white;border-radius:var(--rad);padding:13px 15px;display:flex;align-items:center;gap:11px;box-shadow:var(--shs);position:relative;overflow:hidden;transition:transform .18s}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.sc::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:14px 0 0 14px}
+.sc.sg::before{background:var(--g)}.sc.sy::before{background:var(--y)}.sc.sr::before{background:var(--r)}.sc.sp::before{background:var(--p)}
+.sc-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sc.sg .sc-ic{background:var(--gp);color:var(--g)}.sc.sy .sc-ic{background:var(--yp);color:var(--y)}.sc.sr .sc-ic{background:var(--rp);color:var(--r)}.sc.sp .sc-ic{background:var(--pp);color:var(--p)}
+.sc-n{font-size:24px;font-weight:800;line-height:1;margin-bottom:1px}
+.sc.sg .sc-n{color:var(--g)}.sc.sy .sc-n{color:var(--y)}.sc.sr .sc-n{color:var(--r)}.sc.sp .sc-n{color:var(--p)}
+.sc-l{font-size:10px;color:var(--s400);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+
+/* ── CARDS ─────────────────────────────────────────────────── */
+.card{background:white;border-radius:var(--rad);box-shadow:var(--shs);overflow:hidden;margin-bottom:13px}
+.card:last-child{margin-bottom:0}
+.ch{padding:12px 16px;border-bottom:1px solid var(--s100);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ct{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;color:var(--s800)}
+.ct i{color:var(--bm);font-size:12px}
+.cs{font-size:11px;color:var(--s400)}
+.cb{padding:13px 16px}
+
+/* ── FILTROS ───────────────────────────────────────────────── */
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:6px 14px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;font-weight:600;color:var(--s600);cursor:pointer;transition:all .18s}
+.filter-btn.active{background:var(--bm);border-color:var(--bm);color:white}
+.fsel{padding:6px 12px;border:1.5px solid var(--s200);border-radius:20px;background:white;font-family:inherit;font-size:12px;color:var(--s600);cursor:pointer;outline:none}
+.fsel:focus{border-color:var(--bm)}
+
+/* ── TABELA DE PRESENÇAS ───────────────────────────────────── */
+.ptable{width:100%;border-collapse:collapse;font-size:13px}
+.ptable th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--s100);white-space:nowrap}
+.ptable td{padding:10px 13px;border-bottom:1px solid var(--s100);vertical-align:middle}
+.ptable tr:hover td{background:var(--s50)}
+.ptable tr:last-child td{border-bottom:none}
+
+/* ── BADGES ────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.badge.presente{background:rgba(16,185,129,.1);color:var(--g)}
+.badge.atraso{background:rgba(245,158,11,.1);color:var(--y)}
+.badge.ausente{background:rgba(239,68,68,.1);color:var(--r)}
+.badge.fd{background:rgba(139,92,246,.1);color:var(--p)}
+
+/* ── LINHA DO DIA (timeline) ───────────────────────────────── */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--s100);position:relative}
+.tl-item:last-child{border-bottom:none}
+.tl-left{width:54px;flex-shrink:0;text-align:right}
+.tl-hora{font-size:12px;font-weight:700;color:var(--s600)}
+.tl-bloco{font-size:10px;color:var(--s400);margin-top:1px}
+.tl-line{width:2px;background:var(--s200);flex-shrink:0;position:relative;margin:4px 0}
+.tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid white;position:absolute;left:-4px;top:4px;flex-shrink:0}
+.tl-dot.presente{background:var(--g)}.tl-dot.atraso{background:var(--y)}.tl-dot.ausente{background:var(--r)}.tl-dot.fd{background:var(--p)}
+.tl-content{flex:1}
+.tl-disc{font-size:13px;font-weight:700;margin-bottom:2px}
+.tl-prof{font-size:11px;color:var(--s400)}
+.tl-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap}
+.tl-chip{background:var(--s100);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--s600);font-weight:600;display:flex;align-items:center;gap:4px}
+
+/* ── PROGRESS BAR ──────────────────────────────────────────── */
+.pbar-bg{flex:1;height:6px;background:var(--s100);border-radius:10px;overflow:hidden;min-width:60px}
+.pbar-f{height:100%;border-radius:10px;transition:width .6s ease}
+.pbar-f.hi{background:var(--g)}.pbar-f.me{background:var(--y)}.pbar-f.lo{background:var(--r)}
+
+/* ── RESUMO DO MÊS ─────────────────────────────────────────── */
+.mes-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.mes-lbl{font-size:9px;font-weight:700;color:var(--s400);text-align:center;text-transform:uppercase;letter-spacing:.3px;padding-bottom:4px}
+.dia-box{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:default;transition:transform .15s}
+.dia-box:hover{transform:scale(1.15)}
+.dia-box.presente{background:rgba(16,185,129,.15);color:var(--g)}
+.dia-box.atraso{background:rgba(245,158,11,.15);color:var(--y)}
+.dia-box.ausente{background:rgba(239,68,68,.15);color:var(--r)}
+.dia-box.vazio{background:transparent;color:transparent;cursor:default}
+.dia-box.fds{background:var(--s100);color:var(--s400);font-weight:400}
+.dia-box.hoje{outline:2px solid var(--bm);outline-offset:1px}
+
+/* ── ALERTA DE FALTAS ──────────────────────────────────────── */
+.alerta{border-radius:var(--rad);padding:14px 16px;margin-bottom:13px;display:flex;align-items:flex-start;gap:12px}
+.alerta.ok{background:var(--gp);border:1.5px solid rgba(16,185,129,.25)}
+.alerta.warn{background:var(--yp);border:1.5px solid rgba(245,158,11,.3)}
+.alerta.crit{background:var(--rp);border:1.5px solid rgba(239,68,68,.25)}
+.alerta-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.alerta-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.alerta.ok .alerta-title{color:#065f46}
+.alerta.warn .alerta-title{color:#92400e}
+.alerta.crit .alerta-title{color:#991b1b}
+.alerta-desc{font-size:12px;line-height:1.5}
+.alerta.ok .alerta-desc{color:#047857}
+.alerta.warn .alerta-desc{color:#b45309}
+.alerta.crit .alerta-desc{color:#b91c1c}
+
+/* ── GRID 2 colunas ────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:1fr 280px;gap:13px}
+.nchip{background:var(--s100);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--s600)}
+
+/* ── EMPTY STATE ───────────────────────────────────────────── */
+.empty{text-align:center;padding:32px 20px;color:var(--s400)}
+.empty i{font-size:36px;color:var(--s200);display:block;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s800);color:white;padding:10px 15px;border-radius:11px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--sh);transform:translateY(80px);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1);z-index:999;max-width:290px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.tg{border-left:4px solid var(--g)}.toast.ty{border-left:4px solid var(--y)}.toast.tr{border-left:4px solid var(--r)}.toast.tb{border-left:4px solid var(--bl)}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:960px){.grid2{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.hero-row{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-toggle{display:flex}.topbar{padding:0 14px 0 58px}.page{padding:14px 10px 28px}.stats-row{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}.mes-grid{gap:2px}}
+</style>
+</head>
+<body>
+
+<button class="sb-toggle" onclick="toggleSb()"><i class="fa fa-bars"></i></button>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <img src="recursos/Imagens/icon.png" alt="SCOPE" onerror="this.style.display='none'">
+    </div>
+    <div><div class="sb-name">SCOPE</div><div class="sb-role">Encarregado</div></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="nav-sec">Principal</div>
+    <button class="nav-item active" id="nav-hoje" onclick="ir('hoje')">
+      <i class="fa fa-calendar-day"></i>Hoje
+    </button>
+    <button class="nav-item" id="nav-historico" onclick="ir('historico')">
+      <i class="fa fa-calendar-check"></i>Histórico
+    </button>
+    <div class="nav-sec">Análise</div>
+    <button class="nav-item" id="nav-resumo" onclick="ir('resumo')">
+      <i class="fa fa-chart-pie"></i>Resumo Mensal
+    </button>
+    <button class="nav-item" id="nav-disciplinas" onclick="ir('disciplinas')">
+      <i class="fa fa-book-open"></i>Por Disciplina
+    </button>
+  </nav>
+
+  <div class="sb-user">
+    <div class="sb-av" id="sbAv">E</div>
+    <div style="flex:1;min-width:0">
+      <div class="sb-uname" id="sbNome">Encarregado</div>
+      <div class="sb-urole">Encarregado de Educação</div>
+    </div>
+    <button class="btn-logout" onclick="if(confirm('Terminar sessão?'))SCOPE.logout()" title="Sair">
+      <i class="fa fa-right-from-bracket"></i>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title" id="tbTitle">Hoje</span>
+    <div class="tb-right">
+      <span class="tb-date" id="tbDate"></span>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- ═══ HOJE ═══════════════════════════════════════════ -->
+    <div class="view active" id="view-hoje">
+
+      <!-- Hero do aluno -->
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-badge"><span class="hero-dot"></span>TURMA ACTIVA</div>
+            <div class="hero-nome" id="heroNome">— Carregando…</div>
+            <div class="hero-turma" id="heroTurma">12ª CFB · 2025/2026</div>
+          </div>
+          <div class="hero-clock">
+            <div class="hero-hora" id="heroHora">--:--</div>
+            <div class="hero-hora-lbl">HORA ATUAL</div>
+          </div>
+        </div>
+        <div class="hero-row">
+          <div class="hero-info">
+            <div class="hero-info-lbl">ENTRADA HOJE</div>
+            <div class="hero-info-val" id="heroEntrada">—</div>
+          </div>
+          <div class="hero-info">
+            <div class="hero-info-lbl">SAÍDA HOJE</div>
+            <div class="hero-info-val" id="heroSaida">—</div>
+          </div>
+          <div class="hero-info">
+            <div class="hero-info-lbl">BLOCOS HOJE</div>
+            <div class="hero-info-val" id="heroBlocos">— / 3</div>
+          </div>
+          <div class="hero-info">
+            <div class="hero-info-lbl">SITUAÇÃO</div>
+            <div class="hero-info-val" id="heroSituacao">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta de situação -->
+      <div class="alerta ok" id="alertaBox">
+        <div class="alerta-icon">✅</div>
+        <div>
+          <div class="alerta-title" id="alertaTitulo">A carregar dados…</div>
+          <div class="alerta-desc" id="alertaDesc">Por favor aguarde.</div>
+        </div>
+      </div>
+
+      <!-- Stats do dia -->
+      <div class="stats-row">
+        <div class="sc sg">
+          <div class="sc-ic"><i class="fa fa-circle-check"></i></div>
+          <div><div class="sc-n" id="stPresentes">0</div><div class="sc-l">Presenças</div></div>
+        </div>
+        <div class="sc sy">
+          <div class="sc-ic"><i class="fa fa-clock"></i></div>
+          <div><div class="sc-n" id="stAtrasos">0</div><div class="sc-l">Atrasos</div></div>
+        </div>
+        <div class="sc sr">
+          <div class="sc-ic"><i class="fa fa-circle-xmark"></i></div>
+          <div><div class="sc-n" id="stFaltas">0</div><div class="sc-l">Faltas Hoje</div></div>
+        </div>
+        <div class="sc sp">
+          <div class="sc-ic"><i class="fa fa-percent"></i></div>
+          <div><div class="sc-n" id="stTaxa">—</div><div class="sc-l">Taxa Mensal</div></div>
+        </div>
+      </div>
+
+      <!-- Timeline do dia -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-timeline"></i>Linha do Tempo — Hoje</span>
+          <span class="cs" id="dataHoje"></span>
+        </div>
+        <div class="cb">
+          <div class="timeline" id="timelineHoje"></div>
+        </div>
+      </div>
+
+    </div><!-- fim view-hoje -->
+
+
+    <!-- ═══ HISTÓRICO ══════════════════════════════════════ -->
+    <div class="view" id="view-historico">
+
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFiltroHist(this,'semana')">Esta Semana</button>
+        <button class="filter-btn" onclick="setFiltroHist(this,'mes')">Este Mês</button>
+        <button class="filter-btn" onclick="setFiltroHist(this,'trimestre')">Trimestre</button>
+        <select class="fsel" id="filtroMes" onchange="carregarHistorico()">
+          <option value="">— Mês —</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-calendar-check"></i>Histórico de Presenças</span>
+          <span class="cs" id="histPeriodo"></span>
+        </div>
+        <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
+          <table class="ptable">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Disciplina</th>
+                <th>Bloco</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- fim view-historico -->
+
+
+    <!-- ═══ RESUMO MENSAL ══════════════════════════════════ -->
+    <div class="view" id="view-resumo">
+
+      <div class="grid2">
+
+        <!-- Calendário de presença -->
+        <div>
+          <div class="card">
+            <div class="ch">
+              <span class="ct"><i class="fa fa-calendar"></i>Calendário de Março 2026</span>
+              <div style="display:flex;gap:8px;font-size:11px;font-weight:600">
+                <span style="color:var(--g)">● Presente</span>
+                <span style="color:var(--y)">● Atraso</span>
+                <span style="color:var(--r)">● Ausente</span>
+              </div>
+            </div>
+            <div class="cb">
+              <div class="mes-grid" id="calLbls"></div>
+              <div class="mes-grid" id="calDias"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <span class="ct"><i class="fa fa-chart-bar"></i>Resumo do Mês</span>
+            </div>
+            <div class="cb">
+              <div style="display:flex;flex-direction:column;gap:10px" id="resumoMes"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel lateral -->
+        <div>
+          <div class="card">
+            <div class="ch"><span class="ct"><i class="fa fa-award"></i>Situação Académica</span></div>
+            <div class="cb" id="situacaoAcad"></div>
+          </div>
+
+          <div class="card" style="margin-top:13px">
+            <div class="ch"><span class="ct"><i class="fa fa-circle-info"></i>Regras de Faltas</span></div>
+            <div class="cb">
+              <div style="font-size:12px;color:var(--s600);line-height:1.7">
+                <p style="margin-bottom:8px"><strong style="color:var(--s800)">Limite de faltas:</strong> Um aluno não pode ultrapassar <strong>1/3</strong> das aulas por disciplina.</p>
+                <p style="margin-bottom:8px"><strong style="color:var(--s800)">Falta justificada:</strong> Deve ser apresentada declaração médica ou documento oficial em até 3 dias úteis.</p>
+                <p><strong style="color:var(--s800)">Atraso repetido:</strong> 3 atrasos equivalem a 1 falta injustificada.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- fim view-resumo -->
+
+
+    <!-- ═══ POR DISCIPLINA ═════════════════════════════════ -->
+    <div class="view" id="view-disciplinas">
+      <div class="card">
+        <div class="ch">
+          <span class="ct"><i class="fa fa-book-open"></i>Assiduidade por Disciplina</span>
+          <span class="cs">Mês actual</span>
+        </div>
+        <div class="cb">
+          <div style="display:flex;flex-direction:column;gap:8px" id="discList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fim page -->
+</div><!-- fim main -->
+
+<!-- Overlay mobile -->
+<div id="sbOv" onclick="toggleSb(false)"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="recursos/js/scope-api.js"></script>
+<script>
+// ============================================================
+//  SCOPE — Portal do Encarregado de Educação
+// ============================================================
+
+// ── Dados globais ────────────────────────────────────────────
+let _user        = null;
+let _alunoId     = null;   // id do aluno cujo encarregado está logado
+let _presencas   = [];     // cache dos registos
+let _filtroHist  = 'mes';
+
+// Mapeamento de dias e disciplinas
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const BLOCOS_HORA = { 1:'13:00–14:30', 2:'14:45–16:15', 3:'16:30–18:00' };
+
+// ── Utilitários ──────────────────────────────────────────────
+let _tT; function toast(m,c='tg'){ scopeToast(m,c); }
+
+function fmtData(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('pt-PT', { weekday:'short', day:'numeric', month:'short' });
+}
+
+function badgeEstado(e) {
+  const m = { presente:['presente','Presente'], atraso:['atraso','Atraso'],
+              ausente:['ausente','Ausente'], falta_disciplinar:['fd','F.Disc'] };
+  const [c,t] = m[e] || ['ausente','Ausente'];
+  return `<span class="badge ${c}">${t}</span>`;
+}
+
+function pcc(p) { return p >= 85 ? 'hi' : p >= 70 ? 'me' : 'lo'; }
+
+function intervaloFiltro(f) {
+  const hoje = SCOPE.hoje();
+  const ano  = hoje.substring(0,4);
+  const mes  = hoje.substring(5,7);
+  if (f === 'semana') {
+    const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1);
+    return { inicio: d.toISOString().split('T')[0], fim: hoje };
+  }
+  if (f === 'mes') {
+    return { inicio: `${ano}-${mes}-01`, fim: hoje };
+  }
+  if (f === 'trimestre') {
+    const t  = Math.floor((parseInt(mes)-1)/3);
+    const mi = String(t*3+1).padStart(2,'0');
+    return { inicio: `${ano}-${mi}-01`, fim: hoje };
+  }
+  return { inicio: `${ano}-${mes}-01`, fim: hoje };
+}
+
+// ── CARREGAR DADOS ───────────────────────────────────────────
+async function carregarDados() {
+  if (!_alunoId) return;
+  const { inicio, fim } = intervaloFiltro('mes');
+  const resp = await SCOPE.presencasAluno(_alunoId, inicio, fim);
+  if (resp.status === 'ok') {
+    _presencas = resp.presencas || [];
+    renderHoje();
+    renderCalendario();
+    renderResumoMes();
+    renderSituacao();
+    renderDisciplinas();
+  }
+}
+
+async function carregarHistorico() {
+  if (!_alunoId) return;
+  const { inicio, fim } = intervaloFiltro(_filtroHist);
+  const resp = await SCOPE.presencasAluno(_alunoId, inicio, fim);
+  if (resp.status === 'ok') {
+    renderHistorico(resp.presencas || [], inicio, fim);
+  }
+}
+
+// ── RENDER: HOJE ─────────────────────────────────────────────
+function renderHoje() {
+  const hoje = SCOPE.hoje();
+  const deHoje = _presencas.filter(p => p.data === hoje);
+
+  document.getElementById('dataHoje').textContent =
+    new Date().toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long' });
+
+  // Hero
+  const primeiraEntrada = deHoje.find(p => p.hora_entrada);
+  const ultimaSaida     = deHoje.filter(p => p.hora_saida).slice(-1)[0];
+  const presentes       = deHoje.filter(p => p.estado === 'presente').length;
+  const atrasos         = deHoje.filter(p => p.estado === 'atraso').length;
+  const faltas          = deHoje.filter(p => p.estado === 'ausente').length;
+  const total           = deHoje.length || 3;
+
+  document.getElementById('heroEntrada').textContent  = primeiraEntrada ? SCOPE.fmtHora(primeiraEntrada.hora_entrada) : '—';
+  document.getElementById('heroSaida').textContent    = ultimaSaida     ? SCOPE.fmtHora(ultimaSaida.hora_saida)       : '—';
+  document.getElementById('heroBlocos').textContent   = `${presentes+atrasos} / ${total}`;
+
+  // Situação
+  const sit = faltas === 0 && atrasos === 0 ? { txt:'Excelente ✨', cls:'ok' }
+            : faltas === 0                  ? { txt:'Com atraso ⏱', cls:'warn' }
+            : faltas === total              ? { txt:'Ausente ❌',    cls:'bad' }
+            :                                { txt:'Parcial ⚠️',    cls:'warn' };
+
+  const sitEl = document.getElementById('heroSituacao');
+  sitEl.textContent = sit.txt;
+  sitEl.className   = `hero-info-val ${sit.cls}`;
+
+  // Alerta
+  const alBox   = document.getElementById('alertaBox');
+  const alTit   = document.getElementById('alertaTitulo');
+  const alDesc  = document.getElementById('alertaDesc');
+
+  if (deHoje.length === 0) {
+    alBox.className  = 'alerta warn';
+    alTit.textContent = 'Sem registos para hoje';
+    alDesc.textContent = 'Ainda não foram registadas presenças hoje. O leitor RFID actualizará automaticamente.';
+  } else if (faltas === 0 && atrasos === 0) {
+    alBox.className  = 'alerta ok';
+    alTit.textContent = '🎉 Presença perfeita hoje!';
+    alDesc.textContent = `${_user?.nome?.split(' ')[0] || 'O seu educando'} esteve presente em todas as aulas de hoje sem atrasos.`;
+  } else if (faltas > 0) {
+    alBox.className  = 'alerta crit';
+    alTit.textContent = `⚠️ ${faltas} falta(s) registada(s) hoje`;
+    alDesc.textContent = 'O seu educando esteve ausente em pelo menos uma aula hoje. Verifique a linha do tempo abaixo.';
+  } else {
+    alBox.className  = 'alerta warn';
+    alTit.textContent = `⏱ ${atrasos} atraso(s) hoje`;
+    alDesc.textContent = 'O seu educando chegou atrasado a pelo menos uma aula. Consulte os detalhes abaixo.';
+  }
+
+  // Estatísticas
+  document.getElementById('stPresentes').textContent = presentes;
+  document.getElementById('stAtrasos').textContent   = atrasos;
+  document.getElementById('stFaltas').textContent    = faltas;
+
+  // Taxa mensal
+  const totalMes = _presencas.length;
+  const presMes  = _presencas.filter(p => ['presente','atraso'].includes(p.estado)).length;
+  const taxa     = totalMes ? Math.round(presMes/totalMes*100) : 0;
+  document.getElementById('stTaxa').textContent = taxa + '%';
+
+  // Timeline
+  const tl = document.getElementById('timelineHoje');
+  if (deHoje.length === 0) {
+    tl.innerHTML = `<div class="empty"><i class="fa fa-clock"></i><p>Sem registos para hoje.</p></div>`;
+    return;
+  }
+
+  tl.innerHTML = deHoje.map(p => `
+    <div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-hora">${p.hora_inicio ? p.hora_inicio.substring(0,5) : '—'}</div>
+        <div class="tl-bloco">Bloco ${p.bloco || '—'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="tl-dot ${p.estado}"></div>
+        <div class="tl-line" style="flex:1;min-height:30px"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-disc">${p.disciplina || '—'}</div>
+        <div class="tl-prof"><i class="fa fa-chalkboard-user" style="margin-right:4px;color:var(--s400)"></i>${p.professor || '—'}</div>
+        <div class="tl-meta">
+          ${badgeEstado(p.estado)}
+          ${p.hora_entrada ? `<div class="tl-chip"><i class="fa fa-right-to-bracket"></i>${SCOPE.fmtHora(p.hora_entrada)}</div>` : ''}
+          ${p.hora_saida   ? `<div class="tl-chip"><i class="fa fa-right-from-bracket"></i>${SCOPE.fmtHora(p.hora_saida)}</div>`   : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── RENDER: HISTÓRICO ────────────────────────────────────────
+function renderHistorico(lista, inicio, fim) {
+  document.getElementById('histPeriodo').textContent =
+    `${fmtData(inicio)} → ${fmtData(fim)} · ${lista.length} registo(s)`;
+
+  if (!lista.length) {
+    document.getElementById('histBody').innerHTML =
+      `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--s400)">Sem registos neste período.</td></tr>`;
+    return;
+  }
+
+  document.getElementById('histBody').innerHTML = lista.map(p => `
+    <tr>
+      <td style="font-weight:600;white-space:nowrap">${fmtData(p.data)}</td>
+      <td style="font-weight:600">${p.disciplina || '—'}</td>
+      <td style="font-size:12px;color:var(--s600)">${BLOCOS_HORA[p.bloco] || '—'}</td>
+      <td style="font-size:12px">${p.hora_entrada ? SCOPE.fmtHora(p.hora_entrada) : '<span style="color:var(--s400)">—</span>'}</td>
+      <td style="font-size:12px">${p.hora_saida   ? SCOPE.fmtHora(p.hora_saida)   : '<span style="color:var(--s400)">—</span>'}</td>
+      <td>${badgeEstado(p.estado)}</td>
+    </tr>`).join('');
+}
+
+// ── RENDER: CALENDÁRIO ───────────────────────────────────────
+function renderCalendario() {
+  const hoje = new Date();
+  const ano  = hoje.getFullYear();
+  const mes  = hoje.getMonth();
+
+  // Cabeçalho dos dias
+  const lbls = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  document.getElementById('calLbls').innerHTML =
+    lbls.map(d => `<div class="mes-lbl">${d}</div>`).join('');
+
+  // Construir grade
+  const primeiroDia = new Date(ano, mes, 1);
+  const ultimoDia   = new Date(ano, mes+1, 0).getDate();
+  let inicio = primeiroDia.getDay(); // 0=Dom
+  if (inicio === 0) inicio = 7;      // Domingo no fim
+  inicio -= 1;                       // Ajustar para Seg=0
+
+  // Mapa data → estado (usar melhor estado do dia)
+  const mapaEstados = {};
+  _presencas.forEach(p => {
+    const d = p.data;
+    if (!mapaEstados[d]) mapaEstados[d] = p.estado;
+    // Prioridade: ausente > atraso > presente
+    const pri = { presente:1, atraso:2, ausente:3, falta_disciplinar:3 };
+    if ((pri[p.estado]||0) > (pri[mapaEstados[d]]||0)) mapaEstados[d] = p.estado;
+  });
+
+  let html = '';
+  // Células vazias antes do dia 1
+  for (let i = 0; i < inicio; i++) html += `<div class="dia-box vazio"></div>`;
+
+  for (let d = 1; d <= ultimoDia; d++) {
+    const dt  = new Date(ano, mes, d);
+    const dow = dt.getDay(); // 0=Dom, 6=Sáb
+    const str = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const eHoje = str === SCOPE.hoje();
+
+    if (dow === 0 || dow === 6) {
+      html += `<div class="dia-box fds ${eHoje?'hoje':''}" title="Fim de semana">${d}</div>`;
+    } else {
+      const estado = mapaEstados[str];
+      const cls    = estado ? estado : '';
+      html += `<div class="dia-box ${cls} ${eHoje?'hoje':''}" title="${str}">${d}</div>`;
+    }
+  }
+  document.getElementById('calDias').innerHTML = html;
+}
+
+// ── RENDER: RESUMO DO MÊS ────────────────────────────────────
+function renderResumoMes() {
+  const total  = _presencas.length;
+  const pres   = _presencas.filter(p => p.estado === 'presente').length;
+  const atr    = _presencas.filter(p => p.estado === 'atraso').length;
+  const aus    = _presencas.filter(p => p.estado === 'ausente').length;
+  const fd     = _presencas.filter(p => p.estado === 'falta_disciplinar').length;
+  const taxa   = total ? Math.round((pres+atr)/total*100) : 0;
+
+  const items = [
+    { lbl:'Presenças',          val:pres, cor:'var(--g)', pct:total?pres/total*100:0 },
+    { lbl:'Atrasos',            val:atr,  cor:'var(--y)', pct:total?atr/total*100:0 },
+    { lbl:'Ausências',          val:aus,  cor:'var(--r)', pct:total?aus/total*100:0 },
+    { lbl:'Faltas Disciplin.', val:fd,   cor:'var(--p)', pct:total?fd/total*100:0 },
+  ];
+
+  document.getElementById('resumoMes').innerHTML = items.map(it => `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:600;color:var(--s800)">${it.lbl}</span>
+        <span style="font-size:12px;font-weight:700;color:${it.cor}">${it.val}</span>
+      </div>
+      <div class="pbar-bg">
+        <div class="pbar-f" style="width:${it.pct}%;background:${it.cor}"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── RENDER: SITUAÇÃO ACADÉMICA ───────────────────────────────
+function renderSituacao() {
+  const total  = _presencas.length || 1;
+  const aus    = _presencas.filter(p => ['ausente','falta_disciplinar'].includes(p.estado)).length;
+  const taxa   = Math.round((total-aus)/total*100);
+  const limite = Math.floor(total / 3);   // 1/3 de faltas permitidas
+
+  let cor, titulo, desc;
+  if (taxa >= 90) {
+    cor='var(--g)'; titulo='Excelente Assiduidade';
+    desc='O seu educando está com presença exemplar este mês.';
+  } else if (taxa >= 75) {
+    cor='var(--y)'; titulo='Assiduidade Satisfatória';
+    desc='A presença está dentro dos limites mas pode melhorar.';
+  } else {
+    cor='var(--r)'; titulo='Assiduidade em Risco';
+    desc='Atenção! O número de faltas está a aproximar-se do limite legal.';
+  }
+
+  document.getElementById('situacaoAcad').innerHTML = `
+    <div style="text-align:center;padding:14px 0 10px">
+      <div style="font-size:36px;font-weight:800;color:${cor}">${taxa}%</div>
+      <div style="font-size:12px;font-weight:700;color:var(--s600);margin-top:2px">${titulo}</div>
+      <div style="font-size:11px;color:var(--s400);margin-top:6px;line-height:1.5;max-width:200px;margin-left:auto;margin-right:auto">${desc}</div>
+    </div>
+    <div style="border-top:1px solid var(--s100);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--s600)">Faltas registadas</span>
+        <span style="font-weight:700;color:${aus>limite?'var(--r)':'var(--s800)'}">${aus}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--s600)">Limite permitido (1/3)</span>
+        <span style="font-weight:700">${limite}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--s600)">Faltas restantes</span>
+        <span style="font-weight:700;color:${limite-aus<=2?'var(--r)':'var(--g)'}">${Math.max(0,limite-aus)}</span>
+      </div>
+    </div>`;
+}
+
+// ── RENDER: DISCIPLINAS ──────────────────────────────────────
+function renderDisciplinas() {
+  // Agrupar por disciplina
+  const mapa = {};
+  _presencas.forEach(p => {
+    const d = p.disciplina || 'Desconhecida';
+    if (!mapa[d]) mapa[d] = { total:0, pres:0, aus:0, atr:0 };
+    mapa[d].total++;
+    if (p.estado==='presente')  mapa[d].pres++;
+    else if (p.estado==='atraso') { mapa[d].pres++; mapa[d].atr++; }
+    else mapa[d].aus++;
+  });
+
+  const disc = Object.entries(mapa).sort((a,b) => b[1].aus - a[1].aus);
+
+  if (!disc.length) {
+    document.getElementById('discList').innerHTML =
+      `<div class="empty"><i class="fa fa-book-open"></i><p>Sem dados disponíveis.</p></div>`;
+    return;
+  }
+
+  document.getElementById('discList').innerHTML = disc.map(([nome, d]) => {
+    const taxa = d.total ? Math.round(d.pres/d.total*100) : 0;
+    const cls  = pcc(taxa);
+    return `
+      <div style="padding:11px 0;border-bottom:1px solid var(--s100)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:700">${nome}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--g)">✅ ${d.pres-d.atr}</span>
+            <span style="font-size:11px;color:var(--y)">⏱ ${d.atr}</span>
+            <span style="font-size:11px;color:var(--r)">❌ ${d.aus}</span>
+            <span style="font-size:12px;font-weight:800;color:${taxa>=85?'var(--g)':taxa>=70?'var(--y)':'var(--r)';min-width:36px;text-align:right}">${taxa}%</span>
+          </div>
+        </div>
+        <div class="pbar-bg">
+          <div class="pbar-f ${cls}" style="width:${taxa}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────
+const TITLES = {
+  hoje:'Hoje', historico:'Histórico', resumo:'Resumo Mensal', disciplinas:'Por Disciplina'
+};
+function ir(v) {
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  document.getElementById('tbTitle').textContent = TITLES[v] || v;
+  if (v === 'historico') carregarHistorico();
+  if (window.innerWidth <= 768) toggleSb(false);
+}
+
+function setFiltroHist(btn, f) {
+  document.querySelectorAll('#view-historico .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  _filtroHist = f;
+  carregarHistorico();
+}
+
+// ── SIDEBAR MOBILE ───────────────────────────────────────────
+let _sbO = false;
+function toggleSb(f) {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOv');
+  if (f === false || _sbO) {
+    sb.classList.remove('open'); ov.style.display='none'; _sbO=false;
+  } else {
+    sb.classList.add('open'); ov.style.display='block'; _sbO=true;
+  }
+}
+
+// ── INICIALIZAÇÃO ────────────────────────────────────────────
+(async function init() {
+
+  // Verificar sessão
+  _user = await SCOPE.verificarSessao('encarregado');
+  if (!_user) return;
+
+  // O referencia_id do encarregado = id do aluno na tabela alunos
+  _alunoId = _user.referencia_id;
+
+  // Preencher UI com nome
+  if (_user.nome) {
+    document.getElementById('sbNome').textContent  = _user.nome;
+    document.getElementById('sbAv').textContent    = scopeIniciais(_user.nome);
+    document.getElementById('heroNome').textContent = _user.nome;
+  }
+
+  // Relógio e data
+  scopeRelogio('heroHora');
+  document.getElementById('tbDate').textContent =
+    new Date().toLocaleDateString('pt-PT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Popular select de meses
+  const sel = document.getElementById('filtroMes');
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                 'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const ano = new Date().getFullYear();
+  meses.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = `${ano}-${String(i+1).padStart(2,'0')}`;
+    opt.textContent = `${m} ${ano}`;
+    sel.appendChild(opt);
+  });
+
+  // Carregar dados
+  await carregarDados();
+
+  // Polling leve a cada 30s (só para actualizar hora de entrada/saída hoje)
+  setInterval(async () => {
+    const hoje = SCOPE.hoje();
+    const resp = await SCOPE.presencasAluno(_alunoId, hoje, hoje);
+    if (resp.status === 'ok') {
+      const novos = resp.presencas || [];
+      const antigos = _presencas.filter(p => p.data !== hoje);
+      _presencas = [...antigos, ...novos];
+      renderHoje();
+    }
+  }, 30000);
+
+})();
+</script>
+</body>
+</html>
