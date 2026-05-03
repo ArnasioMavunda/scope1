@@ -40,7 +40,7 @@ function verificarAcesso($perfis = null): array {
                 'professor'     => '/scope/dashboard_professor.html',
                 'coordenador'   => '/scope/dashboard_coordenador.html',
                 'administrador' => '/scope/dashboard_admin.html',
-                'encarregado'   => '/scope/portal_encarregado.html',
+                
             ];
             header('Location: ' . ($destinos[$user['perfil']] ?? '/scope/index.html'));
             exit;

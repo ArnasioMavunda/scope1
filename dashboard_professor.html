@@ -42,9 +42,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
 .topbar{background:white;padding:0 22px;height:54px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--s200);flex-shrink:0;box-shadow:var(--shs)}
 .tb-title{font-size:15px;font-weight:700;color:var(--s800)}
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.rfid-pill{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--g)}
-.rfid-dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pg 2s infinite}
+
+/* ── Indicador de estado do dispositivo RFID ── */
+.rfid-pill{display:flex;align-items:center;gap:6px;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;transition:all .4s}
+.rfid-pill.online{background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);color:var(--g)}
+.rfid-pill.offline{background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.25);color:var(--r)}
+.rfid-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rfid-pill.online .rfid-dot{background:var(--g);animation:pg 2s infinite}
+.rfid-pill.offline .rfid-dot{background:var(--r)}
 @keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{box-shadow:0 0 0 4px rgba(16,185,129,0)}}
+
+/* ── Aviso offline para edição manual ── */
+.offline-banner{display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#92400e;font-weight:600;align-items:center;gap:9px}
+.offline-banner.show{display:flex}
+.offline-banner i{font-size:15px;color:#f59e0b;flex-shrink:0}
+
 .tb-date{font-size:11px;color:var(--s400);font-weight:500;white-space:nowrap}
 .page{flex:1;overflow-y:auto;padding:18px 20px 36px}
 .view{display:none}.view.active{display:block}
@@ -92,8 +104,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
 .asub{font-size:11px;color:var(--s400);margin-top:1px}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .badge.presente{background:rgba(16,185,129,.1);color:var(--g)}.badge.atraso{background:rgba(245,158,11,.1);color:var(--y)}.badge.ausente{background:rgba(239,68,68,.1);color:var(--r)}
+
+/* Botão de edição: oculto quando dispositivo online */
 .btn-mini{width:27px;height:27px;border:1.5px solid var(--s200);border-radius:7px;background:none;cursor:pointer;font-size:11px;color:var(--s400);display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
 .btn-mini:hover{border-color:var(--bm);color:var(--bm);background:var(--bp)}
+.btn-mini:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.btn-mini-tooltip{position:relative}
+.btn-mini-tooltip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);right:0;background:#1e293b;color:white;font-size:10px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99}
+.btn-mini-tooltip:hover::after{opacity:1}
+
 .rfid-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
 .rfid-ev{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s50);border:1px solid var(--s100);border-radius:var(--rads);animation:si .35s ease}
 @keyframes si{from{transform:translateX(10px);opacity:0}to{transform:translateX(0);opacity:1}}
@@ -139,18 +158,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
 .sum-item:last-child{border-bottom:none}
 .ov{position:fixed;inset:0;background:rgba(15,25,50,.55);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center}
 .ov.open{display:flex}
-.modal{background:white;border-radius:18px;padding:22px;width:320px;max-width:92vw;box-shadow:0 18px 52px rgba(0,0,0,.2);animation:mi .28s ease}
+.modal{background:white;border-radius:18px;padding:22px;width:340px;max-width:92vw;box-shadow:0 18px 52px rgba(0,0,0,.2);animation:mi .28s ease}
 @keyframes mi{from{opacity:0;transform:scale(.93) translateY(-8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.mt{font-size:14px;font-weight:800;margin-bottom:14px}
+.mt{font-size:14px;font-weight:800;margin-bottom:6px}
+.modal-aviso-offline{background:#fef3c7;border:1px solid #f59e0b;border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#92400e;display:flex;align-items:flex-start;gap:8px}
+.modal-aviso-offline i{flex-shrink:0;margin-top:1px;color:#f59e0b}
+.modal-aviso-online{background:#ecfdf5;border:1px solid rgba(16,185,129,.3);border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#065f46;display:flex;align-items:flex-start;gap:8px}
+.modal-aviso-online i{flex-shrink:0;margin-top:1px;color:var(--g)}
 .est-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px}
 .eb{padding:10px 6px;border:2px solid var(--s200);border-radius:9px;background:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:4px}
 .eb i{font-size:16px}
 .eb.sg{border-color:var(--g);background:rgba(16,185,129,.1);color:var(--g)}
 .eb.sy{border-color:var(--y);background:rgba(245,158,11,.1);color:var(--y)}
 .eb.sr{border-color:var(--r);background:rgba(239,68,68,.1);color:var(--r)}
+.eb:disabled{opacity:.35;cursor:not-allowed}
 .mft{display:flex;gap:7px;justify-content:flex-end}
 .btn-c{padding:8px 15px;border:1.5px solid var(--s200);border-radius:8px;background:none;font-family:inherit;font-size:13px;cursor:pointer;color:var(--s600)}
 .btn-s{padding:8px 15px;background:linear-gradient(135deg,var(--bm),var(--b));color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.btn-s:disabled{opacity:.4;cursor:not-allowed}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--s800);color:white;padding:10px 15px;border-radius:11px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--sh);transform:translateY(80px);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1);z-index:999;max-width:290px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.tg{border-left:4px solid var(--g)}.toast.ty{border-left:4px solid var(--y)}.toast.tr{border-left:4px solid var(--r)}.toast.tb{border-left:4px solid var(--bl)}
@@ -190,7 +215,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
   <div class="topbar">
     <span class="tb-title" id="tbTitle">Aula Atual</span>
     <div class="tb-right">
-      <div class="rfid-pill"><div class="rfid-dot"></div><span>Leitor Online</span></div>
+      <!-- Indicador de estado do dispositivo RFID (muda dinamicamente) -->
+      <div class="rfid-pill online" id="devicePill">
+        <div class="rfid-dot"></div>
+        <span id="devicePillTxt">Leitor Online</span>
+      </div>
       <span class="tb-date" id="tbDate"></span>
     </div>
   </div>
@@ -198,35 +227,47 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
 
     <!-- AULA ATUAL -->
     <div class="view active" id="view-aula">
+
+      <!-- Banner de aviso quando o dispositivo está offline -->
+      <div class="offline-banner" id="offlineBanner">
+        <i class="fa fa-triangle-exclamation"></i>
+        <div>
+          <strong>Leitor RFID offline.</strong>
+          O dispositivo não comunica há mais de 2 minutos.
+          Podes registar presenças manualmente enquanto o leitor estiver indisponível.
+        </div>
+      </div>
+
       <div class="hero">
         <div class="hero-top">
           <div>
             <div class="hero-badge"><span class="hero-dot"></span>AULA EM CURSO</div>
             <div class="hero-turma">12ª CFB</div>
-            <div class="hero-disc">Ciências Físicas e Biológicas · 2025/2026</div>
+            <div class="hero-disc" id="heroDisc">— · 2025/2026</div>
           </div>
           <div class="hero-clock">
+            <!-- [FIX 1] hora sincronizada com o servidor PHP -->
             <div class="hero-hora" id="hora">--:--</div>
-            <div class="hero-hora-lbl">HORA ATUAL</div>
+            <div class="hero-hora-lbl">HORA DO SERVIDOR</div>
           </div>
         </div>
         <div class="hero-row">
-          <div class="hero-info"><div class="hero-info-lbl">SALA</div><div class="hero-info-val">Sala 12</div></div>
-          <div class="hero-info"><div class="hero-info-lbl">HORÁRIO</div><div class="hero-info-val">13:00 – 14:30</div></div>
-          <div class="hero-info"><div class="hero-info-lbl">ANO LETIVO</div><div class="hero-info-val">2025 / 2026</div></div>
+          <div class="hero-info"><div class="hero-info-lbl">SALA</div><div class="hero-info-val" id="heroSala">—</div></div>
+          <div class="hero-info"><div class="hero-info-lbl">HORÁRIO</div><div class="hero-info-val" id="heroHorario">— : — – — : —</div></div>
+          <div class="hero-info"><div class="hero-info-lbl">BLOCO</div><div class="hero-info-val" id="heroBloco">—</div></div>
         </div>
       </div>
       <div class="stats-row">
         <div class="sc sg"><div class="sc-ic"><i class="fa fa-circle-check"></i></div><div><div class="sc-n" id="stP">0</div><div class="sc-l">Presentes</div></div></div>
         <div class="sc sy"><div class="sc-ic"><i class="fa fa-clock"></i></div><div><div class="sc-n" id="stAt">0</div><div class="sc-l">Atraso</div></div></div>
-        <div class="sc sr"><div class="sc-ic"><i class="fa fa-circle-xmark"></i></div><div><div class="sc-n" id="stAu">7</div><div class="sc-l">Ausentes</div></div></div>
+        <div class="sc sr"><div class="sc-ic"><i class="fa fa-circle-xmark"></i></div><div><div class="sc-n" id="stAu">0</div><div class="sc-l">Ausentes</div></div></div>
         <div class="sc sb"><div class="sc-ic"><i class="fa fa-chart-pie"></i></div><div><div class="sc-n" id="stT">0%</div><div class="sc-l">Taxa Presença</div></div></div>
       </div>
       <div class="grid2">
         <div class="card">
           <div class="ch">
             <span class="ct"><i class="fa fa-clipboard-list"></i>Lista de Presenças — 12ª CFB</span>
-            <span class="cs" id="subA">0 de 7 registados</span>
+            <span class="cs" id="subA">0 de 0 registados</span>
           </div>
           <div class="cb"><div class="aluno-list" id="alunoList"></div></div>
         </div>
@@ -234,7 +275,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
           <div class="card">
             <div class="ch">
               <span class="ct"><i class="fa fa-tower-broadcast"></i>Leituras RFID</span>
-              <span style="font-size:10px;color:var(--g);font-weight:700;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--g);display:inline-block;animation:pg 2s infinite"></span>LIVE</span>
+              <span style="font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px" id="rfidLiveLbl">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--g);display:inline-block;animation:pg 2s infinite"></span>
+                LIVE
+              </span>
             </div>
             <div class="cb">
               <div class="rfid-list" id="rfidList">
@@ -260,10 +304,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
           <span class="ct"><i class="fa fa-clipboard-list"></i>Lista de Presenças — 12ª CFB</span>
           <select class="fsel" id="discFilter">
             <option value="">Todas as disciplinas</option>
-            <option>Matemática</option><option>Física</option><option>Língua Inglesa</option>
-            <option>Língua Portuguesa</option><option>Biologia</option><option>Geologia</option>
-            <option>Química</option><option>Empreendedorismo</option><option>Filosofia</option>
-            <option>Geometria Descritiva</option><option>Educação Física</option>
           </select>
         </div>
         <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
@@ -282,22 +322,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
         <button class="filter-btn" onclick="setF(this)">Mês</button>
         <button class="filter-btn" onclick="setF(this)">Trimestre</button>
         <button class="filter-btn" onclick="setF(this)">Ano</button>
-        <select class="fsel"><option>Março 2026</option><option>Fevereiro 2026</option></select>
-        <select class="fsel"><option>Todas as disciplinas</option></select>
         <button class="btn-act prim" style="width:auto;padding:6px 14px;margin:0;font-size:12px" onclick="toast('A exportar…','tb')"><i class="fa fa-download"></i>Exportar</button>
       </div>
       <div class="hist-stats">
-        <div class="hs"><div class="hs-n" style="color:var(--bm)">12</div><div class="hs-l">Aulas</div></div>
-        <div class="hs"><div class="hs-n" style="color:var(--g)">68</div><div class="hs-l">Presenças</div></div>
-        <div class="hs"><div class="hs-n" style="color:var(--r)">16</div><div class="hs-l">Ausências</div></div>
-        <div class="hs"><div class="hs-n" style="color:var(--y)">8</div><div class="hs-l">Atrasos</div></div>
-        <div class="hs"><div class="hs-n" style="color:var(--bm)">81%</div><div class="hs-l">Média</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--bm)" id="hAulas">—</div><div class="hs-l">Aulas</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--g)" id="hPres">—</div><div class="hs-l">Presenças</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--r)" id="hAus">—</div><div class="hs-l">Ausências</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--y)" id="hAtras">—</div><div class="hs-l">Atrasos</div></div>
+        <div class="hs"><div class="hs-n" style="color:var(--bm)" id="hTaxa">—</div><div class="hs-l">Média</div></div>
       </div>
       <div class="card">
         <div class="ch"><span class="ct"><i class="fa fa-calendar-check"></i>Histórico Detalhado</span></div>
         <div class="cb" style="padding:0 16px 16px;overflow-x:auto">
           <table class="htable">
-            <thead><tr><th>Data</th><th>Hora</th><th>Disciplina</th><th>Presentes</th><th>Ausentes</th><th>Atrasos</th><th>Observações</th></tr></thead>
+            <thead><tr><th>Aluno</th><th>Presenças</th><th>Ausências</th><th>Atrasos</th><th>Taxa</th><th>Estado</th></tr></thead>
             <tbody id="histBody"></tbody>
           </table>
         </div>
@@ -307,7 +345,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
     <!-- ALUNOS DA TURMA -->
     <div class="view" id="view-alunos">
       <div class="card">
-        <div class="ch"><span class="ct"><i class="fa fa-users-rectangle"></i>Alunos — 12ª CFB (7 alunos)</span></div>
+        <div class="ch"><span class="ct"><i class="fa fa-users-rectangle"></i>Alunos — 12ª CFB</span><span class="cs" id="nAlunos"></span></div>
         <div class="cb"><div class="aluno-list" id="alunosTurma"></div></div>
       </div>
     </div>
@@ -318,7 +356,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
         <div class="card">
           <div class="ch"><span class="ct"><i class="fa fa-pen-to-square"></i>Sumário da Aula</span><span class="cs" id="sumData"></span></div>
           <div class="cb">
-            <div class="fg"><label class="fl">Disciplina</label><select class="fi" id="sumDisc"><option>Matemática</option><option>Física</option><option>Língua Inglesa</option><option>Língua Portuguesa</option><option>Biologia</option><option>Geologia</option><option>Química</option><option>Empreendedorismo</option><option>Filosofia</option><option>Geometria Descritiva</option><option>Educação Física</option></select></div>
+            <div class="fg"><label class="fl">Disciplina</label>
+              <select class="fi" id="sumDisc"><option>—</option></select>
+            </div>
             <div class="fg"><label class="fl">Sumário</label><textarea class="txa" style="height:120px" id="sumText" placeholder="Escreve o sumário da aula…"></textarea></div>
             <div class="fg"><label class="fl">Observações</label><textarea class="txa" id="sumObs" placeholder="Observações adicionais (opcional)…"></textarea></div>
             <button class="btn-act prim" onclick="guardarSum()"><i class="fa fa-floppy-disk"></i>Guardar Sumário</button>
@@ -337,16 +377,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
         <div class="ch"><span class="ct"><i class="fa fa-triangle-exclamation"></i>Registar Ocorrência</span></div>
         <div class="cb">
           <div class="fg"><label class="fl">Aluno (opcional)</label>
-            <select class="fi" id="ocAluno">
-              <option value="">Toda a turma</option>
-              <option>1 — Agnalda Kunjikisse Jelembi Vapor</option>
-              <option>2 — Alexandre Fernando Monteiro Pereira</option>
-              <option>3 — Domingos Caselo Kalwiji Samanjata</option>
-              <option>4 — Haziel Simboyala Chitau Hamuyela Tchitavila</option>
-              <option>5 — Larissa Fato Botelho</option>
-              <option>6 — Luís Caison Zango Caica</option>
-              <option>7 — Maria Da Conceição José Pena</option>
-            </select>
+            <select class="fi" id="ocAluno"><option value="">Toda a turma</option></select>
           </div>
           <div class="fg"><label class="fl">Tipo</label>
             <select class="fi"><option>Comportamento</option><option>Advertência</option><option>Elogio</option><option>Outro</option></select>
@@ -357,23 +388,36 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
           <button class="btn-act prim" onclick="guardarOc()"><i class="fa fa-floppy-disk"></i>Guardar Ocorrência</button>
         </div>
       </div>
+      <div class="card" style="margin-top:0">
+        <div class="ch"><span class="ct"><i class="fa fa-list"></i>Ocorrências Registadas</span></div>
+        <div id="ocList"><div style="text-align:center;padding:24px;color:var(--s400)">A carregar…</div></div>
+      </div>
     </div>
 
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL EDITAR ESTADO -->
 <div class="ov" id="modalEst">
   <div class="modal">
     <div class="mt" id="modalNome">Editar Estado</div>
-    <div class="est-btns">
+    <!-- Aviso dinâmico — muda conforme estado do dispositivo -->
+    <div id="modalAvisoOffline" class="modal-aviso-offline" style="display:none">
+      <i class="fa fa-triangle-exclamation"></i>
+      <div>O leitor RFID está offline. Podes registar manualmente.</div>
+    </div>
+    <div id="modalAvisoOnline" class="modal-aviso-online" style="display:none">
+      <i class="fa fa-circle-check"></i>
+      <div>O leitor está online — a presença é registada automaticamente pelo cartão. A edição manual está bloqueada para professores.</div>
+    </div>
+    <div class="est-btns" id="estBtns">
       <button class="eb" id="eb-presente" onclick="selE('presente')"><i class="fa fa-circle-check"></i>Presente</button>
-      <button class="eb" id="eb-atraso" onclick="selE('atraso')"><i class="fa fa-clock"></i>Atraso</button>
-      <button class="eb" id="eb-ausente" onclick="selE('ausente')"><i class="fa fa-circle-xmark"></i>Ausente</button>
+      <button class="eb" id="eb-atraso"   onclick="selE('atraso')"><i class="fa fa-clock"></i>Atraso</button>
+      <button class="eb" id="eb-ausente"  onclick="selE('ausente')"><i class="fa fa-circle-xmark"></i>Ausente</button>
     </div>
     <div class="mft">
       <button class="btn-c" onclick="closeM()">Cancelar</button>
-      <button class="btn-s" onclick="saveM()">Guardar</button>
+      <button class="btn-s" id="btnSaveM" onclick="saveM()">Guardar</button>
     </div>
   </div>
 </div>
@@ -384,9 +428,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--s100);color:var
 <script src="recursos/js/scope-api.js"></script>
 <script>
 // ── Estado local ─────────────────────────────────────────────
-let ALUNOS      = [];          // lista actualizada pela API
-let _horarioId  = null;        // id do horário do bloco actual
-let mId = null, mEst = null;   // modal editar estado
+let ALUNOS     = [];
+let _horarioId = null;
+let mId = null, mEst = null;
+let _sessaoUser = {};
 
 // ── Utilitários ──────────────────────────────────────────────
 const COR = SCOPE_CORES;
@@ -395,34 +440,67 @@ function lbl(e){ return e==='presente'?'Presente':e==='atraso'?'Atraso':e==='fal
 function pcc(p){ return p>=85?'hi':p>=70?'me':'lo'; }
 let tT; function toast(msg,c='tg'){ scopeToast(msg,c); }
 
-// ── Renderizar lista de alunos (aula actual) ─────────────────
+// ── [FIX 3] Actualizar indicador de dispositivo na topbar ─────
+function actualizarIndicadorDevice(online){
+  const pill = document.getElementById('devicePill');
+  const txt  = document.getElementById('devicePillTxt');
+  const banner = document.getElementById('offlineBanner');
+  if(!pill) return;
+  if(online){
+    pill.className  = 'rfid-pill online';
+    txt.textContent = 'Leitor Online';
+    banner.classList.remove('show');
+  } else {
+    pill.className  = 'rfid-pill offline';
+    txt.textContent = 'Leitor Offline';
+    banner.classList.add('show');
+  }
+}
+
+// ── Renderizar lista de alunos ────────────────────────────────
+// O botão de edição mostra tooltip diferente conforme estado
 function rAlunos(){
-  document.getElementById('alunoList').innerHTML = ALUNOS.map((a,i)=>`
+  const deviceOnline = SCOPE.deviceOnline();
+  document.getElementById('alunoList').innerHTML = ALUNOS.map((a,i)=>{
+    // Botão de edição: sempre visível mas comportamento muda
+    const btnTooltip = deviceOnline
+      ? 'Leitor online — edição bloqueada para professor'
+      : 'Dispositivo offline — clica para registar manualmente';
+    return `
     <div class="aluno-row ${a.estado==='ausente'?'aus':''}" id="row-${a.id}">
       <div class="av" style="background:${COR[i%COR.length]}">${ini(a.nome)}</div>
       <div class="ai">
         <div class="an">${i+1}. ${a.nome}</div>
         <div class="asub">${a.hora_entrada
           ? '<i class="fa fa-clock" style="margin-right:3px"></i>'+SCOPE.fmtHora(a.hora_entrada)
+            + (a.registado_por==='rfid'?' <span style="font-size:9px;color:var(--g)">(RFID)</span>'
+              : a.registado_por==='professor'?' <span style="font-size:9px;color:var(--y)">(Manual)</span>':'')
           : 'Proc. '+a.num_processo}</div>
       </div>
       <span class="badge ${a.estado}">${lbl(a.estado)}</span>
-      <button class="btn-mini" onclick="openM(${a.id},${i})"><i class="fa fa-pen"></i></button>
-    </div>`).join('');
+      <div class="btn-mini-tooltip" data-tip="${btnTooltip}">
+        <button class="btn-mini" onclick="openM(${a.id},${i})">
+          <i class="fa fa-pen"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-// ── Renderizar alunos da turma (secção Alunos) ───────────────
+// ── Renderizar alunos da turma ────────────────────────────────
 function rTurma(){
   const el = document.getElementById('alunosTurma'); if(!el) return;
   el.innerHTML = ALUNOS.map((a,i)=>`
     <div class="aluno-row">
       <div class="av" style="background:${COR[i%COR.length]}">${ini(a.nome)}</div>
-      <div class="ai"><div class="an">${i+1}. ${a.nome}</div><div class="asub">Nº Processo: ${a.num_processo}</div></div>
+      <div class="ai"><div class="an">${i+1}. ${a.nome}</div><div class="asub">Nº Processo: ${a.num_processo||'—'}</div></div>
       <span class="badge presente" style="opacity:.6">Ativo</span>
     </div>`).join('');
+  const nc = document.getElementById('nAlunos');
+  if(nc) nc.textContent = ALUNOS.length + ' alunos';
 }
 
-// ── Actualizar contadores de estatísticas ────────────────────
+// ── Actualizar contadores ─────────────────────────────────────
 function updStats(totais){
   if(!totais) {
     const p  = ALUNOS.filter(a=>a.estado==='presente').length;
@@ -435,16 +513,17 @@ function updStats(totais){
   document.getElementById('stAt').textContent = totais.atrasos;
   document.getElementById('stAu').textContent = totais.ausentes;
   document.getElementById('stT').textContent  = totais.taxa + '%';
-  document.getElementById('subA').textContent = `${totais.presentes+totais.atrasos} de ${totais.total} registados`;
+  document.getElementById('subA').textContent =
+    `${totais.presentes+totais.atrasos} de ${totais.total} registados`;
 }
 
-// ── Tabela Lista de Presenças (usa estatísticas do mês) ──────
+// ── Tabela de presenças (estatísticas do mês) ─────────────────
 async function rPresencas(){
   const resp = await SCOPE.estatisticas();
   if(resp.status !== 'ok') return;
   document.getElementById('presBody').innerHTML = resp.dados.map((a,i)=>{
     const pct = parseFloat(a.taxa) || 0;
-    const nome = a.nome || a.aluno || '—';
+    const nome = a.nome || '—';
     return `<tr>
       <td><span class="nchip">${i+1}</span></td>
       <td><div style="display:flex;align-items:center;gap:8px">
@@ -453,35 +532,65 @@ async function rPresencas(){
       <td><div style="display:flex;align-items:center;gap:8px">
         <div class="pbar-bg"><div class="pbar-f ${pcc(pct)}" style="width:${pct}%"></div></div>
         <span style="font-size:12px;font-weight:700;min-width:32px;text-align:right;color:${pct>=85?'var(--g)':pct>=70?'var(--y)':'var(--r)'}">${pct}%</span></div></td>
-      <td style="color:var(--g);font-weight:700">${a.presencas}</td>
-      <td style="color:${a.ausencias>3?'var(--r)':'var(--s600)'};font-weight:${a.ausencias>3?700:400}">${a.ausencias}</td>
-      <td style="color:${a.faltas_disc>0?'var(--y)':'var(--s400)'}">${a.faltas_disc}</td>
+      <td style="color:var(--g);font-weight:700">${a.presencas||0}</td>
+      <td style="color:${(a.ausencias||0)>3?'var(--r)':'var(--s600)'};font-weight:${(a.ausencias||0)>3?700:400}">${a.ausencias||0}</td>
+      <td style="color:${(a.faltas_disc||0)>0?'var(--y)':'var(--s400)'}">${a.faltas_disc||0}</td>
       <td><span class="badge ${pct>=85?'presente':pct>=70?'atraso':'ausente'}" style="font-size:10px">${pct>=85?'Regular':pct>=70?'Em risco':'Crítico'}</span></td>
     </tr>`;
   }).join('');
 }
 
-// ── Histórico (placeholder — futura tabela de sumários) ──────
-function rHist(){
-  document.getElementById('histBody').innerHTML =
-    `<tr><td colspan="7" style="text-align:center;color:var(--s400);padding:24px">
-      Sem registos históricos disponíveis.
-    </td></tr>`;
+// ── Histórico ─────────────────────────────────────────────────
+async function rHist(){
+  const resp = await SCOPE.estatisticas();
+  if(resp.status !== 'ok' || !resp.dados.length){
+    document.getElementById('histBody').innerHTML =
+      `<tr><td colspan="6" style="text-align:center;color:var(--s400);padding:24px">Sem registos.</td></tr>`;
+    return;
+  }
+  // Totais gerais
+  let totP=0,totA=0,totAt=0,totT=0;
+  resp.dados.forEach(a=>{
+    totP  += parseInt(a.presencas)||0;
+    totA  += parseInt(a.ausencias)||0;
+    totAt += parseInt(a.atrasos)||0;
+    totT  += parseInt(a.total)||0;
+  });
+  const taxaG = totT>0?Math.round((totP+totAt)/totT*100):0;
+  document.getElementById('hPres').textContent  = totP+totAt;
+  document.getElementById('hAus').textContent   = totA;
+  document.getElementById('hAtras').textContent = totAt;
+  document.getElementById('hTaxa').textContent  = taxaG+'%';
+  document.getElementById('hAulas').textContent = totT;
+
+  document.getElementById('histBody').innerHTML = resp.dados.map((a,i)=>{
+    const pct = parseFloat(a.taxa)||0;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="width:26px;height:26px;border-radius:50%;background:${COR[i%COR.length]};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">${ini(a.nome)}</div>
+        <span style="font-weight:600;font-size:12px">${a.nome}</span></div></td>
+      <td style="color:var(--g);font-weight:700">${(parseInt(a.presencas)||0)+(parseInt(a.atrasos)||0)}</td>
+      <td style="color:${(a.ausencias||0)>3?'var(--r)':'var(--s600)'}">${a.ausencias||0}</td>
+      <td style="color:var(--y)">${a.atrasos||0}</td>
+      <td><div style="display:flex;align-items:center;gap:7px">
+        <div class="pbar-bg"><div class="pbar-f ${pcc(pct)}" style="width:${pct}%"></div></div>
+        <span style="font-size:12px;font-weight:700;color:${pct>=85?'var(--g)':pct>=70?'var(--y)':'var(--r)'}">${pct}%</span></div></td>
+      <td><span class="badge ${pct>=85?'presente':pct>=70?'atraso':'ausente'}" style="font-size:10px">${pct>=85?'Regular':pct>=70?'Em risco':'Crítico'}</span></td>
+    </tr>`;
+  }).join('');
 }
 
-// ── Sumário ──────────────────────────────────────────────────
+// ── Sumário ───────────────────────────────────────────────────
 function rSumario(){
   document.getElementById('sumData').textContent =
-    new Date().toLocaleDateString('pt-PT',{day:'numeric',month:'long'});
+    SCOPE.horaActualAjustada().toLocaleDateString('pt-PT',{day:'numeric',month:'long'});
   const el = document.getElementById('sumHist'); if(!el) return;
   el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--s400);font-size:12px">Sem sumários anteriores.</div>`;
 }
 async function guardarSum(){
   const t = document.getElementById('sumText').value.trim();
   if(!t){ toast('Escreve o sumário primeiro.','ty'); return; }
-  // Guardar sumário como ocorrência com prefixo [Sumário]
-  const sessao = JSON.parse(localStorage.getItem('scope_user')||'{}');
-  const profId = sessao.referencia_id || 1;
+  const profId = _sessaoUser.referencia_id || 1;
   const resp = await SCOPE.guardarOcorrencia(profId, '[Sumário] ' + t);
   if(resp.status === 'ok'){
     document.getElementById('sumText').value='';
@@ -492,35 +601,31 @@ async function guardarSum(){
   }
 }
 
-// ── Guardar ocorrência via API ────────────────────────────────
+// ── Ocorrências ───────────────────────────────────────────────
 async function guardarOc(){
   const desc = document.getElementById('ocText').value.trim();
   if(!desc){ toast('Escreve a ocorrência.','ty'); return; }
-  // Usar professor_id da sessão guardada
-  const sessao = JSON.parse(localStorage.getItem('scope_user')||'{}');
-  const profId = sessao.referencia_id || 1;
+  const profId = _sessaoUser.referencia_id || 1;
   const resp = await SCOPE.guardarOcorrencia(profId, desc);
   if(resp.status === 'ok'){
     document.getElementById('ocText').value='';
     toast('Ocorrência guardada!','tg');
-    rOcView(); // actualizar lista
+    rOcView();
   } else {
     toast('Erro ao guardar ocorrência.','tr');
   }
 }
-
-// ── Listar ocorrências da turma ───────────────────────────────
 async function rOcView(){
   const el = document.getElementById('ocList'); if(!el) return;
-  el.innerHTML = '<div style="color:var(--s400);font-size:12px;padding:8px">A carregar…</div>';
-  const resp = await fetch('api/turma.php?acao=listar_ocorrencias&turma=1')
+  el.innerHTML = '<div style="color:var(--s400);font-size:12px;padding:12px 16px">A carregar…</div>';
+  const resp = await fetch('/scope/api/turma.php?acao=listar_ocorrencias&turma=1')
     .then(r=>r.json()).catch(()=>({status:'erro'}));
-  if(resp.status !== 'ok' || !resp.ocorrencias.length){
+  if(resp.status !== 'ok' || !resp.ocorrencias?.length){
     el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--s400)"><i class="fa fa-folder-open" style="font-size:28px;display:block;margin-bottom:8px"></i>Sem ocorrências registadas.</div>';
     return;
   }
   el.innerHTML = resp.ocorrencias.map(o=>`
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--s100)">
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--s100)">
       <div style="width:36px;height:36px;border-radius:50%;background:var(--yp);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px">⚠️</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600">${o.descricao||'—'}</div>
@@ -531,7 +636,7 @@ async function rOcView(){
     </div>`).join('');
 }
 
-// ── Adicionar evento RFID ao painel lateral ──────────────────
+// ── RFID event card ───────────────────────────────────────────
 function adicionarEventoRFID(aluno){
   const lst = document.getElementById('rfidList');
   document.getElementById('rfidEmpty')?.remove();
@@ -550,14 +655,13 @@ function adicionarEventoRFID(aluno){
   setTimeout(()=>d.classList.remove('nova'), 3000);
   if(lst.querySelectorAll('.rfid-ev').length>5) lst.lastChild.remove();
 
-  // Flash na linha do aluno
   const row = document.getElementById('row-'+aluno.id);
   if(row){ row.classList.add('rfid-flash'); setTimeout(()=>row.classList.remove('rfid-flash'),1400); }
 
   toast(aluno.nome.split(' ')[0]+' — '+lbl(aluno.estado), aluno.estado==='presente'?'tg':'ty');
 }
 
-// ── Carregar presenças do bloco actual ───────────────────────
+// ── Carregar presenças do bloco actual ────────────────────────
 async function carregarAulaActual(){
   const resp = await SCOPE.carregarPresencasDia();
   if(resp.status !== 'ok') return;
@@ -567,43 +671,110 @@ async function carregarAulaActual(){
 
   rAlunos();
   updStats(resp.totais);
+
+  // Preencher info da aula
+  const aulaResp = await SCOPE.aulaAtual();
+  if(aulaResp.status==='ok' && aulaResp.horario){
+    const h = aulaResp.horario;
+    const discEl = document.getElementById('heroDisc');
+    if(discEl) discEl.textContent = (h.disciplina||'—') + ' · 2025/2026';
+    const horEl = document.getElementById('heroHorario');
+    if(horEl) horEl.textContent = (h.hora_inicio||'—') + ' – ' + (h.hora_fim||'—');
+    const blocoEl = document.getElementById('heroBloco');
+    if(blocoEl) blocoEl.textContent = 'Bloco ' + (aulaResp.bloco||'—');
+  }
 }
 
-// ── Modal editar estado ──────────────────────────────────────
+// ── [FIX 3] Modal editar estado — lógica online/offline ───────
 function openM(id, idx){
   const a = ALUNOS.find(x=>x.id===id); if(!a) return;
   mId = id; mEst = a.estado;
-  document.getElementById('modalNome').textContent = '✏️ '+a.nome;
-  updEB(a.estado);
+  document.getElementById('modalNome').textContent = '✏️ ' + a.nome;
+
+  const deviceOnline = SCOPE.deviceOnline();
+  const avisoOffline = document.getElementById('modalAvisoOffline');
+  const avisoOnline  = document.getElementById('modalAvisoOnline');
+  const estBtns      = document.getElementById('estBtns');
+  const btnSave      = document.getElementById('btnSaveM');
+  const isProfessor  = (_sessaoUser.perfil === 'professor');
+
+  if(isProfessor && deviceOnline){
+    // Professor + dispositivo online → bloqueado
+    avisoOffline.style.display = 'none';
+    avisoOnline.style.display  = 'flex';
+    // Desactivar botões
+    estBtns.querySelectorAll('.eb').forEach(b=>b.disabled=true);
+    btnSave.disabled = true;
+  } else {
+    // Offline OU admin/coordenador → permitido
+    avisoOnline.style.display  = 'none';
+    avisoOffline.style.display = (!deviceOnline) ? 'flex' : 'none';
+    estBtns.querySelectorAll('.eb').forEach(b=>b.disabled=false);
+    btnSave.disabled = false;
+    updEB(a.estado);
+  }
+
   document.getElementById('modalEst').classList.add('open');
 }
-function selE(e){ mEst=e; updEB(e); }
+
+function selE(e){
+  if(document.getElementById('btnSaveM').disabled) return;
+  mEst=e; updEB(e);
+}
 function updEB(e){
   const m={presente:'sg',atraso:'sy',ausente:'sr'};
   ['presente','atraso','ausente'].forEach(x=>{
     document.getElementById('eb-'+x).className='eb'+(x===e?' '+m[x]:'');
   });
 }
+
 async function saveM(){
   const a = ALUNOS.find(x=>x.id===mId); if(!a) return;
   if(!_horarioId){ toast('Sem aula activa para editar.','ty'); closeM(); return; }
-  const resp = await SCOPE.editarEstado(mId, _horarioId, mEst);
-  if(resp.status==='ok'){
+
+  const resp = await SCOPE.editarEstado(
+    mId, _horarioId, mEst, '',
+    null,
+    _sessaoUser.perfil || 'professor'
+  );
+
+  if(resp.status === 'ok'){
     a.estado = mEst;
-    if(mEst!=='ausente' && !a.hora_entrada) a.hora_entrada = new Date().toTimeString().substring(0,8);
+    a.registado_por = 'professor';
+    if(mEst!=='ausente' && !a.hora_entrada)
+      a.hora_entrada = SCOPE.horaActualAjustada().toTimeString().substring(0,8);
     if(mEst==='ausente') a.hora_entrada = null;
     rAlunos(); updStats();
     toast(a.nome.split(' ')[0]+' → '+lbl(mEst), 'tg');
+  } else if(resp.status === 'bloqueado'){
+    toast('Edição bloqueada: leitor RFID está online.', 'ty');
+    actualizarIndicadorDevice(true);
   } else {
     toast('Erro ao guardar estado.','tr');
   }
   closeM();
 }
-function closeM(){ document.getElementById('modalEst').classList.remove('open'); }
-document.getElementById('modalEst').addEventListener('click', e=>{ if(e.target.id==='modalEst') closeM(); });
+function closeM(){
+  document.getElementById('modalEst').classList.remove('open');
+}
+document.getElementById('modalEst').addEventListener('click', e=>{
+  if(e.target.id==='modalEst') closeM();
+});
 
-// ── Navegação entre vistas ───────────────────────────────────
-const TITLES={aula:'Aula Atual',presencas:'Lista de Presenças',historico:'Histórico de Presenças',alunos:'Alunos da Turma',sumario:'Sumário',ocorrencias:'Ocorrências'};
+// ── Listener de mudança de estado do dispositivo ──────────────
+SCOPE.on('device_status', ({online})=>{
+  actualizarIndicadorDevice(online);
+  // Quando dispositivo fica online, re-renderizar lista
+  // para actualizar tooltips dos botões
+  if(ALUNOS.length) rAlunos();
+});
+
+// ── Navegação ─────────────────────────────────────────────────
+const TITLES={
+  aula:'Aula Atual',presencas:'Lista de Presenças',
+  historico:'Histórico de Presenças',alunos:'Alunos da Turma',
+  sumario:'Sumário',ocorrencias:'Ocorrências'
+};
 function ir(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
@@ -618,31 +789,53 @@ function ir(v){
   if(window.innerWidth<=768) toggleSb(false);
 }
 
-// ── Sidebar ──────────────────────────────────────────────────
+// ── Sidebar ───────────────────────────────────────────────────
 let sbO=false;
 function toggleSb(f){
   const sb=document.getElementById('sidebar'),o=document.getElementById('ov');
   if(f===false||sbO){sb.classList.remove('open');o.style.display='none';sbO=false;}
   else{sb.classList.add('open');o.style.display='block';sbO=true;}
 }
-function setF(btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function setF(btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
 
-// ── Inicialização ────────────────────────────────────────────
+// ── Inicialização ─────────────────────────────────────────────
 (async function init(){
-  // Verificar sessão — só professores podem aceder
-  const user = await SCOPE.verificarSessao(['professor','administrador']);
+  const user = await SCOPE.verificarSessao(['professor','administrador','coordenador']);
   if (!user) return;
+  _sessaoUser = user;
   SCOPE.preencherUI(user);
-  // Relógio e data
+
+  // [FIX 1] Sincronizar hora com servidor ANTES de arrancar o relógio
+  await SCOPE.sincronizarHora();
   scopeRelogio('hora');
   scopeDataExtenso('tbDate');
+
+  // Preencher select de ocorrências com alunos da turma
+  const alunosResp = await SCOPE.listarAlunos();
+  if(alunosResp.status === 'ok'){
+    const sel = document.getElementById('ocAluno');
+    if(sel){
+      alunosResp.alunos.forEach((a,i)=>{
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = (i+1) + ' — ' + a.nome;
+        sel.appendChild(opt);
+      });
+    }
+  }
 
   // Carregar aula actual
   await carregarAulaActual();
 
-  // Iniciar polling RFID — actualiza a cada 8s
+  // [FIX 3] Verificar estado do dispositivo imediatamente
+  const online = await SCOPE.verificarDispositivoOnline();
+  actualizarIndicadorDevice(online);
+
+  // [FIX 2] Iniciar polling — agora actualiza SEMPRE (não só em novas leituras)
   SCOPE.iniciarPolling(novaLeitura => {
-    // Actualizar aluno na lista local
     const idx = ALUNOS.findIndex(a=>a.id===novaLeitura.id);
     if(idx >= 0) ALUNOS[idx] = { ...ALUNOS[idx], ...novaLeitura };
     adicionarEventoRFID(novaLeitura);
@@ -653,6 +846,7 @@ function setF(btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classLi
   // Listener de actualização geral
   SCOPE.on('presencas_atualizadas', resp=>{
     ALUNOS = resp.alunos.map((a,i)=>({...a, ord:i+1}));
+    _horarioId = resp.alunos[0]?.horario_id ?? _horarioId;
     rAlunos();
     updStats(resp.totais);
   });

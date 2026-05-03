@@ -1,27 +1,50 @@
 // ============================================================
-//  SCOPE — scope-api.js
+//  SCOPE — scope-api.js  (VERSÃO CORRIGIDA v2)
 //  Ficheiro central de comunicação com a API PHP.
 //  Incluir em TODOS os dashboards:
 //    <script src="recursos/js/scope-api.js"></script>
+//
+//  CORRECÇÕES v2:
+//  [FIX 1] Hora do relógio sincronizada com o servidor PHP.
+//          scopeRelogio() agora ajusta o offset entre a hora
+//          do browser e a do servidor, exibindo sempre a hora
+//          correcta no painel mesmo que o computador do professor
+//          tenha o relógio desajustado.
+//
+//  [FIX 2] Polling mais robusto: o listener 'presencas_atualizadas'
+//          agora é chamado em CADA poll (não só quando há nova
+//          leitura RFID), garantindo que a lista de alunos
+//          actualiza mesmo que o aluno já tenha passado o cartão
+//          antes do professor abrir o painel.
+//
+//  [FIX 3] SCOPE.deviceOnline() — verifica se o ESP32 está
+//          online. O dashboard do professor usa isto para mostrar
+//          ou esconder o botão de edição manual.
+//          Regra: professor só pode editar manualmente quando
+//          o dispositivo está offline.
+//
+//  [FIX 4] SCOPE.adicionarAluno() — novo método para o admin
+//          adicionar alunos pelo painel web.
 // ============================================================
 
 const SCOPE = (() => {
 
   // ── Configuração ────────────────────────────────────────
-  const BASE = '/scope/api';           // Caminho base da API
-  const TURMA_ID = 1;                  // 12ª CFB (única turma)
-  const POLL_INTERVAL = 8000;          // Polling RFID: 8 segundos
+  const BASE          = '/scope/api';
+  const TURMA_ID      = 1;
+  const POLL_INTERVAL = 8000;   // 8 segundos
 
   // ── Estado global ────────────────────────────────────────
-  let _pollTimer     = null;
-  let _ultimoRegisto = null;           // Último timestamp recebido
-  let _callbacks     = {};             // Registo de listeners
+  let _pollTimer      = null;
+  let _ultimoRegisto  = null;
+  let _callbacks      = {};
+  let _serverOffset   = 0;      // diferença em ms entre browser e servidor
+  let _deviceOnline   = false;  // estado do ESP32
 
   // ──────────────────────────────────────────────────────────
   //  UTILITÁRIOS
   // ──────────────────────────────────────────────────────────
 
-  /** Fetch genérico com tratamento de erros */
   async function api(endpoint, opcoes = {}) {
     try {
       const resp = await fetch(`${BASE}/${endpoint}`, {
@@ -36,41 +59,94 @@ const SCOPE = (() => {
     }
   }
 
-  /** GET com query string */
   function get(endpoint, params = {}) {
     const qs = new URLSearchParams(params).toString();
     return api(qs ? `${endpoint}?${qs}` : endpoint);
   }
 
-  /** POST com corpo JSON */
   function post(endpoint, corpo = {}) {
     return api(endpoint, { method: 'POST', body: JSON.stringify(corpo) });
   }
 
-  /** Formata hora: "13:03:22" → "13:03" */
   function fmtHora(h) {
     if (!h) return '--:--';
     return h.substring(0, 5);
   }
 
-  /** Data de hoje YYYY-MM-DD */
   function hoje() {
     return new Date().toISOString().split('T')[0];
   }
 
-  /** Devolve bloco activo (1, 2, 3) ou null */
   function blocoAtual() {
-    const h = new Date();
+    // Usa a hora ajustada com o offset do servidor
+    const h = horaActualAjustada();
     const t = h.getHours() * 60 + h.getMinutes();
-    if (t >= 13*60     && t < 14*60+30) return 1;   // 13:00–14:30
-    if (t >= 14*60+45  && t < 16*60+15) return 2;   // 14:45–16:15
-    if (t >= 16*60+30  && t < 18*60)    return 3;   // 16:30–18:00
+    if (t >= 13*60     && t < 14*60+30) return 1;
+    if (t >= 14*60+45  && t < 16*60+15) return 2;
+    if (t >= 16*60+30  && t < 18*60)    return 3;
     return null;
   }
 
-  /** Emitir evento interno */
+  // Hora actual ajustada com o offset calculado face ao servidor
+  function horaActualAjustada() {
+    return new Date(Date.now() + _serverOffset);
+  }
+
   function emit(evento, dados) {
     (_callbacks[evento] || []).forEach(fn => fn(dados));
+  }
+
+  // ──────────────────────────────────────────────────────────
+  //  SINCRONIZAÇÃO DE HORA COM O SERVIDOR
+  //  [FIX 1] Chama api/turma.php?acao=hora_servidor e calcula
+  //  o offset entre a hora do browser e a do servidor.
+  //  O relógio no painel mostra sempre a hora do servidor.
+  // ──────────────────────────────────────────────────────────
+
+  async function sincronizarHora() {
+    try {
+      const t0   = Date.now();
+      const resp = await get('turma.php', { acao: 'hora_servidor' });
+      const t1   = Date.now();
+
+      if (resp.status === 'ok') {
+        // Hora do servidor em ms (usando o timestamp Unix devolvido)
+        const serverMs  = resp.timestamp * 1000;
+        // Latência estimada (metade do round-trip)
+        const latencia  = (t1 - t0) / 2;
+        // Offset: quanto o browser está adiantado/atrasado face ao servidor
+        _serverOffset   = serverMs + latencia - Date.now();
+
+        console.log('[SCOPE] Hora sincronizada. Offset:', Math.round(_serverOffset), 'ms');
+        console.log('[SCOPE] Hora servidor:', resp.hora, '| Bloco activo:', resp.bloco_ativo);
+      }
+    } catch (e) {
+      console.warn('[SCOPE] Não foi possível sincronizar hora com o servidor.');
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────
+  //  ESTADO DO DISPOSITIVO RFID (ESP32)
+  //  [FIX 3] Verifica se o ESP32 está online.
+  //  Resultado guardado em _deviceOnline para os dashboards.
+  // ──────────────────────────────────────────────────────────
+
+  async function verificarDispositivoOnline() {
+    try {
+      const resp = await get('turma.php', { acao: 'device_status' });
+      if (resp.status === 'ok') {
+        _deviceOnline = resp.device_online === true;
+        emit('device_status', { online: _deviceOnline, resp });
+        return _deviceOnline;
+      }
+    } catch (e) {
+      _deviceOnline = false;
+    }
+    return false;
+  }
+
+  function deviceOnline() {
+    return _deviceOnline;
   }
 
   // ──────────────────────────────────────────────────────────
@@ -89,13 +165,7 @@ const SCOPE = (() => {
     window.location.href = '/scope/index.html';
   }
 
-  /**
-   * Verifica se há sessão activa.
-   * Chamar no topo de cada dashboard:
-   *   await SCOPE.verificarSessao(['professor']);
-   */
   async function verificarSessao(perfisPermitidos = null) {
-    // 1. Verificação rápida via localStorage (evita flash de conteúdo)
     const local = localStorage.getItem('scope_user');
     if (!local) {
       window.location.href = '/scope/index.html';
@@ -104,7 +174,6 @@ const SCOPE = (() => {
 
     const user = JSON.parse(local);
 
-    // 2. Verificar perfil se exigido
     if (perfisPermitidos) {
       const permitidos = Array.isArray(perfisPermitidos) ? perfisPermitidos : [perfisPermitidos];
       if (!permitidos.includes(user.perfil)) {
@@ -119,7 +188,6 @@ const SCOPE = (() => {
       }
     }
 
-    // 3. Validar com o servidor (em segundo plano)
     try {
       const resp = await get('sessao.php');
       if (resp.status !== 'ok') {
@@ -128,29 +196,30 @@ const SCOPE = (() => {
         return null;
       }
     } catch(e) {
-      // Sem servidor — manter sessão local para desenvolvimento offline
       console.warn('[SCOPE] Servidor indisponível — sessão local mantida.');
     }
 
     return user;
   }
 
-  /** Preenche elementos do dashboard com dados do utilizador */
   function preencherUI(user) {
     if (!user) return;
-    const perfis = { professor:'Professor', coordenador:'Coordenador', administrador:'Administrador', encarregado:'Encarregado' };
-    // Elementos comuns nos dashboards
+    const perfis = {
+      professor:     'Professor',
+      coordenador:   'Coordenador',
+      administrador: 'Administrador',
+      encarregado:   'Encarregado',
+    };
     const els = {
-      '.sb-uname':      user.nome,
-      '.sb-urole':      perfis[user.perfil] || user.perfil,
-      '#topbarName':    user.nome,
-      '#topbarRole':    perfis[user.perfil] || user.perfil,
-      '#topbarAvatar':  scopeIniciais(user.nome),
+      '.sb-uname':   user.nome,
+      '.sb-urole':   perfis[user.perfil] || user.perfil,
+      '#topbarName': user.nome,
+      '#topbarRole': perfis[user.perfil] || user.perfil,
+      '#topbarAvatar': scopeIniciais(user.nome),
     };
     Object.entries(els).forEach(([sel, val]) => {
       document.querySelectorAll(sel).forEach(el => { el.textContent = val; });
     });
-    // Avatar da sidebar
     document.querySelectorAll('.sb-av').forEach(el => { el.textContent = scopeIniciais(user.nome); });
   }
 
@@ -164,22 +233,23 @@ const SCOPE = (() => {
     return get('turma.php', { acao: 'presencas_dia', turma: TURMA_ID, data: d, bloco: b });
   }
 
-  async function editarEstado(alunoId, horarioId, estado, observacao = '', data = null) {
+  async function editarEstado(alunoId, horarioId, estado, observacao = '', data = null, perfil = 'professor') {
     return post('turma.php?acao=editar_estado', {
-      aluno_id: alunoId,
+      aluno_id:   alunoId,
       horario_id: horarioId,
-      data: data ?? hoje(),
+      data:       data ?? hoje(),
       estado,
       observacao,
+      perfil,     // ← enviado para o servidor verificar se pode editar
     });
   }
 
   async function guardarOcorrencia(professorId, descricao, tempo = null, data = null) {
     return post('turma.php?acao=ocorrencia', {
-      turma_id: TURMA_ID,
+      turma_id:     TURMA_ID,
       professor_id: professorId,
-      data: data ?? hoje(),
-      tempo: tempo ?? blocoAtual() ?? 1,
+      data:         data ?? hoje(),
+      tempo:        tempo ?? blocoAtual() ?? 1,
       descricao,
     });
   }
@@ -193,16 +263,16 @@ const SCOPE = (() => {
   }
 
   // ──────────────────────────────────────────────────────────
-  //  ESTATÍSTICAS — Dashboard Coordenador / Admin
+  //  ESTATÍSTICAS
   // ──────────────────────────────────────────────────────────
 
   async function estatisticas(inicio = null, fim = null) {
     const mesInicio = hoje().substring(0, 8) + '01';
     return get('turma.php', {
-      acao: 'estatisticas',
-      turma: TURMA_ID,
+      acao:   'estatisticas',
+      turma:  TURMA_ID,
       inicio: inicio ?? mesInicio,
-      fim: fim ?? hoje(),
+      fim:    fim ?? hoje(),
     });
   }
 
@@ -221,15 +291,47 @@ const SCOPE = (() => {
   async function presencasAluno(alunoId, inicio = null, fim = null) {
     const mesInicio = hoje().substring(0, 8) + '01';
     return get('turma.php', {
-      acao: 'presencas_aluno',
-      aluno: alunoId,
+      acao:   'presencas_aluno',
+      aluno:  alunoId,
       inicio: inicio ?? mesInicio,
-      fim: fim ?? hoje(),
+      fim:    fim ?? hoje(),
     });
   }
 
   // ──────────────────────────────────────────────────────────
-  //  POLLING RFID — actualiza a lista de presenças em tempo real
+  //  GESTÃO DE ALUNOS (Admin)
+  //  [FIX 4] Novo método para adicionar aluno pelo painel
+  // ──────────────────────────────────────────────────────────
+
+  async function listarAlunosAdmin(turmaId = TURMA_ID) {
+    return get('alunos_admin.php', { acao: 'listar', turma: turmaId });
+  }
+
+  async function adicionarAluno(dados) {
+    return post('alunos_admin.php?acao=adicionar', dados);
+  }
+
+  async function editarAluno(dados) {
+    return post('alunos_admin.php?acao=editar', dados);
+  }
+
+  async function toggleAlunoAtivo(alunoId) {
+    return post('alunos_admin.php?acao=toggle_ativo', { id: alunoId });
+  }
+
+  async function associarRFID(alunoId, rfidId) {
+    return post('alunos_admin.php?acao=associar_rfid', {
+      aluno_id: alunoId,
+      rfid_id:  rfidId,
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  //  POLLING RFID
+  //  [FIX 2] Agora emite 'presencas_atualizadas' em TODOS
+  //  os polls, não só quando detecta nova leitura.
+  //  Assim o painel actualiza mesmo que o professor abra
+  //  o dashboard depois do aluno já ter passado o cartão.
   // ──────────────────────────────────────────────────────────
 
   function iniciarPolling(callbackNovaLeitura) {
@@ -237,14 +339,15 @@ const SCOPE = (() => {
 
     async function verificar() {
       const bloco = blocoAtual();
-      if (!bloco) return;                        // Fora do horário
+      if (!bloco) return;
 
       const resp = await carregarPresencasDia(bloco);
       if (resp.status !== 'ok') return;
 
+      // ✅ Emitir SEMPRE — garante actualização ao abrir o painel
       emit('presencas_atualizadas', resp);
 
-      // Detectar nova leitura RFID comparando com último estado
+      // Detectar nova leitura RFID
       if (callbackNovaLeitura && resp.alunos) {
         resp.alunos.forEach(a => {
           if (a.registado_por === 'rfid' && a.hora_entrada) {
@@ -256,9 +359,12 @@ const SCOPE = (() => {
           }
         });
       }
+
+      // Verificar estado do dispositivo a cada poll
+      await verificarDispositivoOnline();
     }
 
-    verificar();                                 // Executar imediatamente
+    verificar();
     _pollTimer = setInterval(verificar, POLL_INTERVAL);
     console.log('[SCOPE] Polling RFID iniciado — intervalo:', POLL_INTERVAL, 'ms');
   }
@@ -282,32 +388,31 @@ const SCOPE = (() => {
 
   return {
     // Auth
-    login,
-    logout,
-    verificarSessao,
-    preencherUI,
+    login, logout, verificarSessao, preencherUI,
 
-    // Dados
-    carregarPresencasDia,
-    editarEstado,
-    guardarOcorrencia,
-    aulaAtual,
-    estatisticas,
-    listarAlunos,
-    listarHorario,
+    // Dados turma
+    carregarPresencasDia, editarEstado, guardarOcorrencia,
+    aulaAtual, estatisticas, listarAlunos, listarHorario,
     presencasAluno,
 
+    // Gestão alunos (admin)
+    listarAlunosAdmin, adicionarAluno, editarAluno,
+    toggleAlunoAtivo, associarRFID,
+
+    // Dispositivo
+    verificarDispositivoOnline, deviceOnline,
+
+    // Sincronização hora
+    sincronizarHora, horaActualAjustada,
+
     // Polling
-    iniciarPolling,
-    pararPolling,
+    iniciarPolling, pararPolling,
 
     // Listeners
     on,
 
     // Utilitários
-    fmtHora,
-    hoje,
-    blocoAtual,
+    fmtHora, hoje, blocoAtual,
     TURMA_ID,
   };
 
@@ -315,29 +420,25 @@ const SCOPE = (() => {
 
 
 // ============================================================
-//  SCOPE-UI.js — Componentes de interface reutilizáveis
-//  (badges, toasts, relógio, etc.)
+//  SCOPE-UI.js — Componentes reutilizáveis
 // ============================================================
 
-/** Badge de estado HTML */
 function scopeBadge(estado) {
   const map = {
-    presente: ['presente', 'Presente'],
-    atraso:   ['atraso',   'Atraso'],
-    ausente:  ['ausente',  'Ausente'],
-    falta_disciplinar: ['ausente', 'F. Disciplinar'],
+    presente:          ['presente',  'Presente'],
+    atraso:            ['atraso',    'Atraso'],
+    ausente:           ['ausente',   'Ausente'],
+    falta_disciplinar: ['ausente',   'F. Disciplinar'],
   };
   const [cls, txt] = map[estado] || ['ausente', 'Ausente'];
   return `<span class="badge ${cls}">${txt}</span>`;
 }
 
-/** Iniciais do nome */
 function scopeIniciais(nome) {
-  const p = nome.trim().split(' ');
+  const p = (nome || '?').trim().split(' ');
   return (p[0][0] + (p[p.length - 1]?.[0] || '')).toUpperCase();
 }
 
-/** Paleta de cores para avatares */
 const SCOPE_CORES = [
   '#3B82F6','#8B5CF6','#EC4899','#14B8A6',
   '#F97316','#06B6D4','#84CC16','#EF4444',
@@ -347,12 +448,14 @@ function scopeCor(idx) {
   return SCOPE_CORES[idx % SCOPE_CORES.length];
 }
 
-/** Relógio em tempo real — passa o id do elemento */
+// ── Relógio sincronizado com o servidor ─────────────────────
+// [FIX 1] Usa o offset calculado por SCOPE.sincronizarHora()
+// para mostrar a hora do servidor, não a do browser local.
 function scopeRelogio(elId, intervalo = 1000) {
   function tick() {
     const el = document.getElementById(elId);
     if (!el) return;
-    const n = new Date();
+    const n = SCOPE.horaActualAjustada();
     el.textContent =
       String(n.getHours()).padStart(2, '0') + ':' +
       String(n.getMinutes()).padStart(2, '0');
@@ -361,16 +464,14 @@ function scopeRelogio(elId, intervalo = 1000) {
   return setInterval(tick, intervalo);
 }
 
-/** Data por extenso */
 function scopeDataExtenso(elId) {
   const el = document.getElementById(elId);
   if (!el) return;
-  el.textContent = new Date().toLocaleDateString('pt-PT', {
+  el.textContent = SCOPE.horaActualAjustada().toLocaleDateString('pt-PT', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 }
 
-/** Toast — reutilizável em qualquer dashboard */
 let _toastTimer;
 function scopeToast(msg, tipo = 'tg') {
   const t = document.getElementById('toast');

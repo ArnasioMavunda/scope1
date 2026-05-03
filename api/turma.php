@@ -1,19 +1,14 @@
 <?php
 // ============================================================
-//  SCOPE — API de Dados da Turma
+//  SCOPE — API de Dados da Turma  (VERSÃO CORRIGIDA v2)
 //  Ficheiro: api/turma.php
-//  Usado pelos dashboards (professor, coordenador, admin)
 //
-//  Endpoints (GET ?acao=...):
-//    presencas_dia   → lista alunos + estado hoje/bloco
-//    aula_atual      → disciplina e professor em curso agora
-//    estatisticas    → resumo de presenças num período
-//    alunos          → lista completa de alunos da turma
-//    horario         → horário semanal da turma
-//
-//  Endpoints (POST ?acao=...):
-//    editar_estado   → professor altera estado manualmente
-//    ocorrencia      → professor guarda ocorrência
+//  NOVIDADES v2:
+//  [NOVA] GET ?acao=device_status → estado online/offline do ESP32
+//  [NOVA] POST ?acao=editar_estado agora verifica se o dispositivo
+//         está offline antes de permitir edição pelo professor.
+//         Admin e coordenador podem sempre editar.
+//  [NOVA] GET ?acao=hora_servidor → hora PHP sincronizada
 // ============================================================
 
 header('Content-Type: application/json; charset=utf-8');
@@ -25,8 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/funcoes.php';
-// require_once __DIR__ . '/../includes/auth.php';
-// exigirPerfil(['professor','coordenador','administrador']);  // Descomentár em produção
 
 $acao   = $_GET['acao']   ?? '';
 $metodo = $_SERVER['REQUEST_METHOD'];
@@ -43,7 +36,6 @@ if ($metodo === 'GET') {
 
         $lista = presencasDia($turmaId, $data, $bloco);
 
-        // Calcular totais
         $presentes = 0; $atrasos = 0; $ausentes = 0;
         foreach ($lista as $a) {
             if ($a['estado'] === 'presente') $presentes++;
@@ -92,7 +84,7 @@ if ($metodo === 'GET') {
     // ── estatisticas ─────────────────────────────────────────
     elseif ($acao === 'estatisticas') {
         $turmaId = (int) ($_GET['turma'] ?? 1);
-        $inicio  = limpar($_GET['inicio'] ?? date('Y-m-01'));   // 1º do mês
+        $inicio  = limpar($_GET['inicio'] ?? date('Y-m-01'));
         $fim     = limpar($_GET['fim']    ?? date('Y-m-d'));
 
         $stats = estatisticasTurma($turmaId, $inicio, $fim);
@@ -139,9 +131,58 @@ if ($metodo === 'GET') {
         if (!$alunoId) {
             jsonResponse(['status' => 'erro', 'mensagem' => 'ID de aluno inválido.'], 400);
         }
-
         $lista = presencasAluno($alunoId, $inicio, $fim);
         jsonResponse(['status' => 'ok', 'presencas' => $lista]);
+    }
+
+    // ── device_status (NOVO) — estado online/offline ESP32 ───
+    elseif ($acao === 'device_status') {
+        try {
+            $db = getDB();
+            $st = $db->prepare(
+                "SELECT valor FROM configuracoes WHERE chave = 'device_online_at' LIMIT 1"
+            );
+            $st->execute();
+            $row = $st->fetch();
+            $online = false;
+            $ultimaLeitura = null;
+            $segundosDesde = null;
+
+            if ($row) {
+                $ultimaLeitura = $row['valor'];
+                $segundosDesde = time() - strtotime($row['valor']);
+                $online = ($segundosDesde < 120);
+            }
+
+            jsonResponse([
+                'status'          => 'ok',
+                'device_online'   => $online,
+                'ultima_leitura'  => $ultimaLeitura,
+                'segundos_desde'  => $segundosDesde,
+                'hora_servidor'   => date('H:i:s'),
+                'data_servidor'   => date('Y-m-d'),
+            ]);
+        } catch (Exception $e) {
+            jsonResponse([
+                'status'        => 'ok',
+                'device_online' => false,
+                'hora_servidor' => date('H:i:s'),
+                'data_servidor' => date('Y-m-d'),
+            ]);
+        }
+    }
+
+    // ── hora_servidor (NOVO) — sincronização de hora ─────────
+    elseif ($acao === 'hora_servidor') {
+        $horaServidor = date('H:i:s');
+        $blocoInfo    = determinarBlocoEstado($horaServidor);
+        jsonResponse([
+            'status'      => 'ok',
+            'hora'        => $horaServidor,
+            'data'        => date('Y-m-d'),
+            'timestamp'   => time(),
+            'bloco_ativo' => $blocoInfo['bloco'],
+        ]);
     }
 
     else {
@@ -156,19 +197,36 @@ elseif ($metodo === 'POST') {
 
     // ── editar_estado (professor) ─────────────────────────────
     if ($acao === 'editar_estado') {
-        $alunoId   = (int)   ($dados['aluno_id']   ?? 0);
-        $horarioId = (int)   ($dados['horario_id'] ?? 0);
-        $data      = limpar( $dados['data']        ?? date('Y-m-d'));
-        $estado    = limpar( $dados['estado']      ?? '');
-        $obs       = limpar( $dados['observacao']  ?? '');
+        $alunoId    = (int)   ($dados['aluno_id']   ?? 0);
+        $horarioId  = (int)   ($dados['horario_id'] ?? 0);
+        $data       = limpar( $dados['data']        ?? date('Y-m-d'));
+        $estado     = limpar( $dados['estado']      ?? '');
+        $obs        = limpar( $dados['observacao']  ?? '');
+        $perfilUser = limpar( $dados['perfil']      ?? 'professor');
 
         $estadosValidos = ['presente','atraso','ausente','falta_disciplinar'];
         if (!$alunoId || !$horarioId || !in_array($estado, $estadosValidos)) {
             jsonResponse(['status' => 'erro', 'mensagem' => 'Dados inválidos.'], 400);
         }
 
+        // ── NOVA LÓGICA: professor só pode editar quando offline ──
+        // Admin e coordenador podem sempre editar
+        if ($perfilUser === 'professor') {
+            $deviceOnline = dispositivoOnline();
+            if ($deviceOnline) {
+                jsonResponse([
+                    'status'   => 'bloqueado',
+                    'mensagem' => 'O dispositivo RFID está online. A edição manual pelo professor só é permitida quando o leitor está offline. Aguarda a leitura automática do cartão.',
+                    'device_online' => true,
+                ], 403);
+            }
+        }
+
         $ok = alterarEstadoManual($alunoId, $horarioId, $data, $estado, $obs);
-        jsonResponse(['status' => $ok ? 'ok' : 'erro', 'mensagem' => $ok ? 'Estado actualizado.' : 'Erro ao actualizar.']);
+        jsonResponse([
+            'status'  => $ok ? 'ok' : 'erro',
+            'mensagem' => $ok ? 'Estado actualizado.' : 'Erro ao actualizar.',
+        ]);
     }
 
     // ── listar_ocorrencias ───────────────────────────────────
