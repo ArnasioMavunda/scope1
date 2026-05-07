@@ -83,11 +83,11 @@
 
 <script src="recursos/js/scope-api.js"></script>
 <script>
-// ============================================================
-//  SCOPE — index.html  (Splash → Login → Autenticar → Redirect)
-// ============================================================
 
-// ── Partículas de fundo ──────────────────────────────────────
+//SCOPE — index.html  (Splash → Login → Autenticar → Redirect)
+
+
+//Partículas de fundo
 (function iniciarParticulas() {
   const canvas = document.getElementById('particles');
   if (!canvas) return;
@@ -121,7 +121,7 @@
       if (p.y < 0 || p.y > H) p.vy *= -1;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillStyle = 'rgba(255,255,255,0.72)';
       ctx.fill();
     });
     // Linhas entre pontos próximos
@@ -133,7 +133,7 @@
           ctx.beginPath();
           ctx.moveTo(pts[i].x, pts[i].y);
           ctx.lineTo(pts[j].x, pts[j].y);
-          ctx.strokeStyle = `rgba(255,255,255,${0.12 * (1 - dist/110)})`;
+          ctx.strokeStyle = `rgba(255,255,255,${0.38 * (1 - dist/110)})`;
           ctx.lineWidth = .6;
           ctx.stroke();
         }
@@ -144,7 +144,7 @@
   draw();
 })();
 
-// ── Utilitários de secções ───────────────────────────────────
+//Utilitários de secções
 function mostrar(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
   document.getElementById(id)?.classList.remove('hidden');
@@ -164,7 +164,7 @@ function limparErro() {
   if (el) el.style.display = 'none';
 }
 
-// ── Toggle visibilidade da senha ─────────────────────────────
+// Toggle visibilidade da senha 
 document.getElementById('togglePassword')?.addEventListener('click', function () {
   const inp = document.getElementById('password');
   const icon = this;
@@ -177,19 +177,19 @@ document.getElementById('togglePassword')?.addEventListener('click', function ()
   }
 });
 
-// ── Permitir Enter nos campos de login ───────────────────────
+// Permitir Enter nos campos de login 
 ['username', 'password'].forEach(id => {
   document.getElementById(id)?.addEventListener('keydown', e => {
     if (e.key === 'Enter') entrar();
   });
 });
 
-// ── Limpar erro ao digitar ───────────────────────────────────
+//Limpar erro ao digitar
 ['username', 'password'].forEach(id => {
   document.getElementById(id)?.addEventListener('input', limparErro);
 });
 
-// ── Barra de progresso animada ───────────────────────────────
+//Barra de progresso animada
 function animarBarra(elId, duracao, cb) {
   const el = document.getElementById(elId);
   if (!el) { cb && cb(); return; }
@@ -202,7 +202,7 @@ function animarBarra(elId, duracao, cb) {
   }, 30);
 }
 
-// ── SPLASH → LOGIN ────────────────────────────────────────────
+//SPLASH → LOGIN 
 window.addEventListener('DOMContentLoaded', () => {
   animarBarra('progress', 1800, () => {
     mostrar('login');
@@ -210,7 +210,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── REDIRECIONAMENTOS por perfil ─────────────────────────────
+//REDIRECIONAMENTOS por perfil
 const DESTINOS = {
   professor:     'dashboard_professor.html',
   coordenador:   'dashboard_coordenador.html',
@@ -218,7 +218,7 @@ const DESTINOS = {
   encarregado:   'portal_encarregado.html',
 };
 
-// ── FUNÇÃO PRINCIPAL DE LOGIN ────────────────────────────────
+//FUNÇÃO PRINCIPAL DE LOGIN 
 async function entrar() {
   limparErro();
 
@@ -273,7 +273,7 @@ async function entrar() {
   }
 }
 
-// ── LOGOUT (chamado pelos dashboards) ────────────────────────
+//LOGOUT (chamado pelos dashboards)
 function logout() {
   localStorage.removeItem('scope_user');
   window.location.href = '/scope/index.html';

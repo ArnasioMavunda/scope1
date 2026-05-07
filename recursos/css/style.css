@@ -1,9 +1,7 @@
-/* ============================================================
-   SCOPE — style.css
-   Estilos do Splash, Login e Processing
-   ============================================================ */
+/* SCOPE — style.css
+   Estilos do Splash, Login e Processing */
 
-/* ── Reset e base ─────────────────────────────────────────── */
+/*Reset e base */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -32,15 +30,15 @@ html, body {
   overflow: hidden;
 }
 
-/* ── Canvas de partículas ─────────────────────────────────── */
+/*Canvas de partículas*/
 #particles {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 11;
   pointer-events: none;
 }
 
-/* ── Secções (splash / login / processing) ────────────────── */
+/*Secções (splash / login / processing)*/
 .section {
   position: fixed;
   inset: 0;
@@ -58,7 +56,7 @@ html, body {
   transform: translateY(12px);
 }
 
-/* ── SPLASH ───────────────────────────────────────────────── */
+/*SPLASH*/
 #splash {
   gap: 14px;
   color: white;
@@ -105,7 +103,7 @@ html, body {
   font-weight: 500;
 }
 
-/* ── Barra de progresso ───────────────────────────────────── */
+/*Barra de progresso*/
 .progress-bar {
   width: 220px;
   height: 4px;
@@ -123,7 +121,7 @@ html, body {
   transition: width .05s linear;
 }
 
-/* ── LOGIN ────────────────────────────────────────────────── */
+/*LOGIN*/
 #login {
   padding: 16px;
 }
@@ -136,6 +134,8 @@ html, body {
   max-width: 400px;
   box-shadow: var(--shadow);
   animation: slideUp .45s cubic-bezier(.16,1,.3,1);
+  position: relative;
+  z-index: 3;
 }
 
 @keyframes slideUp {
@@ -169,7 +169,7 @@ html, body {
   font-weight: 500;
 }
 
-/* ── Grupos de input ──────────────────────────────────────── */
+/* Grupos de input */
 .input-group {
   position: relative;
   margin-bottom: 14px;
@@ -236,7 +236,7 @@ html, body {
 
 .right-icon:hover { color: var(--blue-mid); }
 
-/* ── Botão de login ───────────────────────────────────────── */
+/* Botão de login */
 .btn-login {
   width: 100%;
   padding: 13px;
@@ -268,7 +268,7 @@ html, body {
   transform: none;
 }
 
-/* ── Mensagem de erro ─────────────────────────────────────── */
+/* Mensagem de erro */
 .login-erro {
   margin-top: 12px;
   padding: 10px 14px;
@@ -290,7 +290,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ── Footer ───────────────────────────────────────────────── */
+/* Footer */
 .login-footer {
   text-align: center;
   font-size: 11px;
@@ -299,7 +299,7 @@ html, body {
   font-weight: 500;
 }
 
-/* ── PROCESSING ───────────────────────────────────────────── */
+/* PROCESSING */
 #processing {
   gap: 24px;
   color: white;
@@ -314,11 +314,27 @@ html, body {
   animation: spin 1s linear infinite;
 }
 
+
+/* Fundo com imagem apenas no ecrã de login */
+#login {
+  padding: 16px;
+  background: url('../imagens/fundo.jpg') center center / cover no-repeat;
+}
+
+#login::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 40, 100, 0.62);
+  z-index: -1;
+  pointer-events: none;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* ── Animações ────────────────────────────────────────────── */
+/* Animações */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-6px); }
@@ -329,7 +345,7 @@ html, body {
 
 .shake { animation: shake .35s ease; }
 
-/* ── Responsivo ───────────────────────────────────────────── */
+/* Responsivo */
 @media (max-width: 480px) {
   .login-container { padding: 24px 18px 20px; }
   #splash h1 { font-size: 34px; }
